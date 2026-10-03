@@ -66,20 +66,22 @@ def check_skin(jar, vlt, work_root):
     if work.exists():
         shutil.rmtree(work)
     work.mkdir(parents=True, exist_ok=True)
-    record = {"skin": name, "vlt": vlt.name, "size": vlt.stat().st_size, "source": "gallery pack"}
+    base = {"vlt": vlt.name, "size": vlt.stat().st_size, "source": "gallery pack"}
     try:
         imported = run(["java", "-jar", str(jar), "vlt", "import", str(vlt), str(work)], work_root, 180)
-        record["import_ms"] = imported["ms"]
-        theme = work / "theme.xml"
-        if imported["code"] != 0 or not theme.exists():
-            record["status"] = "import failed"
-            record["error"] = (imported["stderr"] or imported["stdout"]).strip()[:400]
-            return record
-        return check_theme(jar, theme, name, work, record)
+        # A bundle archive can carry several themes in subfolders.
+        themes = sorted(work.rglob("theme.xml"))
+        if imported["code"] != 0 or not themes:
+            return [dict(base, skin=name, import_ms=imported["ms"], status="import failed",
+                         error=(imported["stderr"] or imported["stdout"]).strip()[:400])]
+        records = []
+        for theme in themes:
+            suffix = "" if len(themes) == 1 else f" [{theme.parent.name}]"
+            record = dict(base, skin=name + suffix, import_ms=imported["ms"])
+            records.append(check_theme(jar, theme, name, theme.parent, record))
+        return records
     except Exception as exc:  # one bad skin must not stop the sweep
-        record["status"] = "exception"
-        record["error"] = str(exc)[:400]
-        return record
+        return [dict(base, skin=name, status="exception", error=str(exc)[:400])]
 
 
 def check_official(jar, theme_source, work_root):
@@ -244,10 +246,10 @@ def main():
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
             futures = {pool.submit(check_skin, args.jar, vlt, args.work): vlt for vlt in vlts}
             for future in concurrent.futures.as_completed(futures):
-                record = future.result()
-                records.append(record)
-                print(f"  {record['skin']}: {record['status']} "
-                      f"(errors={record.get('errors', '?')})", flush=True)
+                for record in future.result():
+                    records.append(record)
+                    print(f"  {record['skin']}: {record['status']} "
+                          f"(errors={record.get('errors', '?')})", flush=True)
 
     for extra in args.extra:
         theme = extra / "theme.xml" if extra.is_dir() else extra

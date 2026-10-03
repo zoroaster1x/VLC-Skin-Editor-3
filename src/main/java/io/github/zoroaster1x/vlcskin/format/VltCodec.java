@@ -180,13 +180,45 @@ public final class VltCodec {
     }
 
     /**
-     * Extracts an archive next to itself into a folder, for VLT import.
+     * Extracts an archive next to itself into a folder, for VLT import. Some
+     * gallery entries are a plain zip that bundles further .vlt archives; those
+     * are unpacked too, one folder per bundled theme.
      */
     public static Path unpack(Path archive, Path targetFolder) throws IOException {
         Contents contents = read(archive);
-        if (contents.themeXml() == null) {
+        if (contents.themeXml() != null) {
+            return extract(contents, targetFolder);
+        }
+        java.util.List<Map.Entry<String, byte[]>> nested = contents.assets().entrySet().stream()
+                .filter(entry -> entry.getKey().toLowerCase(java.util.Locale.ROOT).endsWith(".vlt"))
+                .filter(entry -> looksLikeArchive(entry.getValue()))
+                .toList();
+        if (nested.isEmpty()) {
             throw new IOException("The archive contains no theme.xml");
         }
+        Path first = null;
+        for (Map.Entry<String, byte[]> entry : nested) {
+            Contents inner = readBytes(entry.getValue());
+            if (inner.themeXml() == null) {
+                continue;
+            }
+            String base = entry.getKey();
+            int slash = base.lastIndexOf('/');
+            base = slash >= 0 ? base.substring(slash + 1) : base;
+            base = base.substring(0, base.length() - 4);
+            Path folder = nested.size() == 1 ? targetFolder : targetFolder.resolve(base);
+            Path themeFile = extract(inner, folder);
+            if (first == null) {
+                first = themeFile;
+            }
+        }
+        if (first == null) {
+            throw new IOException("The bundled .vlt files contain no theme.xml");
+        }
+        return first;
+    }
+
+    private static Path extract(Contents contents, Path targetFolder) throws IOException {
         Files.createDirectories(targetFolder);
         Files.writeString(targetFolder.resolve("theme.xml"), contents.themeXml(), StandardCharsets.UTF_8);
         for (Map.Entry<String, byte[]> asset : contents.assets().entrySet()) {
@@ -198,6 +230,13 @@ public final class VltCodec {
             Files.write(file, asset.getValue());
         }
         return targetFolder.resolve("theme.xml");
+    }
+
+    private static boolean looksLikeArchive(byte[] bytes) {
+        if (bytes.length > 2 && bytes[0] == 'P' && bytes[1] == 'K') {
+            return true;
+        }
+        return bytes.length > 2 && (bytes[0] & 0xFF) == 0x1F && (bytes[1] & 0xFF) == 0x8B;
     }
 
     /**

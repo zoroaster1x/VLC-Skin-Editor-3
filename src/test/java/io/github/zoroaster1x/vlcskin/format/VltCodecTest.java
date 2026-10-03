@@ -50,4 +50,29 @@ class VltCodecTest {
         assertThat(contents.themeXml()).contains("Window");
         assertThat(contents.assets()).containsKey("image.png");
     }
+
+    @Test
+    void aZipBundlingVltFilesUnpacksEveryTheme(@TempDir Path folder) throws Exception {
+        Path skinFolder = folder.resolve("skin");
+        Path themeFile = ExampleSkins.create(skinFolder, ExampleSkins.NEON);
+        var session = io.github.zoroaster1x.vlcskin.edit.EditorSession.open(themeFile);
+        byte[] inner = VltCodec.toBytes(session.theme(), themeFile);
+
+        Path bundle = folder.resolve("bundle.vlt");
+        try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(bundle))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("ColdBlue.vlt"));
+            out.write(inner);
+            out.closeEntry();
+            out.putNextEntry(new java.util.zip.ZipEntry("FreshGreen.vlt"));
+            out.write(inner);
+            out.closeEntry();
+        }
+
+        Path unpacked = folder.resolve("unpacked");
+        Path first = VltCodec.unpack(bundle, unpacked);
+        assertThat(first).exists();
+        assertThat(unpacked.resolve("ColdBlue").resolve("theme.xml")).exists();
+        assertThat(unpacked.resolve("FreshGreen").resolve("theme.xml")).exists();
+        assertThat(unpacked.resolve("ColdBlue").resolve("background.png")).exists();
+    }
 }

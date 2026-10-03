@@ -59,17 +59,18 @@ documents the exact flags and the runtime libraries the binary needs.
 
 | Suite | Covers |
 |---|---|
-| `core/.../format/SkinRoundTripTest` | every element survives write, parse and write; escaping; unknown attributes and children kept; `id="none"` becomes a generated unique id |
-| `core/.../render/BezierPathTest` | the port of VLC's bezier sampler: interpolation, single points, monotonic percentages, parsing and formatting |
-| `core/.../render/BooleanExpressionTest` | `not`/`and`/`or`, parentheses, unknown identifiers, variable substitution, slider state |
-| `core/.../render/RendererTest` | the example renders at zoom, corner transparency, topmost hit testing, selection overlay, thumb tracking |
-| `core/.../render/ImageStoreTest` | bitmap frame cycling, animation fps discovery, tick wrapping |
-| `core/.../render/SliderBackgroundGeneratorTest` | frame count, horizontal and vertical strips, required middle image |
-| `core/.../edit/EditorSessionTest` | coalesced nudges, per item undo steps, revision bumps |
-| `core/.../format/VltCodecTest` | VLT export and import, assets, zip archives accepted |
-| `core/.../mcp/EditorServiceTest` | document info, add/move/edit/undo, unknown attributes and duplicate ids rejected, render PNG and geometry, validation, playlist slider rules, nested parent lists, sub bitmap lifecycle, tool catalog |
-| `app/.../StudioUiTest` | the whole panel tree paints real pixels in both themes, canvas drag moves items undoably, adding items updates the tree and the UI description |
-| `app/.../i18n/MessagesTest` | the converted original translations load, unknown keys fall back, the language catalog lists the original 21 |
+| `format/SkinRoundTripTest` | every element survives write, parse and write; escaping; unknown attributes and children kept; `id="none"` becomes a generated unique id |
+| `render/BezierPathTest` | the port of VLC's bezier sampler: interpolation, single points, monotonic percentages, parsing and formatting |
+| `render/BooleanExpressionTest` | `not`/`and`/`or`, parentheses, unknown identifiers, variable substitution, slider state |
+| `render/RendererTest` | the example renders at zoom, corner transparency, topmost hit testing, selection overlay, thumb tracking |
+| `render/ImageStoreTest` | bitmap frame cycling, animation fps discovery, tick wrapping |
+| `render/SliderBackgroundGeneratorTest` | frame count, horizontal and vertical strips, required middle image |
+| `edit/EditorSessionTest` | coalesced nudges, per item undo steps, revision bumps |
+| `format/VltCodecTest` | VLT export and import, assets, zip archives accepted, a zip bundling further .vlt files unpacks every theme |
+| `mcp/EditorServiceTest` | document info, add/move/edit/undo, unknown attributes and duplicate ids rejected, render PNG and geometry, validation, playlist slider rules, nested parent lists, sub bitmap lifecycle, tool catalog |
+| `mcp/EditorControlTest` | undo/redo and history, selection, nudge, reorder and reparent, XML round trip, preferences through a stub UiInspector, slider background generator |
+| `app/StudioUiTest` | the whole panel tree paints real pixels in both themes, canvas drag moves items undoably, adding items updates the tree and the UI description |
+| `app/i18n/MessagesTest` | the converted original translations load, unknown keys fall back, the language catalog lists the original 21 |
 
 The two tools under `tools/` are the acceptance harnesses:
 
@@ -179,7 +180,9 @@ regressions to avoid, not as work to do.
   The catalog lives in `ActionCatalog`.
 * VLT archives are gzipped tar with `theme.xml` and every referenced asset.
   Some files in the wild are plain zip; `VltCodec` accepts both and refuses
-  entries that would escape the target folder.
+  entries that would escape the target folder. One gallery entry (the Ecco
+  ColdBlue/FreshGreen download) is a zip that bundles further `.vlt` archives;
+  `unpack` recurses and writes each bundled theme into its own subfolder.
 * `Theme version` must be 2.x for skins2. A newer minor version is a warning,
   not a hard stop; the editor preserves what it cannot interpret.
 
