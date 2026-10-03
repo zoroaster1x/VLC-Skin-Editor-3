@@ -444,7 +444,8 @@ public final class Studio {
 
     public void error(String message) {
         status(message);
-        JOptionPane.showMessageDialog(null, message, "VLC Skin Studio", JOptionPane.ERROR_MESSAGE);
+        runOnEdt(() -> JOptionPane.showMessageDialog(null, message, "VLC Skin Studio",
+                JOptionPane.ERROR_MESSAGE));
     }
 
     public void runOnEdt(Runnable runnable) {
