@@ -1,0 +1,553 @@
+package io.github.zoroaster1x.vlcskin.app;
+
+import io.github.zoroaster1x.vlcskin.Version;
+import io.github.zoroaster1x.vlcskin.app.chrome.ChromeActions;
+import io.github.zoroaster1x.vlcskin.app.chrome.MenuBarFactory;
+import io.github.zoroaster1x.vlcskin.app.chrome.StatusBar;
+import io.github.zoroaster1x.vlcskin.app.chrome.ToolBarFactory;
+import io.github.zoroaster1x.vlcskin.app.config.StudioSettings;
+import io.github.zoroaster1x.vlcskin.app.dialog.AboutDialog;
+import io.github.zoroaster1x.vlcskin.app.dialog.PreferencesDialog;
+import io.github.zoroaster1x.vlcskin.app.dialog.ThemeSettingsDialog;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
+import io.github.zoroaster1x.vlcskin.app.panel.CanvasPanel;
+import io.github.zoroaster1x.vlcskin.app.panel.Panels;
+import io.github.zoroaster1x.vlcskin.app.snapshot.SwingUiInspector;
+import io.github.zoroaster1x.vlcskin.edit.ValueCommand;
+import io.github.zoroaster1x.vlcskin.model.SkinLayout;
+import io.github.zoroaster1x.vlcskin.model.SkinWindow;
+import io.github.zoroaster1x.vlcskin.model.item.Item;
+import io.github.zoroaster1x.vlcskin.model.resource.Resource;
+import java.awt.BorderLayout;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.function.Consumer;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import io.github.andrewauclair.moderndocking.DockableStyle;
+import io.github.andrewauclair.moderndocking.DockingRegion;
+import io.github.andrewauclair.moderndocking.app.Docking;
+import io.github.andrewauclair.moderndocking.app.DockingState;
+import io.github.andrewauclair.moderndocking.app.LayoutPersistence;
+import io.github.andrewauclair.moderndocking.app.RootDockingPanel;
+import io.github.andrewauclair.moderndocking.ext.ui.DockingUI;
+import io.github.andrewauclair.moderndocking.ui.DefaultDockingPanel;
+
+/**
+ * The desktop window: chrome, dockable panels and the status bar.
+ */
+public final class StudioFrame extends JFrame implements ChromeActions {
+
+    private final Studio studio;
+    private final Panels panels;
+    private final JToolBar toolbar;
+    private JFrame toolbarHolder;
+    private final StatusBar statusBar = new StatusBar();
+    private final MenuBarFactory.ThemeControl themeControl = new MenuBarFactory.ThemeControl() {
+        @Override
+        public void apply(String id) {
+            studio.applyTheme(id);
+            SwingUtilities.updateComponentTreeUI(StudioFrame.this);
+            setJMenuBar(MenuBarFactory.build(StudioFrame.this, this));
+            applyChromeState();
+            studio.session().fireChanged();
+        }
+
+        @Override
+        public boolean isDark() {
+            return studio.isDarkTheme();
+        }
+    };
+
+    public StudioFrame(Studio studio) {
+        super(Version.NAME);
+        this.studio = studio;
+        Messages.setLanguage(studio.settings().getLanguage());
+        this.panels = new Panels(studio);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        setJMenuBar(MenuBarFactory.build(this, themeControl));
+        toolbar = ToolBarFactory.build(this);
+        restoreToolbar(studio.settings());
+
+        Docking.initialize(this);
+        DockingUI.initialize();
+        RootDockingPanel root = new RootDockingPanel(this);
+        JPanel content = new JPanel(new BorderLayout());
+        content.add(root, BorderLayout.CENTER);
+        if (toolbar.getParent() == null) {
+            content.add(toolbar, studio.settings().getToolbarOrientation() == JToolBar.VERTICAL
+                    ? BorderLayout.WEST : BorderLayout.NORTH);
+        }
+        content.add(statusBar, BorderLayout.SOUTH);
+        setContentPane(content);
+
+        registerDockable("resources", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources(), panels.resources);
+        registerDockable("structure", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.windows(), panels.structure);
+        registerDockable("items", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.items(), panels.items);
+        registerDockable("canvas", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.canvas(), panels.canvas);
+        registerDockable("inspector", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.inspector(), panels.inspector);
+        registerDockable("variables", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables(), panels.variables);
+        registerDockable("problems", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
+        registerDockable("xml", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
+        registerDockable("ai", io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai(), panels.ai);
+
+        Docking.dock("resources", this, DockingRegion.WEST, 0.18);
+        Docking.dock("structure", "resources", DockingRegion.SOUTH, 0.35);
+        Docking.dock("items", "structure", DockingRegion.SOUTH, 0.55);
+        Docking.dock("inspector", this, DockingRegion.EAST, 0.23);
+        Docking.dock("canvas", this, DockingRegion.CENTER);
+        Docking.dock("problems", "canvas", DockingRegion.SOUTH, 0.25);
+        Docking.dock("xml", "problems", DockingRegion.CENTER);
+        Docking.dock("variables", "inspector", DockingRegion.SOUTH, 0.4);
+        Docking.dock("ai", "variables", DockingRegion.CENTER);
+
+        restoreLayout();
+        applyWindowGeometry();
+        installShortcuts();
+
+        studio.addStatusListener(statusBar::setMessage);
+        studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window"));
+        studio.session().addListener(this::onSessionChanged);
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                exit();
+            }
+        });
+        onSessionChanged();
+    }
+
+    private void onSessionChanged() {
+        statusBar.update(studio);
+        MenuBarFactory.refreshUndoLabels(getJMenuBar(), studio, "Undo", "Redo");
+        applyToolbarVisibility();
+        ToolBarFactory.syncUndoButtons(toolbar,
+                studio.session().history().canUndo(), studio.session().history().canRedo());
+        String name = studio.session().file() == null ? "Untitled"
+                : studio.session().file().getFileName().toString();
+        setTitle((studio.session().isDirty() ? "*" : "") + name + " - " + Version.NAME);
+    }
+
+    private void applyChromeState() {
+        applyToolbarVisibility();
+        ToolBarFactory.syncToolButtons(toolbar, panels.canvas.tool());
+    }
+
+    private void applyToolbarVisibility() {
+        boolean visible = studio.settings().isShowToolbar();
+        toolbar.setVisible(visible);
+        if (toolbarHolder != null) {
+            toolbarHolder.setVisible(visible);
+        }
+    }
+
+    /**
+     * Restores the toolbar orientation, visibility and floating state.
+     */
+    private void restoreToolbar(StudioSettings settings) {
+        toolbar.setFloatable(true);
+        toolbar.setOrientation(settings.getToolbarOrientation() == 1
+                ? JToolBar.VERTICAL : JToolBar.HORIZONTAL);
+        toolbar.setVisible(settings.isShowToolbar());
+        if (settings.isToolbarFloating()) {
+            toolbarHolder = new JFrame(Version.NAME + " toolbar");
+            toolbarHolder.setIconImage(getIconImage());
+            toolbarHolder.add(toolbar, BorderLayout.CENTER);
+            toolbarHolder.pack();
+            toolbarHolder.setLocationRelativeTo(null);
+            toolbarHolder.setVisible(settings.isShowToolbar());
+        }
+    }
+
+    private void registerDockable(String id, String title, JComponent content) {
+        DefaultDockingPanel dockable = new DefaultDockingPanel(id, title);
+        dockable.setStyle(DockableStyle.BOTH);
+        dockable.setLayout(new BorderLayout());
+        content.putClientProperty("panelName", title);
+        dockable.add(content, BorderLayout.CENTER);
+        Docking.registerDockable(dockable);
+    }
+
+
+    private void installShortcuts() {
+        JComponent root = getRootPane();
+        bind(root, "DELETE", "delete-item", e -> deleteSelected());
+        if (isMac()) {
+            bind(root, "meta BACK_SPACE", "delete-item-backspace", e -> deleteSelected());
+        }
+        bind(root, "control UP", "move-up", e -> moveSelected(0, -1));
+        bind(root, "control DOWN", "move-down", e -> moveSelected(0, 1));
+        bind(root, "control LEFT", "move-left", e -> moveSelected(-1, 0));
+        bind(root, "control RIGHT", "move-right", e -> moveSelected(1, 0));
+        bind(root, "control EQUALS", "zoom-in", e -> zoomIn());
+        bind(root, "control MINUS", "zoom-out", e -> zoomOut());
+        bind(root, "control 0", "fit", e -> fitToWindow());
+        bind(root, "control D", "duplicate", e -> duplicate());
+    }
+
+    private static boolean isMac() {
+        return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac");
+    }
+
+    private void bind(JComponent component, String keyStroke, String name, Consumer<ActionEvent> action) {
+        component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyStroke), name);
+        component.getActionMap().put(name, new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                action.accept(e);
+            }
+        });
+    }
+
+
+    @Override
+    public void newSkin() {
+        studio.newSkin(getContentPane());
+    }
+
+    @Override
+    public void openSkin() {
+        studio.openDialog(getContentPane());
+    }
+
+    @Override
+    public void save() {
+        studio.save();
+    }
+
+    @Override
+    public void saveAs() {
+        studio.saveAsDialog(getContentPane());
+    }
+
+    @Override
+    public void importVlt() {
+        var chooser = studio.chooser(getContentPane(), "Import VLT",
+                new FileNameExtensionFilter("VLC theme (*.vlt, *.zip)", "vlt", "zip"));
+        if (chooser.showOpenDialog(getContentPane()) == JFileChooser.APPROVE_OPTION) {
+            studio.importVlt(getContentPane(), chooser.getSelectedFile().toPath());
+        }
+    }
+
+    @Override
+    public void exportVlt() {
+        studio.exportVltDialog(getContentPane());
+    }
+
+    @Override
+    public void renderPreview() {
+        studio.renderPreviewDialog(getContentPane());
+    }
+
+    @Override
+    public void testInVlc() {
+        if (studio.session().file() == null) {
+            studio.saveAsDialog(getContentPane());
+        } else {
+            studio.save();
+        }
+        Path skin = studio.session().file();
+        if (skin == null) {
+            return;
+        }
+        var vlc = VlcLauncher.find();
+        if (vlc.isEmpty()) {
+            studio.error("VLC was not found. Install it, or start it yourself with:\n"
+                    + "vlc -I skins2 --skins2-last=" + skin);
+            return;
+        }
+        try {
+            VlcLauncher.launch(vlc.get(), skin);
+            studio.status("Started VLC with " + skin.getFileName());
+        } catch (Exception ex) {
+            studio.error("Could not start VLC: " + ex.getMessage());
+        }
+    }
+
+    @Override
+    public void undo() {
+        studio.session().undo();
+    }
+
+    @Override
+    public void redo() {
+        studio.session().redo();
+    }
+
+    @Override
+    public void duplicate() {
+        Item item = studio.session().selection().item(studio.session().index());
+        if (item == null) {
+            return;
+        }
+        String pattern = (String) JOptionPane.showInputDialog(this,
+                Messages.get("DUPLICATE_MSG",
+                        "Please enter the rename pattern for the duplicated objects.\n"
+                                + "%oldid% will be replaced by the old ID of the object."),
+                "%oldid%_copy");
+        if (pattern == null) {
+            return;
+        }
+        var outcome = studio.service().duplicateItem(item.getId(), pattern);
+        if (outcome.error()) {
+            studio.error(outcome.text());
+        }
+        studio.session().fireChanged();
+    }
+
+    @Override
+    public void deleteSelected() {
+        Item item = studio.session().selection().item(studio.session().index());
+        if (item != null) {
+            if (!confirmDelete(item.getId())) {
+                return;
+            }
+            var outcome = studio.service().deleteItem(item.getId());
+            if (outcome.error()) {
+                studio.error(outcome.text());
+            } else {
+                studio.session().selection().clearItem();
+                studio.session().fireChanged();
+            }
+            return;
+        }
+        Resource resource = studio.session().selection().resource(studio.session().index());
+        if (resource != null) {
+            if (studio.session().index().isResourceUsed(resource.getId())) {
+                JOptionPane.showMessageDialog(this,
+                        Messages.get("ERROR_RES_DEL_INUSE",
+                                "Resource is still used in the skin, thus it cannot be deleted."),
+                        Messages.get("ERROR_RES_DEL_TITLE", "Could not delete resource"),
+                        JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            if (!confirmDelete(resource.getId())) {
+                return;
+            }
+            var outcome = studio.service().deleteResource(resource.getId());
+            if (outcome.error()) {
+                studio.error(outcome.text());
+            } else {
+                studio.session().selection().selectResource(null);
+                studio.session().fireChanged();
+            }
+            return;
+        }
+        SkinLayout layout = studio.session().selection().layout(studio.session().index());
+        if (layout != null) {
+            SkinWindow window = studio.session().selection().window(studio.session().index());
+            if (window == null) {
+                return;
+            }
+            if (window.getLayouts().size() <= 1) {
+                studio.error("A window must keep at least one layout.");
+                return;
+            }
+            if (!confirmDelete(layout.getId())) {
+                return;
+            }
+            int index = window.getLayouts().indexOf(layout);
+            studio.session().apply(ValueCommand.builder("Delete layout")
+                    .step(() -> window.getLayouts().remove(layout),
+                            () -> window.getLayouts().add(index, layout))
+                    .build());
+            studio.session().selection().selectWindow(window.getId());
+            return;
+        }
+        SkinWindow window = studio.session().selection().window(studio.session().index());
+        if (window == null) {
+            return;
+        }
+        if (studio.session().theme().getWindows().size() <= 1) {
+            studio.error("A theme must keep at least one window.");
+            return;
+        }
+        if (!confirmDelete(window.getId())) {
+            return;
+        }
+        int index = studio.session().theme().getWindows().indexOf(window);
+        studio.session().apply(ValueCommand.builder("Delete window")
+                .step(() -> studio.session().theme().getWindows().remove(window),
+                        () -> studio.session().theme().getWindows().add(index, window))
+                .build());
+        studio.session().selection().selectWindow(null);
+    }
+
+    private boolean confirmDelete(String id) {
+        return JOptionPane.showConfirmDialog(this, "Delete \"" + id + "\"?",
+                Messages.get("DEL_CONFIRM_TITLE", "Deletion confirmation"),
+                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+
+    @Override
+    public void moveSelected(int dx, int dy) {
+        Item item = studio.session().selection().item(studio.session().index());
+        if (item == null) {
+            return;
+        }
+        int x = item.getX() + dx;
+        int y = item.getY() + dy;
+        studio.session().apply(ValueCommand.builder("Move " + item.type().displayName())
+                .set(item.getX(), x, item::setX)
+                .set(item.getY(), y, item::setY)
+                .build());
+    }
+
+    @Override
+    public void zoomIn() {
+        panels.canvas.zoomIn();
+        applyChromeState();
+    }
+
+    @Override
+    public void zoomOut() {
+        panels.canvas.zoomOut();
+        applyChromeState();
+    }
+
+    @Override
+    public void fitToWindow() {
+        panels.canvas.fitToWindow();
+        applyChromeState();
+    }
+
+    @Override
+    public void setTool(CanvasPanel.Tool tool) {
+        panels.canvas.setTool(tool);
+        ToolBarFactory.syncToolButtons(toolbar, tool);
+    }
+
+    @Override
+    public void validate() {
+        panels.problems.validate();
+        studio.status("Validation finished");
+    }
+
+    @Override
+    public void openSettings() {
+        new ThemeSettingsDialog(studio).setVisible(true);
+    }
+
+    /**
+     * Preferences with a live toolbar visibility callback.
+     */
+    public void openPreferences() {
+        new PreferencesDialog(studio, this::setToolbarVisible).setVisible(true);
+    }
+
+    private void setToolbarVisible(boolean visible) {
+        toolbar.setVisible(visible);
+        if (toolbarHolder != null) {
+            toolbarHolder.setVisible(visible);
+        }
+    }
+
+    @Override
+    public void showVariables() {
+        Docking.bringToFront("variables");
+    }
+
+    @Override
+    public void showAi() {
+        Docking.bringToFront("ai");
+    }
+
+    @Override
+    public void toggleCheckerboard() {
+        studio.settings().setCheckerboard(!studio.settings().isCheckerboard());
+        studio.session().fireChanged();
+    }
+
+
+    private Path layoutFile() {
+        return io.github.zoroaster1x.vlcskin.app.config.SettingsStore.defaultPath().resolveSibling("layout.xml");
+    }
+
+    private void restoreLayout() {
+        try {
+            if (Files.exists(layoutFile())) {
+                var layout = LayoutPersistence.loadWindowLayoutFromFile(layoutFile().toFile());
+                if (layout != null) {
+                    DockingState.restoreWindowLayout(this, layout);
+                }
+            }
+        } catch (Exception ex) {
+            // A stale layout file must never stop the window from opening.
+        }
+    }
+
+    private void saveLayout() {
+        try {
+            Files.createDirectories(layoutFile().getParent());
+            LayoutPersistence.saveWindowLayoutToFile(layoutFile().toFile(),
+                    DockingState.getWindowLayout(this));
+        } catch (Exception ex) {
+            // Best effort.
+        }
+    }
+
+    private void applyWindowGeometry() {
+        var settings = studio.settings();
+        setSize(settings.getWindowWidth(), settings.getWindowHeight());
+        if (settings.getWindowX() >= 0 && settings.getWindowY() >= 0) {
+            setLocation(settings.getWindowX(), settings.getWindowY());
+        } else {
+            setLocationRelativeTo(null);
+        }
+        if (settings.isWindowMaximized()) {
+            setExtendedState(MAXIMIZED_BOTH);
+        }
+    }
+
+    @Override
+    public void exit() {
+        if (studio.session().isDirty()) {
+            int choice = JOptionPane.showConfirmDialog(this, "Save changes before closing?", Version.NAME,
+                    JOptionPane.YES_NO_CANCEL_OPTION);
+            if (choice == JOptionPane.CANCEL_OPTION || choice == JOptionPane.CLOSED_OPTION) {
+                return;
+            }
+            if (choice == JOptionPane.YES_OPTION) {
+                studio.save();
+            }
+        }
+        var settings = studio.settings();
+        settings.setWindowMaximized((getExtendedState() & MAXIMIZED_BOTH) == MAXIMIZED_BOTH);
+        if (!settings.isWindowMaximized()) {
+            settings.setWindowX(getX());
+            settings.setWindowY(getY());
+            settings.setWindowWidth(getWidth());
+            settings.setWindowHeight(getHeight());
+        }
+        settings.setToolbarFloating(toolbar.getTopLevelAncestor() != this);
+        settings.setToolbarOrientation(toolbar.getOrientation());
+        studio.saveSettings();
+        saveLayout();
+        dispose();
+        System.exit(0);
+    }
+
+    public Studio studio() {
+        return studio;
+    }
+
+    public Panels panels() {
+        return panels;
+    }
+}

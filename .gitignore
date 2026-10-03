@@ -1,0 +1,27 @@
+# Gradle build output.
+build/
+.gradle/
+*/build/
+*/.gradle/
+
+# Local machine notes: real paths, never in git. The tracked AGENTS.md points
+# at this file by name; only the file itself stays out of the repository.
+PRIVATE_AGENTS.md
+
+# Local test configuration with real theme and VLC paths.
+.testenv
+
+# Screenshots and reports produced while checking the UI.
+app/build/reports/
+
+# Editor and tool caches.
+.idea/
+.vscode/
+*.iml
+__pycache__/
+*.pyc
+
+# Logs and crash dumps.
+*.log
+hs_err_pid*
+replay_pid*

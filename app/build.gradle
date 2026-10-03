@@ -1,0 +1,56 @@
+plugins {
+    id 'application'
+    alias(libs.plugins.shadow)
+}
+
+dependencies {
+    implementation project(':core')
+
+    implementation libs.flatlaf
+    implementation libs.flatlaf.extras
+    implementation libs.flatlaf.themes
+    implementation libs.modern.docking.api
+    implementation libs.modern.docking.ui
+    implementation libs.modern.docking.single.app
+    implementation libs.rsyntaxtextarea
+    implementation libs.miglayout.swing
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.junit.jupiter
+    testImplementation libs.assertj
+    testRuntimeOnly libs.junit.platform.launcher
+}
+
+application {
+    mainClass = 'io.github.zoroaster1x.vlcskin.app.VlcSkinStudio'
+    applicationName = 'vlc-skin-studio'
+}
+
+tasks.named('shadowJar') {
+    archiveBaseName = 'vlc-skin-studio'
+    archiveClassifier = ''
+    archiveVersion = ''
+    manifest {
+        attributes 'Main-Class': application.mainClass.get(),
+                   'Enable-Native-Access': 'ALL-UNNAMED'
+    }
+    mergeServiceFiles()
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}
+
+// Regenerates screenshots/ with the headless UI harness: stills and 30fps GIFs.
+// Set VELOCITY_THEME to a VeLoCity theme.xml path to also render that fixture.
+tasks.register('uiScreenshots', JavaExec) {
+    group = 'verification'
+    description = 'Regenerate screenshots/ with the headless UI harness.'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.zoroaster1x.vlcskin.app.UiShots'
+    workingDir = rootProject.projectDir
+    args = [new File(rootProject.projectDir, 'screenshots').absolutePath, System.getenv('VELOCITY_THEME') ?: '']
+    dependsOn testClasses
+}

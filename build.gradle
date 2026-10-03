@@ -1,0 +1,38 @@
+plugins {
+    alias(libs.plugins.shadow) apply false
+}
+
+allprojects {
+    group = 'io.github.zoroaster1x'
+    version = providers.gradleProperty('version').getOrElse('1.0.0')
+}
+
+subprojects {
+    apply plugin: 'java'
+
+    repositories {
+        mavenCentral()
+    }
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInteger())
+        }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        options.encoding = 'UTF-8'
+        // options.release = 25
+        // JDK 23 and newer no longer run annotation processors unless asked to.
+        // Lombok generates every model accessor, so this is required.
+        options.compilerArgs.add('-proc:full')
+    }
+
+    tasks.withType(Test).configureEach {
+        useJUnitPlatform()
+        testLogging {
+            events 'failed', 'skipped'
+            exceptionFormat 'full'
+        }
+    }
+}

@@ -1,0 +1,271 @@
+# VLC Skin Studio
+
+A modern editor for VLC skins2 themes: dockable desktop UI, live preview, a
+terminal UI, a CLI and an MCP server so AI clients can inspect and build skins
+with you. It is a from scratch port of the original VLC Skin Editor (0.8.6)
+to Java 25.
+
+![Dark theme](docs/screenshot-dark.png)
+
+![Light theme](docs/screenshot-light.png)
+
+## What it does
+
+* Opens and saves VLC skins2 themes (`.xml`, `.vlt`) with every control skins2
+  supports: windows, layouts, anchors, buttons, checkboxes, images, text,
+  sliders, slider backgrounds, radial sliders, video areas, playlists,
+  playtrees, panels and groups.
+* Draws the layout the way VLC does, using VLC's own rules (bezier slider
+  paths, slider background frame grids, alphacolor keying, boolean `visible`
+  expressions, `$T` and friends). The preview is a real Java2D render, not a
+  mockup.
+* Keeps everything it does not understand: unknown attributes and elements are
+  preserved and written back. A theme from any VLC version opens and saves
+  without losing data.
+* Animates multi-frame bitmaps in the preview at their fps, like VLC does.
+* Drag and drop in the items tree moves controls between groups and panels;
+  the canvas drags them with the mouse and every move is undoable.
+* Packages and unpacks `.vlt` archives (gzip tar, plus plain zip archives found
+  in the wild) with all referenced assets.
+* Validates ids, references, sizes, colors and files before VLC has to.
+* Speaks the original editor's language files: 21 translations converted from
+  the original VLC Skin Editor bundles cover menus, toolbar, panel titles and
+  the common dialogs, and new surfaces fall back to English until translated.
+* Gives an AI the same controls through MCP: `layout_tree` describes geometry
+  as data for models without vision, `render_layout` returns a PNG and the same
+  data for models with vision, and the editing tools change the open document
+  with undo.
+
+## Requirements
+
+* Java 25. The build asks Gradle for a Java 25 toolchain.
+* VLC only if you want the "Test skin in VLC" menu item.
+
+## Build and run
+
+```bash
+./gradlew build                    # compile, test, build the fat jar
+java -jar app/build/libs/vlc-skin-studio.jar          # desktop UI
+java -jar app/build/libs/vlc-skin-studio.jar --help   # CLI
+./run.sh                           # the same, builds on first run
+```
+
+The desktop window opens with the welcome card: create a skin, open one, or
+generate the built in example with real assets. Panels are dockable; drag them
+anywhere, float them, or restore the layout on the next start.
+
+Inside the theme there is a generated example that looks like this:
+
+![Example preview](docs/example-neon.png)
+
+## Desktop UI
+
+| Panel | What it does |
+|---|---|
+| Resources | bitmaps with sub bitmaps, fonts, bitmap fonts, popup menus, ini files; add bitmap/font, reload images |
+| Windows and layouts | windows and their layouts; add, duplicate, delete, reorder |
+| Items | the item tree of the active layout; add any control, duplicate, delete, reorder |
+| Canvas | the live preview; click to select the topmost item, drag to move, path tool edits slider points, ctrl+wheel zooms |
+| Inspector | every attribute of the selected item, resource, window or layout, committed through undo |
+| Variables | simulates player state: booleans such as `vlc.isPlaying`, text variables such as `$N`, slider position |
+| Problems | validation results; double click jumps to the element |
+| Skin XML | the generated XML with syntax highlighting, editable with an Apply step |
+| AI assistant | chat with any OpenAI compatible endpoint using the same tools as MCP |
+
+Shortcuts: `Ctrl+N` new, `Ctrl+O` open, `Ctrl+S` save, `Ctrl+Z/Y` undo/redo,
+`Ctrl+Up/Down/Left/Right` nudge the selected item, `Delete` removes it,
+`Ctrl+D` duplicates, `Ctrl+=`/`Ctrl+-`/`Ctrl+0` zoom the canvas.
+
+Themes: Light, Dark, IntelliJ, Darcula, Arc, Arc dark, One dark. The accent is
+VLC orange everywhere; both themes are first class.
+
+## CLI
+
+```
+vlc-skin-studio <command> [options]
+
+  new        Create a new skin file, empty or from an example
+  render     Render a layout to PNG and print or write its geometry
+  inspect    Print everything known about a skin as JSON
+  validate   Check a skin for errors and warnings
+  vlt        Import or export a .vlt theme archive
+  tui        Browse and edit a skin in the terminal
+  mcp        Run the MCP server over stdio
+  examples   List the built in example themes
+```
+
+Examples:
+
+```bash
+# Start from a generated example with real images.
+java -jar vlc-skin-studio.jar new --example neon out/theme.xml
+
+# Validate and render at 2x, with the geometry as JSON.
+java -jar vlc-skin-studio.jar validate out/theme.xml
+java -jar vlc-skin-studio.jar render out/theme.xml -z 2 -o preview.png --json geometry.json
+
+# Package a theme for VLC.
+java -jar vlc-skin-studio.jar vlt export out/theme.xml out/theme.vlt
+vlc -I skins2 --skins2-last=out/theme.xml
+```
+
+`render` writes a PNG and, with `--json`, a `layout_tree` style description:
+every item with id, type, absolute x/y/width/height, z order, visibility, text
+and the attributes that matter. A model without image input can reason about
+the layout from that alone.
+
+## Terminal UI
+
+```
+./run.sh tui out/theme.xml
+vlcskin> tree            # geometry as a table
+vlcskin> render!         # the preview as truecolor half blocks
+vlcskin> set vlc.isPlaying true
+vlcskin> show play_btn
+vlcskin> validate
+```
+
+The TUI is line based on purpose: it works over SSH, in CI logs, and is covered
+by tests without a terminal.
+
+## MCP server
+
+The server speaks MCP over stdio and exposes the editor:
+
+* `open_skin`, `new_skin`, `save_skin`, `import_vlt`, `export_vlt`,
+  `document_info`
+* `layout_tree`, `render_layout`, `list_items`, `get_item`
+* `add_item`, `delete_item`, `move_item`, `set_item_property`, `duplicate_item`
+* `add_resource`, `add_bitmap_from_file`, `set_resource_property`,
+  `set_sub_bitmap_property`, `delete_resource`
+* `add_window`, `add_layout`, `set_theme_property`
+* `validate_skin`, `set_variables`, `list_actions`, `list_examples`,
+  `create_example`
+* `describe_editor_ui`, `screenshot_editor` (available when the desktop window
+  is running in the same process)
+
+Register it with OpenCode (V2 configuration):
+
+```jsonc
+{
+  "mcp": {
+    "servers": {
+      "vlc-skin-studio": {
+        "type": "local",
+        "command": ["java", "-jar", "/absolute/path/vlc-skin-studio.jar", "mcp"]
+      }
+    }
+  }
+}
+```
+
+Or with the CLI: `opencode mcp add vlc-skin-studio --global -- java -jar /path/vlc-skin-studio.jar mcp`.
+
+Start it with a skin already open if you like:
+`java -jar vlc-skin-studio.jar mcp --file out/theme.xml`.
+
+A typical AI session: create an example, ask for the geometry, change a few
+attributes, ask for a render and look at it. The server returns the PNG as
+image content and the geometry as structured data in the same reply.
+
+## AI assistant panel
+
+The AI panel in the desktop window talks to any OpenAI compatible
+`/chat/completions` endpoint (OpenAI, a local llama.cpp, Ollama's `/v1`, ...).
+It reuses the MCP tool catalog for tool calling and can attach renders as
+images when the model accepts them. The API key is read from the environment
+variable named in the panel (`OPENAI_API_KEY` by default) or pasted into the
+field, which is kept in memory only and never written to disk.
+
+## Format support
+
+Everything the DTD and the original editor support, plus the parts the original
+dropped:
+
+* Theme, ThemeInfo, Window, Layout, Include, IniFile
+* Bitmap, SubBitmap, Font, BitmapFont
+* PopupMenu with MenuItem and MenuSeparator
+* Anchor, Button, Checkbox, Group, Image, Panel, Playlist, Playtree,
+  RadialSlider, Slider, SliderBackground, Text, Video
+
+The editor writes canonical attribute order and omits defaults. Unknown
+attributes and elements are kept verbatim. See `AGENTS.md` for the exact
+behavior of defaults, ids, bezier paths, alpha keying and expressions.
+
+## Examples
+
+Two examples are generated on demand with real PNG assets drawn by the tool
+itself: `neon` (a 320x140 player bar) and `panel` (a 420x220 video panel with
+a playlist area). They exist to give new users something that renders on the
+first run and to give tests a realistic theme.
+
+## Architecture
+
+```
+core   model, parser, writer, validator, renderer, edit commands, MCP server,
+       AI client, CLI, TUI, examples. No Swing.
+app    Swing UI on FlatLaf and ModernDocking, panels, dialogs, inspector,
+       headless UI harness, MCP UI bridge.
+```
+
+The core is UI free, so it can render, validate and serve MCP in a terminal or
+a server. The app adds the desktop window and never reaches into model
+internals directly: every change goes through `EditorService` or an undoable
+`ValueCommand`.
+
+## Tests
+
+```bash
+./gradlew build
+```
+
+28 core tests cover round trips, escaping, unknown content, bezier maths,
+boolean expressions, rendering, hit testing, slider backgrounds, VLT archives,
+the editor service and the MCP tool catalog. 6 UI tests build the whole panel
+tree offscreen, paint it in both themes, dispatch real mouse events to move an
+item and undo it, and write screenshots to `app/build/reports/screenshots/`.
+
+## Known limits
+
+* Localization covers the original editor's surfaces (menus, toolbar, panel
+  titles, common dialogs). The newer panels and the AI assistant stay English
+  until a translation exists; the bundle mechanism is in place.
+* The update check opens the GitHub releases page and can compare the latest
+  release tag on startup; there is no self-updater, because releases are cut
+  and attested by CI.
+* VLT import and export show a progress dialog but no byte level progress bar.
+* Real chart parts, video playback and tooltips are VLC runtime behavior and
+  are not simulated beyond the black video rectangle.
+* The preview renders fonts with the JVM's font stack; a skin that depends on
+  hinting differences may look a pixel or two off from VLC on another platform.
+* The toolbar is docked at the top; unlike the original it is not a floating
+  palette, since floating panels already cover that need.
+
+## License
+
+GPL-3.0-or-later. This is a derivative of the original VLC Skin Editor by
+Daniel Dreibrodt (GPL-2.0-or-later) and reads the VLC skins2 format, whose
+implementation in VLC is GPL-2.0-or-later. See `LICENSE`.
+
+## Credits
+
+* The original VLC Skin Editor 0.8.6 by Daniel Dreibrodt, the reference for
+  every dialog and for the generated XML.
+* The VLC team for skins2 and its parser, the source of truth for rendering
+  and format behavior.
+* FlatLaf, ModernDocking, RSyntaxTextArea, MigLayout, Jackson, picocli, JLine,
+  Apache Commons Compress and the official MCP Java SDK.
+
+## Funding
+
+If this saves you time, consider supporting development. Every contribution
+goes toward maintenance and the long tail of skin edge cases.
+
+**Monero (XMR):**
+
+```
+8BdxmQSniku4dBJXWPXeXvgjztmj5nmvWQqeCrVvCtYciusbAyo4rqrGCefTfQ4gGaVZmLN7VgLiYUYyBdYFEwHn1UWPjWs
+```
+
+Crypto is not your thing? Starring the repository, filing clear bug reports
+with a sample skin, and telling other skinners all help just as much.

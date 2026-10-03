@@ -1,0 +1,123 @@
+# Builds and tests every push to main. Cuts a release only when the head
+# commit message carries a version marker, for example:
+#
+#   VLC Skin Studio 1.0.1 [release] 1.0.1
+#
+# The marker version must equal the version in gradle.properties. The release
+# notes list every commit since the previous release tag, then the text from
+# .github/release-template.md, which carries the funding block. The jar is
+# attested so a reader can verify where it was built, then published with a
+# SHA-256 checksum file.
+
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
+  attestations: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Build and test
+        run: ./gradlew build
+
+      - name: Read the release marker
+        id: version
+        run: |
+          PROPERTY_VERSION=$(sed -n 's/^version[[:space:]]*=[[:space:]]*//p' gradle.properties | head -n1 | tr -d '[:space:]')
+          if [ -z "$PROPERTY_VERSION" ]; then
+            echo "::error::gradle.properties has no version."
+            exit 1
+          fi
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="$PROPERTY_VERSION"
+          else
+            VERSION=$(git log -1 --pretty=%B | python3 -c "import sys,re;m=re.search(r'\[release\]\s*(\d+\.\d+\.\d+)', sys.stdin.read(), re.I);print(m.group(1) if m else '')")
+          fi
+          if [ -z "$VERSION" ]; then
+            echo "No [release] x.y.z marker in the head commit; this is a normal build."
+            exit 0
+          fi
+          if [ "$VERSION" != "$PROPERTY_VERSION" ]; then
+            echo "::error::The commit says [release] $VERSION but gradle.properties says $PROPERTY_VERSION."
+            exit 1
+          fi
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Build the release notes
+        if: steps.version.outputs.version != ''
+        run: |
+          PREVIOUS=$(git describe --tags --abbrev=0 --match '[0-9]*' 2>/dev/null || true)
+          if [ -z "$PREVIOUS" ]; then
+            RANGE="HEAD"
+            PREVIOUS_LABEL="the beginning"
+          else
+            RANGE="$PREVIOUS..HEAD"
+            PREVIOUS_LABEL="$PREVIOUS"
+          fi
+          git log $RANGE --pretty=format:'- %s' > /tmp/changes.txt
+          git log $RANGE --pretty=format:'- %h %s' > /tmp/commits.txt
+          VERSION="${{ steps.version.outputs.version }}" PREVIOUS_LABEL="$PREVIOUS_LABEL" python3 - <<'PY'
+          import os
+          template = open(".github/release-template.md", encoding="utf-8").read()
+          changes = open("/tmp/changes.txt", encoding="utf-8").read().strip() or "- No changes since the previous release."
+          commits = open("/tmp/commits.txt", encoding="utf-8").read().strip() or "- No commits."
+          body = (
+              template.replace("{{VERSION}}", os.environ["VERSION"])
+              .replace("{{PREVIOUS}}", os.environ["PREVIOUS_LABEL"])
+              .replace("{{CHANGES}}", changes)
+              .replace("{{COMMITS}}", commits)
+          )
+          open("/tmp/release-body.md", "w", encoding="utf-8").write(body)
+          PY
+          echo "notes written for ${{ steps.version.outputs.version }}"
+
+      - name: Write the checksum file
+        if: steps.version.outputs.version != ''
+        run: |
+          cd app/build/libs
+          sha256sum vlc-skin-studio.jar > SHA256SUMS
+          cat SHA256SUMS
+
+      - name: Attest build provenance
+        if: steps.version.outputs.version != ''
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: app/build/libs/vlc-skin-studio.jar
+
+      - name: Publish the release
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          TITLE="VLC Skin Studio $VERSION"
+          if gh release view "$VERSION" >/dev/null 2>&1; then
+            gh release edit "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md
+            gh release upload "$VERSION" app/build/libs/vlc-skin-studio.jar app/build/libs/SHA256SUMS --clobber
+          else
+            gh release create "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md --target "${{ github.sha }}" app/build/libs/vlc-skin-studio.jar app/build/libs/SHA256SUMS
+          fi
+          echo "Released $VERSION."

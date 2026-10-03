@@ -1,0 +1,13 @@
+NOTICE
+
+The language files in the messages folder (languages.properties and
+messages_<code>.properties) are converted from the original VLC Skin Editor
+language files.
+
+Original: VLC Skin Editor, Copyright (C) 2007-2009 Daniel Dreibrodt and the
+translators credited in each language file. Distributed under the GNU General
+Public License version 2 or later (GPL-2.0-or-later).
+
+These converted translation files are distributed under the GNU General
+Public License version 3 or later (GPL-3.0-or-later), the same license as
+this project. See the LICENSE file in the project root.
