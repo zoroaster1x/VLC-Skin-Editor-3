@@ -57,6 +57,12 @@ the JVM; the native binary says so when started without a subcommand. The
 script documents the flags, writes `fontconfig.properties` next to the binary
 and lists the runtime libraries it needs.
 
+`run.sh` snapshots the jar into `build/run/` before starting. Gradle rewrites
+`build/libs/vlc-skin-studio.jar` in place, and a JVM that lazily loads a class
+from a truncated jar dies with `ClassNotFoundException` (this once broke
+Jackson saves, ModernDocking layout persistence and the close prompt). Keep the
+snapshot, so builds stay safe while the app is open.
+
 ## 4. Test suites
 
 | Suite | Covers |
