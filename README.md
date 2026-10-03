@@ -187,14 +187,22 @@ by tests without a terminal.
 The server speaks MCP over stdio and exposes the editor:
 
 * `open_skin`, `new_skin`, `save_skin`, `import_vlt`, `export_vlt`,
-  `document_info`
-* `layout_tree`, `render_layout`, `list_items`, `get_item`
-* `add_item`, `delete_item`, `move_item`, `set_item_property`, `duplicate_item`
-* `add_resource`, `add_bitmap_from_file`, `set_resource_property`,
-  `set_sub_bitmap_property`, `delete_resource`
-* `add_window`, `add_layout`, `set_theme_property`
-* `validate_skin`, `set_variables`, `list_actions`, `list_examples`,
-  `create_example`
+  `document_info`, `reset_skin`
+* `layout_tree`, `render_layout`, `list_items`, `get_item`, `get_resource`
+* `add_item`, `delete_item`, `move_item`, `nudge_item`, `reorder_item`,
+  `reparent_item`, `set_item_property`, `duplicate_item`
+* `add_resource`, `add_bitmap_from_file`, `add_sub_bitmap`,
+  `set_resource_property`, `set_sub_bitmap_property`, `delete_sub_bitmap`,
+  `delete_resource`, `duplicate_resource`
+* `add_window`, `delete_window`, `add_layout`, `delete_layout`,
+  `duplicate_window`, `duplicate_layout`, `reorder_layout`,
+  `set_theme_property`, `set_window_property`, `set_layout_property`
+* `undo`, `redo`, `history_state`, `select_element`, `get_selection`
+* `get_xml`, `apply_xml`, `reload_images`, `save_preview`, `test_in_vlc`
+* `generate_slider_background`, `validate_skin`, `set_variables`,
+  `get_variables`, `list_actions`, `list_examples`, `create_example`
+* `get_preferences`, `set_preferences`, `set_canvas`, `show_panel`,
+  `open_settings`, `check_for_updates`
 * `describe_editor_ui`, `screenshot_editor` (available when the desktop window
   is running in the same process)
 

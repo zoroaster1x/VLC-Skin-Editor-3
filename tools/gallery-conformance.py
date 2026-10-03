@@ -66,7 +66,7 @@ def check_skin(jar, vlt, work_root):
     if work.exists():
         shutil.rmtree(work)
     work.mkdir(parents=True, exist_ok=True)
-    record = {"skin": name, "vlt": vlt.name, "size": vlt.stat().st_size}
+    record = {"skin": name, "vlt": vlt.name, "size": vlt.stat().st_size, "source": "gallery pack"}
     try:
         imported = run(["java", "-jar", str(jar), "vlt", "import", str(vlt), str(work)], work_root, 180)
         record["import_ms"] = imported["ms"]
@@ -75,54 +75,74 @@ def check_skin(jar, vlt, work_root):
             record["status"] = "import failed"
             record["error"] = (imported["stderr"] or imported["stdout"]).strip()[:400]
             return record
-        asset_count = len(list(work.iterdir()))
-        record["assets"] = asset_count
-
-        inspected = run(["java", "-jar", str(jar), "inspect", str(theme)], work, 60)
-        if inspected["code"] != 0:
-            record["status"] = "inspect failed"
-            record["error"] = (inspected["stderr"] or inspected["stdout"]).strip()[:400]
-            return record
-        info = json.loads(inspected["stdout"])
-        record["windows"] = info.get("windows", 0)
-        record["layouts"] = info.get("layouts", 0)
-        record["items"] = info.get("items", 0)
-
-        validated = run(["java", "-jar", str(jar), "validate", str(theme)], work, 60)
-        match = re.search(r"(\d+) issues, (\d+) errors", validated["stdout"])
-        record["issues"] = int(match.group(1)) if match else -1
-        record["errors"] = int(match.group(2)) if match else -1
-        record["problems"] = [
-            line for line in validated["stdout"].splitlines()
-            if ": ERROR" in line or ": WARNING" in line
-        ][:5]
-
-        first = next(
-            (entry for entry in info.get("layoutsDetail", []) if entry.get("layout")), None
-        )
-        if first:
-            window = first.get("window") or ""
-            layout = first.get("layout") or ""
-            rendered = run(
-                ["java", "-jar", str(jar), "render", str(theme),
-                 "-w", window, "-l", layout, "-z", "1",
-                 "-o", str(work / "render.png"), "--quiet"],
-                work, 120)
-            record["render_ms"] = rendered["ms"]
-            png = work / "render.png"
-            if rendered["code"] == 0 and png.exists() and png.stat().st_size > 200:
-                record["status"] = "ok"
-                record["render_bytes"] = png.stat().st_size
-            else:
-                record["status"] = "render failed"
-                record["error"] = (rendered["stderr"] or rendered["stdout"]).strip()[:400]
-        else:
-            record["status"] = "no layout"
-        return record
+        return check_theme(jar, theme, name, work, record)
     except Exception as exc:  # one bad skin must not stop the sweep
         record["status"] = "exception"
         record["error"] = str(exc)[:400]
         return record
+
+
+def check_official(jar, theme_source, work_root):
+    """Check a theme that ships with VLC itself, no VLT import needed."""
+    source_dir = theme_source.parent
+    name = "vlc-" + source_dir.name if theme_source.name == "theme.xml" else "vlc-" + theme_source.stem
+    work = work_root / "work" / name
+    if work.exists():
+        shutil.rmtree(work)
+    shutil.copytree(source_dir, work)
+    record = {"skin": name, "vlt": theme_source.name, "size": theme_source.stat().st_size,
+              "source": "VLC built in"}
+    try:
+        return check_theme(jar, work / theme_source.name, name, work, record)
+    except Exception as exc:
+        record["status"] = "exception"
+        record["error"] = str(exc)[:400]
+        return record
+
+
+def check_theme(jar, theme, name, work, record):
+    record["assets"] = len(list(work.iterdir()))
+    inspected = run(["java", "-jar", str(jar), "inspect", str(theme)], work, 60)
+    if inspected["code"] != 0:
+        record["status"] = "inspect failed"
+        record["error"] = (inspected["stderr"] or inspected["stdout"]).strip()[:400]
+        return record
+    info = json.loads(inspected["stdout"])
+    record["windows"] = info.get("windows", 0)
+    record["layouts"] = info.get("layouts", 0)
+    record["items"] = info.get("items", 0)
+
+    validated = run(["java", "-jar", str(jar), "validate", str(theme)], work, 60)
+    match = re.search(r"(\d+) issues, (\d+) errors", validated["stdout"])
+    record["issues"] = int(match.group(1)) if match else -1
+    record["errors"] = int(match.group(2)) if match else -1
+    record["problems"] = [
+        line for line in validated["stdout"].splitlines()
+        if ": ERROR" in line or ": WARNING" in line
+    ][:5]
+
+    first = next(
+        (entry for entry in info.get("layoutsDetail", []) if entry.get("layout")), None
+    )
+    if first:
+        window = first.get("window") or ""
+        layout = first.get("layout") or ""
+        rendered = run(
+            ["java", "-jar", str(jar), "render", str(theme),
+             "-w", window, "-l", layout, "-z", "1",
+             "-o", str(work / "render.png"), "--quiet"],
+            work, 120)
+        record["render_ms"] = rendered["ms"]
+        png = work / "render.png"
+        if rendered["code"] == 0 and png.exists() and png.stat().st_size > 200:
+            record["status"] = "ok"
+            record["render_bytes"] = png.stat().st_size
+        else:
+            record["status"] = "render failed"
+            record["error"] = (rendered["stderr"] or rendered["stdout"]).strip()[:400]
+    else:
+        record["status"] = "no layout"
+    return record
 
 
 def write_report(records, out_dir):
@@ -194,40 +214,53 @@ def main():
     parser.add_argument("--pack-url", default=DEFAULT_PACK)
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--limit", type=int, default=0)
-    parser.add_argument("--theme", type=Path,
-                        help="Check one already unpacked theme.xml instead of the pack")
+    parser.add_argument("--extra", type=Path, action="append", default=[],
+                        help="A theme.xml or a folder containing one, repeatable; "
+                             "use this for the themes VLC itself ships")
+    parser.add_argument("--no-pack", action="store_true",
+                        help="Only check --extra themes, skip the gallery pack")
     args = parser.parse_args()
 
     if not args.jar.exists():
         print(f"jar not found: {args.jar}", file=sys.stderr)
         return 1
     args.out.mkdir(parents=True, exist_ok=True)
-
     args.work.mkdir(parents=True, exist_ok=True)
-    pack = download(args.pack_url, args.work / "vlc-skins.zip")
-    unpacked = args.work / "skins"
-    if not unpacked.exists():
-        print(f"unpacking {pack}")
-        unpacked.mkdir(parents=True, exist_ok=True)
-        with zipfile.ZipFile(pack) as archive:
-            archive.extractall(unpacked)
-    vlts = sorted(unpacked.rglob("*.vlt"))
-    if args.limit:
-        vlts = vlts[:args.limit]
-    print(f"{len(vlts)} themes to check with {args.jobs} workers")
-    if not vlts:
-        print("no .vlt files in the pack", file=sys.stderr)
-        return 1
 
     records = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
-        futures = {pool.submit(check_skin, args.jar, vlt, args.work): vlt for vlt in vlts}
-        for future in concurrent.futures.as_completed(futures):
-            record = future.result()
-            records.append(record)
-            errors = record.get("errors", "?")
-            print(f"  {record['skin']}: {record['status']} (errors={errors})", flush=True)
+    if not args.no_pack:
+        pack = download(args.pack_url, args.work / "vlc-skins.zip")
+        unpacked = args.work / "skins"
+        if not unpacked.exists():
+            print(f"unpacking {pack}")
+            unpacked.mkdir(parents=True, exist_ok=True)
+            with zipfile.ZipFile(pack) as archive:
+                archive.extractall(unpacked)
+        vlts = sorted(unpacked.rglob("*.vlt"))
+        if args.limit:
+            vlts = vlts[:args.limit]
+        print(f"{len(vlts)} gallery themes to check with {args.jobs} workers")
+        with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
+            futures = {pool.submit(check_skin, args.jar, vlt, args.work): vlt for vlt in vlts}
+            for future in concurrent.futures.as_completed(futures):
+                record = future.result()
+                records.append(record)
+                print(f"  {record['skin']}: {record['status']} "
+                      f"(errors={record.get('errors', '?')})", flush=True)
 
+    for extra in args.extra:
+        theme = extra / "theme.xml" if extra.is_dir() else extra
+        if not theme.exists():
+            print(f"extra theme not found: {theme}", file=sys.stderr)
+            continue
+        print(f"checking official theme {theme}")
+        record = check_official(args.jar, theme, args.work)
+        records.append(record)
+        print(f"  {record['skin']}: {record['status']} (errors={record.get('errors', '?')})", flush=True)
+
+    if not records:
+        print("nothing to check", file=sys.stderr)
+        return 1
     write_report(records, args.out)
     return 0
 

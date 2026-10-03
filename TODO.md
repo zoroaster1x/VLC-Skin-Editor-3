@@ -68,10 +68,15 @@ after looking at a fresh screenshot or GIF.
    to `build/...`. Verify with a clean `./gradlew build` and by rerunning the
    CLI, MCP handshake and screenshot generation.
 3. **Gallery conformance sweep.** Run `tools/gallery-conformance.py` over the
-   120 themes in the official pack (downloaded to
-   `/tmp/opencode/skin-gallery`). Triage every import, validate and render
-   failure; fix parser or renderer bugs; rerun until every theme imports and
-   renders. Commit `docs/skin-gallery-report.md` and the JSON.
+   120 themes in the official pack plus the themes VLC itself ships
+   (`share/skins2/default/theme.xml` and `share/skins2/winamp2.xml`, extracted
+   to `/tmp/opencode/skin-gallery/official` and passed with `--extra`). Triage
+   every import, validate and render failure; fix parser or renderer bugs;
+   rerun until every theme imports and renders. The two built-in themes are
+   the official reference for skins2 features; winamp2 ships without its BMP
+   assets in the VLC tree, so missing-asset warnings there are expected and
+   must be reported as such. Commit `docs/skin-gallery-report.md` and the
+   JSON, and keep the raw work folder out of the repository.
 4. **VeLoCity recreation over MCP.** Rerun
    `tools/recreate-velocity-via-mcp.py` on the merged jar, review the step
    renders, fix any tool gaps it exposes, then copy
