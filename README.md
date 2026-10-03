@@ -233,19 +233,25 @@ image content and the geometry as structured data in the same reply.
 ## Native image (optional)
 
 GraalVM 25 can build a self-contained binary for the CLI, TUI and MCP entry
-points. The desktop Swing window stays on the JVM; the native path is for fast
-`mcp` startup and scripted use.
+points, PNG rendering included. The desktop Swing window stays on the JVM: the
+binary prints that pointer when started without a subcommand.
 
 ```bash
 sdk install java 25.4.4.1+1-graalce
 tools/build-native.sh
 build/native/vlc-skin-studio --version
+build/native/vlc-skin-studio render skin.xml -o preview.png
 build/native/vlc-skin-studio mcp
 ```
 
-The binary is about 60 MB and needs the `.so` files native-image places next to
-it. `picocli-codegen` runs at compile time so the CLI's reflection metadata is
-already in the jar. The desktop UI is not covered by native testing.
+Java2D inside the image has no font configuration of its own, so the build
+writes `fontconfig.properties` next to the binary with the DejaVu families it
+found; `VlcSkinStudio` points `sun.awt.fontconfig` at it. Keep that file and
+the `.so` files that native-image places next to the executable.
+
+The binary is about 68 MB. `picocli-codegen` runs at compile time for the CLI
+metadata, and the AWT reflection and JNI entries collected with GraalVM's
+tracing agent live under `src/main/resources/META-INF/native-image/`.
 
 ## AI assistant panel
 
@@ -331,9 +337,10 @@ in `docs/skin-gallery-report.md`.
   hinting differences may look a pixel or two off from VLC on another platform.
 * The toolbar is docked at the top; unlike the original it is not a floating
   palette, since floating panels already cover that need.
-* The GraalVM native image covers the CLI, TUI and MCP entry points; the Swing
-  window is tested on the JVM only. The renderer works in the native image, but
-  the image needs the `.so` files native-image writes next to the binary.
+* The GraalVM native image covers the CLI, TUI, MCP server and PNG rendering;
+  the desktop window runs on the JVM and the binary prints a pointer when it is
+  started without a subcommand. The image needs the `.so` files and the
+  generated `fontconfig.properties` next to the executable.
 
 ## License
 

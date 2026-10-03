@@ -77,8 +77,14 @@ after looking at a fresh screenshot or GIF.
   class, the native-image metadata folder and every doc path.
 * The MCP stdio server exits when its client closes stdin instead of waiting
   for a signal, which matters for scripted clients and leaks no processes.
-* The native image carries GraalVM agent metadata for AWT: JNI field and method
-  registrations for Java2D plus the FindClass entries in `jni-config.json`.
+* The native image carries GraalVM agent metadata for AWT (reflection, JNI and
+  resources) plus `tools/generate-fontconfig.py`, which writes the
+  `fontconfig.properties` Java2D needs next to the binary. `new`, `inspect`,
+  `validate`, `vlt`, `render`, the MCP `render_layout` and the MCP server all
+  work in the image. The desktop window stays on the JVM; a native launch
+  without a subcommand prints that pointer. The Swing path was traced and its
+  metadata collected, but the X11 toolkit did not paint the frame reliably, so
+  the JVM remains the supported GUI.
 
 ## Next, in order
 

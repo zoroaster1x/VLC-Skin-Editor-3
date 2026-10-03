@@ -52,8 +52,10 @@ The fat jar lands at `build/libs/vlc-skin-studio.jar` and its main class is
 CLI; anything else opens the window.
 
 GraalVM 25 can build a native CLI, TUI and MCP binary with
-`tools/build-native.sh`; the desktop Swing window stays on the JVM. The script
-documents the exact flags and the runtime libraries the binary needs.
+`tools/build-native.sh`, rendering included. The desktop Swing window stays on
+the JVM; the native binary says so when started without a subcommand. The
+script documents the flags, writes `fontconfig.properties` next to the binary
+and lists the runtime libraries it needs.
 
 ## 4. Test suites
 
