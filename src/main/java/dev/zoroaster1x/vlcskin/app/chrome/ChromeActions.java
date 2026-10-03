@@ -48,6 +48,11 @@ public interface ChromeActions {
 
     void validateSkin();
 
+    /**
+     * Restores the default docking arrangement.
+     */
+    void resetLayout();
+
     void openSettings();
 
     void showVariables();

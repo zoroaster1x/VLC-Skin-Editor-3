@@ -341,6 +341,11 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
+    public void resetLayout() {
+        statusBar.setMessage("Panel layout reset");
+    }
+
+    @Override
     public void openSettings() {
         statusBar.setMessage("Skin settings open in the desktop window");
     }

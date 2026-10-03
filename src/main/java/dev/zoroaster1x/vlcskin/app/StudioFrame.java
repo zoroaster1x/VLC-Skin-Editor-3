@@ -111,16 +111,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         registerDockable("xml", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
         registerDockable("ai", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai(), panels.ai);
 
-        Docking.dock("resources", this, DockingRegion.WEST, 0.18);
-        Docking.dock("structure", "resources", DockingRegion.SOUTH, 0.35);
-        Docking.dock("items", "structure", DockingRegion.SOUTH, 0.55);
-        Docking.dock("inspector", this, DockingRegion.EAST, 0.23);
-        Docking.dock("canvas", this, DockingRegion.CENTER);
-        Docking.dock("problems", "canvas", DockingRegion.SOUTH, 0.25);
-        Docking.dock("xml", "problems", DockingRegion.CENTER);
-        Docking.dock("variables", "inspector", DockingRegion.SOUTH, 0.4);
-        Docking.dock("ai", "variables", DockingRegion.CENTER);
-
+        dockDefaultLayout();
         restoreLayout();
         installShortcuts();
 
@@ -542,6 +533,33 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         if (settings.isWindowMaximized()) {
             setExtendedState(MAXIMIZED_BOTH);
         }
+    }
+
+    private void dockDefaultLayout() {
+        // The canvas is docked first, so the side panels split around it in the
+        // order users expect: resources left, inspector right, canvas centre.
+        Docking.dock("canvas", this);
+        Docking.dock("resources", "canvas", DockingRegion.WEST, 0.18);
+        Docking.dock("inspector", "canvas", DockingRegion.EAST, 0.23);
+        Docking.dock("structure", "resources", DockingRegion.SOUTH, 0.35);
+        Docking.dock("items", "structure", DockingRegion.SOUTH, 0.55);
+        Docking.dock("problems", "canvas", DockingRegion.SOUTH, 0.25);
+        Docking.dock("xml", "problems", DockingRegion.CENTER);
+        Docking.dock("variables", "inspector", DockingRegion.SOUTH, 0.4);
+        Docking.dock("ai", "variables", DockingRegion.CENTER);
+    }
+
+    @Override
+    public void resetLayout() {
+        try {
+            Files.deleteIfExists(layoutFile());
+        } catch (Exception ex) {
+            // Best effort; the default layout is applied either way.
+        }
+        dockDefaultLayout();
+        revalidate();
+        repaint();
+        studio.status("Panel layout reset");
     }
 
     @Override

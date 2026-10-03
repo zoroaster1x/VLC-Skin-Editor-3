@@ -103,6 +103,7 @@ public final class MenuBarFactory {
             checkerboard.setSelected(actions.studio().settings().isCheckerboard());
         });
         view.add(checkerboard);
+        view.add(item("Reset panel layout", null, 0, e -> actions.resetLayout()));
         view.addSeparator();
         view.add(item(Messages.get("TOOLBAR_MOVE", "Move tool"), "move", 0,
                 e -> actions.setTool(dev.zoroaster1x.vlcskin.app.panel.CanvasPanel.Tool.MOVE)));
