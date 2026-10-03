@@ -75,12 +75,33 @@ public final class McpServerRunner {
     }
 
     /**
-     * Blocks on stdio until the client disconnects.
+     * Blocks on stdio until the client disconnects. The input stream wrapper
+     * notices the end of stdin and releases the latch, so a scripted client
+     * that closes the pipe does not leave the process behind.
      */
     public static void serveStdio(EditorService service, String version) {
         JacksonMcpJsonMapper mapper = new JacksonMcpJsonMapper(Json.mapper());
-        McpSyncServer server = build(new StdioServerTransportProvider(mapper), service, version);
         CountDownLatch latch = new CountDownLatch(1);
+        InputStream in = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                int next = System.in.read();
+                if (next < 0) {
+                    latch.countDown();
+                }
+                return next;
+            }
+
+            @Override
+            public int read(byte[] buffer, int offset, int length) throws IOException {
+                int count = System.in.read(buffer, offset, length);
+                if (count < 0) {
+                    latch.countDown();
+                }
+                return count;
+            }
+        };
+        McpSyncServer server = build(new StdioServerTransportProvider(mapper, in, System.out), service, version);
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             server.closeGracefully();
             latch.countDown();
@@ -89,7 +110,7 @@ public final class McpServerRunner {
             latch.await();
         } catch (InterruptedException ex) {
             Thread.currentThread().interrupt();
-            server.close();
         }
+        server.closeGracefully();
     }
 }
