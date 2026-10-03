@@ -11,7 +11,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -22,6 +21,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 
@@ -39,28 +39,26 @@ final class WelcomeCard extends JPanel {
         setBackground(new Color(0x16, 0x18, 0x1D));
         setLayout(new java.awt.GridBagLayout());
 
-        JPanel card = new JPanel();
+        JPanel card = new TrackWidthPanel();
         card.setLayout(new BoxLayout(card, BoxLayout.Y_AXIS));
         card.setBackground(UIManager.getColor("Panel.background"));
         card.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(UIManager.getColor("Component.borderColor"), 1, true),
                 BorderFactory.createEmptyBorder(28, 34, 28, 34)));
 
-        JLabel title = new JLabel(Messages.get("WELCOME_TITLE", "VLC Skin Studio"));
-        title.setFont(title.getFont().deriveFont(Font.BOLD, 24f));
-        title.setAlignmentX(LEFT_ALIGNMENT);
-        JLabel subtitle = new JLabel(Messages.get("APP_WELCOME_SUBTITLE",
-                "Design VLC skins2 themes with a live preview."));
-        subtitle.setForeground(UIManager.getColor("Label.disabledForeground"));
-        subtitle.setAlignmentX(LEFT_ALIGNMENT);
+        JTextArea title = wrapArea(Messages.get("WELCOME_TITLE", "VLC Skin Studio"),
+                getFont().deriveFont(Font.BOLD, 24f), null);
+        JTextArea subtitle = wrapArea(Messages.get("APP_WELCOME_SUBTITLE",
+                        "Design VLC skins2 themes with a live preview."),
+                getFont().deriveFont(Font.PLAIN, 12f), UIManager.getColor("Label.disabledForeground"));
 
-        JPanel actions = new JPanel(new GridLayout(1, 3, 10, 0));
+        JPanel actions = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 10, 6));
         actions.setOpaque(false);
         actions.setAlignmentX(LEFT_ALIGNMENT);
         actions.add(button(Messages.get("WELCOME_NEW", "New skin"), "new", e -> studio.newSkin()));
         actions.add(button(Messages.get("WELCOME_OPEN", "Open skin"), "open", e -> studio.openDialog(this)));
         actions.add(button(Messages.get("APP_WELCOME_EXAMPLES", "Examples"), "layers", e -> showExamples()));
-        actions.setMaximumSize(new Dimension(520, 40));
+        actions.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
 
         recentPanel.setOpaque(false);
         recentPanel.setLayout(new BoxLayout(recentPanel, BoxLayout.Y_AXIS));
@@ -81,7 +79,88 @@ final class WelcomeCard extends JPanel {
         for (ExampleSkins.Example example : ExampleSkins.catalog()) {
             card.add(exampleRow(example));
         }
-        add(card);
+        card.add(Box.createVerticalGlue());
+
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(card,
+                javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(null);
+        scroll.setOpaque(false);
+        scroll.getViewport().setOpaque(false);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+
+        java.awt.GridBagConstraints constraints = new java.awt.GridBagConstraints();
+        constraints.fill = java.awt.GridBagConstraints.BOTH;
+        constraints.weightx = 1;
+        constraints.weighty = 1;
+        constraints.insets = new java.awt.Insets(18, 18, 18, 18);
+        add(scroll, constraints);
+    }
+
+    /**
+     * The card stretches to the viewport width so the buttons wrap and the text
+     * gets the room the panel actually has.
+     */
+    private static final class TrackWidthPanel extends JPanel implements javax.swing.Scrollable {
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return visible.height;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
+    }
+
+    /**
+     * A text area that wraps and reports a height for the width it actually
+     * gets, so the welcome card works in a narrow dock.
+     */
+    private static final class WrapArea extends javax.swing.JTextArea {
+        WrapArea(String text, Font font, Color color) {
+            super(text);
+            setFont(font);
+            if (color != null) {
+                setForeground(color);
+            }
+            setOpaque(false);
+            setEditable(false);
+            setFocusable(false);
+            setLineWrap(true);
+            setWrapStyleWord(true);
+            setColumns(1);
+            setRows(1);
+            setBorder(null);
+            setAlignmentX(LEFT_ALIGNMENT);
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            int width = getWidth() > 0 ? getWidth() : 240;
+            setSize(width, Integer.MAX_VALUE);
+            Dimension size = super.getPreferredSize();
+            return new Dimension(width, size.height);
+        }
+    }
+
+    private static JTextArea wrapArea(String text, Font font, Color color) {
+        return new WrapArea(text, font, color);
     }
 
     private JLabel sectionLabel(String text) {
@@ -103,10 +182,13 @@ final class WelcomeCard extends JPanel {
         JPanel row = new JPanel(new BorderLayout(8, 0));
         row.setOpaque(false);
         row.setAlignmentX(LEFT_ALIGNMENT);
-        JLabel label = new JLabel("<html><b>" + example.name() + "</b><br><span style='font-size:9px'>"
-                + example.description() + "</span></html>");
-        label.setHorizontalAlignment(SwingConstants.LEFT);
-        row.add(label, BorderLayout.CENTER);
+        JPanel texts = new JPanel();
+        texts.setOpaque(false);
+        texts.setLayout(new BoxLayout(texts, BoxLayout.Y_AXIS));
+        texts.add(wrapArea(example.name(), getFont().deriveFont(Font.BOLD), null));
+        texts.add(wrapArea(example.description(),
+                getFont().deriveFont(Font.PLAIN, 10f), UIManager.getColor("Label.disabledForeground")));
+        row.add(texts, BorderLayout.CENTER);
         JButton create = new JButton(Messages.get("APP_WELCOME_CREATE", "Create"));
         create.addActionListener(e -> {
             Path folder = studio.settings().getLastDirectory() != null
@@ -121,7 +203,7 @@ final class WelcomeCard extends JPanel {
             }
         });
         row.add(create, BorderLayout.EAST);
-        row.setMaximumSize(new Dimension(520, 48));
+        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 48));
         return row;
     }
 
