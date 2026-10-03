@@ -120,6 +120,21 @@ public final class MenuBarFactory {
             checkerboard.setSelected(actions.studio().settings().isCheckerboard());
         });
         view.add(checkerboard);
+        JMenu panels = new JMenu("Panels");
+        for (var entry : java.util.List.of(
+                java.util.Map.entry("resources", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources()),
+                java.util.Map.entry("structure", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.windows()),
+                java.util.Map.entry("items", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.items()),
+                java.util.Map.entry("canvas", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.canvas()),
+                java.util.Map.entry("inspector", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.inspector()),
+                java.util.Map.entry("variables", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables()),
+                java.util.Map.entry("problems", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems()),
+                java.util.Map.entry("xml", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml()))) {
+            JMenuItem panelItem = new JMenuItem(entry.getValue());
+            panelItem.addActionListener(e -> actions.showPanel(entry.getKey()));
+            panels.add(panelItem);
+        }
+        view.add(panels);
         view.add(item("Reset panel layout", null, 0, e -> actions.resetLayout()));
         view.addSeparator();
         view.add(item(Messages.get("TOOLBAR_MOVE", "Move tool"), "move", 0,

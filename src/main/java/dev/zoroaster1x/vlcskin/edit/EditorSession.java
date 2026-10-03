@@ -6,6 +6,7 @@ import dev.zoroaster1x.vlcskin.format.SkinWriter;
 import dev.zoroaster1x.vlcskin.model.SkinIndex;
 import dev.zoroaster1x.vlcskin.model.SkinLayout;
 import dev.zoroaster1x.vlcskin.model.SkinTheme;
+import dev.zoroaster1x.vlcskin.model.SkinWindow;
 import dev.zoroaster1x.vlcskin.model.item.Item;
 import dev.zoroaster1x.vlcskin.render.ImageStore;
 import dev.zoroaster1x.vlcskin.render.PreviewVariables;
@@ -75,7 +76,24 @@ public final class EditorSession {
         EditorSession session = new EditorSession(theme, file);
         session.issues = List.of();
         session.dirty = false;
+        session.selectFirstLayout();
         return session;
+    }
+
+    /**
+     * Selects the first layout of the first window, or the window itself when
+     * it has no layouts. Public because services replace the document in place.
+     */
+    public void selectFirstLayout() {
+        for (SkinWindow window : theme.getWindows()) {
+            if (!window.getLayouts().isEmpty()) {
+                selection.selectLayout(window.getId(), window.getLayouts().get(0).getId());
+                return;
+            }
+            selection.selectWindow(window.getId());
+            return;
+        }
+        selection.selectWindow(null);
     }
 
     private void rebuild(SkinTheme theme, Path file) {

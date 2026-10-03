@@ -59,6 +59,12 @@ public interface ChromeActions {
     void browseThemes();
 
     /**
+     * Brings a dockable panel to the front, showing it again when it was
+     * hidden.
+     */
+    void showPanel(String id);
+
+    /**
      * Opens the bundled documentation viewer.
      */
     void browseDocumentation();

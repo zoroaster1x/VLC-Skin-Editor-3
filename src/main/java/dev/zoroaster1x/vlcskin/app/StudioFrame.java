@@ -116,7 +116,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
 
         studio.addStatusListener(statusBar::setMessage);
         studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window",
-                () -> panels.canvas, this::showPanel));
+                () -> panels.canvas, this::showPanelByName));
         studio.session().addListener(this::onSessionChanged);
 
         addWindowListener(new WindowAdapter() {
@@ -175,12 +175,94 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     private void registerDockable(String id, String title, JComponent content) {
-        DefaultDockingPanel dockable = new DefaultDockingPanel(id, title);
+        DefaultDockingPanel dockable = new DockablePanel(id, title);
         dockable.setStyle(DockableStyle.BOTH);
+        dockable.setMinMaxAllowed(true);
         dockable.setLayout(new BorderLayout());
         content.putClientProperty("panelName", title);
         dockable.add(content, BorderLayout.CENTER);
+        dockable.addMoreOptions(panelMenu(id, title));
+        javax.swing.JPopupMenu contextMenu = panelMenu(id, title);
+        dockable.setComponentPopupMenu(contextMenu);
         Docking.registerDockable(dockable);
+    }
+
+    /**
+     * The right click menu of a panel: hide it, float it, or restore the
+     * default layout. The View menu can always bring a hidden panel back.
+     */
+    private javax.swing.JPopupMenu panelMenu(String id, String title) {
+        javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
+        javax.swing.JMenuItem hide = new javax.swing.JMenuItem("Hide " + title);
+        hide.addActionListener(e -> {
+            io.github.andrewauclair.moderndocking.Dockable dockable = dockable(id);
+            if (dockable != null) {
+                Docking.minimize(dockable);
+            }
+        });
+        javax.swing.JMenuItem floatWindow = new javax.swing.JMenuItem("Float " + title);
+        floatWindow.addActionListener(e -> Docking.newWindow(id));
+        javax.swing.JMenuItem show = new javax.swing.JMenuItem("Show " + title);
+        show.addActionListener(e -> {
+            Docking.display(id);
+            Docking.bringToFront(id);
+        });
+        javax.swing.JMenuItem reset = new javax.swing.JMenuItem("Reset panel layout");
+        reset.addActionListener(e -> resetLayout());
+        menu.add(show);
+        menu.add(hide);
+        menu.add(floatWindow);
+        menu.addSeparator();
+        menu.add(reset);
+        return menu;
+    }
+
+    /**
+     * The registered dockable with this id, or null.
+     */
+    private static io.github.andrewauclair.moderndocking.Dockable dockable(String id) {
+        return Docking.getDockables().stream()
+                .filter(dockable -> id.equals(dockable.getPersistentID()))
+                .findFirst()
+                .orElse(null);
+    }
+
+    /**
+     * ModernDocking puts every panel in a scroll pane; tracking the viewport
+     * stops the outer scrollbars and lets the trees scroll themselves.
+     */
+    private static final class DockablePanel extends DefaultDockingPanel
+            implements javax.swing.Scrollable {
+
+        DockablePanel(String id, String title) {
+            super(id, title);
+        }
+
+        @Override
+        public java.awt.Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return Math.max(16, orientation == javax.swing.SwingConstants.VERTICAL
+                    ? visible.height : visible.width);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return true;
+        }
     }
 
 
@@ -265,17 +347,17 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         if (skin == null) {
             return;
         }
-        var vlc = VlcLauncher.find();
-        if (vlc.isEmpty()) {
-            studio.error("VLC was not found. Install it, or start it yourself with:\n"
-                    + "vlc -I skins2 --skins2-last=" + skin);
-            return;
-        }
         try {
-            VlcLauncher.launch(vlc.get(), skin);
-            studio.status("Started VLC with " + skin.getFileName());
+            Path archive = Files.createTempFile("vlc-skin-", ".vlt");
+            dev.zoroaster1x.vlcskin.format.VltCodec.write(
+                    studio.session().theme(), skin, archive);
+            Path installed = dev.zoroaster1x.vlcskin.util.VlcFinder.install(archive);
+            Files.deleteIfExists(archive);
+            dev.zoroaster1x.vlcskin.util.VlcFinder.launch(installed);
+            studio.status("Started VLC with " + installed.getFileName());
         } catch (Exception ex) {
-            studio.error("Could not start VLC: " + ex.getMessage());
+            studio.error("Could not start VLC: " + ex.getMessage()
+                    + "\nTry: " + dev.zoroaster1x.vlcskin.util.VlcFinder.describeLaunch(skin));
         }
     }
 
@@ -487,9 +569,22 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     /**
+     * Brings a dockable panel to the front by its id, showing it again when it
+     * was hidden. Menu panels use this.
+     */
+    @Override
+    public void showPanel(String id) {
+        if (id == null || id.isBlank()) {
+            return;
+        }
+        Docking.display(id);
+        Docking.bringToFront(id);
+    }
+
+    /**
      * Focuses a dockable panel by its tool name, for the MCP show_panel tool.
      */
-    private boolean showPanel(String name) {
+    private boolean showPanelByName(String name) {
         String key = name == null ? "" : name.toLowerCase(java.util.Locale.ROOT).trim();
         String id = switch (key) {
             case "resources", "resource" -> "resources";
@@ -528,7 +623,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
                     DockingState.restoreWindowLayout(this, layout);
                 }
             }
-        } catch (Exception ex) {
+        } catch (Throwable ex) {
             // A stale layout file must never stop the window from opening.
         }
     }
@@ -538,8 +633,8 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             Files.createDirectories(layoutFile().getParent());
             LayoutPersistence.saveWindowLayoutToFile(layoutFile().toFile(),
                     DockingState.getWindowLayout(this));
-        } catch (Exception ex) {
-            // Best effort.
+        } catch (Throwable ex) {
+            // Best effort, including a missing docking implementation.
         }
     }
 
@@ -629,7 +724,11 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             settings.setToolbarY(toolbarHolder.getY());
         }
         studio.saveSettings();
-        saveLayout();
+        try {
+            saveLayout();
+        } catch (Throwable ex) {
+            // A persistence problem must never keep the window from closing.
+        }
         dispose();
         System.exit(0);
     }

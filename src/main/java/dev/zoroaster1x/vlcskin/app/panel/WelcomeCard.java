@@ -130,7 +130,8 @@ final class WelcomeCard extends JPanel {
 
     /**
      * A text area that wraps and reports a height for the width it actually
-     * gets, so the welcome card works in a narrow dock.
+     * gets, without resizing itself during layout (which would make the docks
+     * ratchet wider every time a split is dragged).
      */
     private static final class WrapArea extends javax.swing.JTextArea {
         WrapArea(String text, Font font, Color color) {
@@ -153,9 +154,14 @@ final class WelcomeCard extends JPanel {
         @Override
         public Dimension getPreferredSize() {
             int width = getWidth() > 0 ? getWidth() : 240;
-            setSize(width, Integer.MAX_VALUE);
-            Dimension size = super.getPreferredSize();
-            return new Dimension(width, size.height);
+            java.awt.FontMetrics metrics = getFontMetrics(getFont());
+            int lineHeight = Math.max(1, metrics.getHeight());
+            int lines = 0;
+            for (String paragraph : getText().split("\n", -1)) {
+                int textWidth = metrics.stringWidth(paragraph);
+                lines += Math.max(1, (int) Math.ceil(textWidth / (double) Math.max(1, width)));
+            }
+            return new Dimension(width, lines * lineHeight + 2);
         }
     }
 
@@ -191,9 +197,7 @@ final class WelcomeCard extends JPanel {
         row.add(texts, BorderLayout.CENTER);
         JButton create = new JButton(Messages.get("APP_WELCOME_CREATE", "Create"));
         create.addActionListener(e -> {
-            Path folder = studio.settings().getLastDirectory() != null
-                    ? Path.of(studio.settings().getLastDirectory()).resolve("vlc-skin-" + example.id())
-                    : Path.of(System.getProperty("user.home"), "vlc-skin-" + example.id());
+            Path folder = exampleFolder(example);
             var outcome = studio.service().createExample(example.id(), folder.toString());
             if (outcome.error()) {
                 studio.error(outcome.text());
@@ -207,12 +211,36 @@ final class WelcomeCard extends JPanel {
         return row;
     }
 
+    /**
+     * Where an example is written: the last folder the user used when it is
+     * writable, otherwise the home folder. Flatpak export directories are never
+     * used, writing there fails with a confusing error.
+     */
+    private Path exampleFolder(ExampleSkins.Example example) {
+        Path home = Path.of(System.getProperty("user.home"));
+        Path base = home;
+        String last = studio.settings().getLastDirectory();
+        if (last != null && !last.isBlank()) {
+            Path candidate = Path.of(last);
+            if (java.nio.file.Files.isDirectory(candidate)
+                    && java.nio.file.Files.isWritable(candidate)
+                    && !candidate.toString().contains("flatpak")) {
+                base = candidate;
+            }
+        }
+        Path folder = base.resolve("vlc-skin-" + example.id());
+        if (!java.nio.file.Files.isWritable(folder.getParent())) {
+            folder = home.resolve("vlc-skin-" + example.id());
+        }
+        return folder;
+    }
+
     private void showExamples() {
         javax.swing.JPopupMenu menu = new javax.swing.JPopupMenu();
         for (ExampleSkins.Example example : ExampleSkins.catalog()) {
             javax.swing.JMenuItem item = new javax.swing.JMenuItem(example.name());
             item.addActionListener(e -> {
-                Path folder = Path.of(System.getProperty("user.home"), "vlc-skin-" + example.id());
+                Path folder = exampleFolder(example);
                 var outcome = studio.service().createExample(example.id(), folder.toString());
                 if (outcome.error()) {
                     studio.error(outcome.text());

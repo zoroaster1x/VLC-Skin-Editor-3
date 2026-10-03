@@ -258,6 +258,7 @@ public final class InspectorPanel extends JPanel {
                 fields.integer(sub.getNbframes(), 1, 100, value -> setSub(sub, "nbframes", value)));
         fields.row(Messages.get("WIN_BITMAP_FPS", "Frames per second"),
                 fields.integer(sub.getFps(), 0, 240, value -> setSub(sub, "fps", value)));
+        fields.row("", new ImagePreview(studio, parent, sub));
         if (parent != null && !subFitsParent(sub, parent)) {
             fields.note(Messages.get("ERROR_OUTSIDE_MSG",
                     "The rectangle is outside the parent bitmap and will be clipped."));
@@ -638,6 +639,7 @@ public final class InspectorPanel extends JPanel {
                 value -> setResource(bitmap, "nbframes", value)));
         fields.row(Messages.get("WIN_BITMAP_FPS", "Frames per second"), fields.integer(bitmap.getFps(), 0, 240,
                 value -> setResource(bitmap, "fps", value)));
+        fields.row("", new ImagePreview(studio, bitmap, null));
         if (!bitmap.getSubBitmaps().isEmpty()) {
             fields.section(Messages.get("APP_INSPECTOR_SUB_BITMAPS", "Sub bitmaps"));
             for (SubBitmap sub : bitmap.getSubBitmaps()) {
@@ -856,5 +858,87 @@ public final class InspectorPanel extends JPanel {
                 field.requestFocusInWindow();
             }
         });
+    }
+
+    /**
+     * A checkerboard backed preview of a bitmap or sub bitmap, scaled to fit,
+     * with a caption of the file, size, frames and alphacolor.
+     */
+    private static final class ImagePreview extends JPanel {
+        ImagePreview(Studio studio, BitmapResource bitmap, SubBitmap sub) {
+            super(new BorderLayout(0, 4));
+            setOpaque(false);
+            java.awt.image.BufferedImage decoded = null;
+            String caption;
+            try {
+                if (sub != null && bitmap != null) {
+                    decoded = studio.session().images().image(studio.session().index(), sub.getId());
+                    caption = bitmap.getId() + " > " + sub.getId() + "   "
+                            + sub.getWidth() + "x" + sub.getHeight()
+                            + " at " + sub.getX() + "," + sub.getY();
+                } else {
+                    decoded = studio.session().images().wholeImage(studio.session().index(), bitmap);
+                    caption = (decoded == null
+                            ? bitmap.getFile()
+                            : decoded.getWidth() + "x" + decoded.getHeight() + "   " + bitmap.getFile())
+                            + (bitmap.getNbframes() > 1
+                                    ? "   " + bitmap.getNbframes() + " frames, " + bitmap.getFps() + " fps"
+                                    : "")
+                            + "   alphacolor " + bitmap.getAlphacolor();
+                }
+            } catch (RuntimeException ex) {
+                caption = ex.getMessage();
+            }
+            add(new PreviewSurface(decoded), BorderLayout.CENTER);
+            JLabel label = new JLabel(caption == null ? " " : caption);
+            label.setFont(label.getFont().deriveFont(10f));
+            label.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
+            add(label, BorderLayout.SOUTH);
+            setPreferredSize(new java.awt.Dimension(300, 210));
+            setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, 240));
+        }
+    }
+
+    /**
+     * Draws the image over a checkerboard so transparency is visible.
+     */
+    private static final class PreviewSurface extends JPanel {
+        private final java.awt.image.BufferedImage image;
+
+        PreviewSurface(java.awt.image.BufferedImage image) {
+            this.image = image;
+            setPreferredSize(new java.awt.Dimension(280, 170));
+            setOpaque(true);
+            setBackground(javax.swing.UIManager.getColor("Panel.background"));
+        }
+
+        @Override
+        protected void paintComponent(java.awt.Graphics g) {
+            super.paintComponent(g);
+            java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+            g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
+                    java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            int cell = 10;
+            for (int y = 0; y < getHeight(); y += cell) {
+                for (int x = 0; x < getWidth(); x += cell) {
+                    boolean light = ((x / cell) + (y / cell)) % 2 == 0;
+                    g2.setColor(light ? new java.awt.Color(0x3A, 0x3C, 0x40)
+                            : new java.awt.Color(0x2B, 0x2D, 0x30));
+                    g2.fillRect(x, y, cell, cell);
+                }
+            }
+            if (image != null) {
+                double scale = Math.min((getWidth() - 8) / (double) image.getWidth(),
+                        (getHeight() - 8) / (double) image.getHeight());
+                int width = Math.max(1, (int) Math.round(image.getWidth() * scale));
+                int height = Math.max(1, (int) Math.round(image.getHeight() * scale));
+                int x = (getWidth() - width) / 2;
+                int y = (getHeight() - height) / 2;
+                g2.drawImage(image, x, y, width, height, null);
+                g2.setColor(javax.swing.UIManager.getColor("Component.borderColor"));
+                g2.drawRect(x, y, width, height);
+            }
+            g2.dispose();
+        }
     }
 }

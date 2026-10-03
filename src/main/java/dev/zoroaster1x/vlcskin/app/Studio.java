@@ -355,22 +355,18 @@ public final class Studio {
      * Only an existing directory is returned; nothing is created.
      */
     private Path defaultDirectory() {
-        Path candidate = VlcLauncher.find().map(Path::getParent).orElse(null);
-        if (candidate == null) {
-            String os = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT);
-            if (os.contains("mac")) {
-                candidate = Path.of(System.getProperty("user.home"),
-                        "Library", "Application Support", "org.videolan.vlc");
-            } else if (os.contains("win")) {
-                String programFiles = System.getenv("ProgramFiles");
-                if (programFiles != null) {
-                    candidate = Path.of(programFiles, "VideoLAN", "VLC");
-                }
-            } else {
-                candidate = Path.of(System.getProperty("user.home"), ".local", "share", "vlc", "skins2");
+        Path candidate = null;
+        Path skins = dev.zoroaster1x.vlcskin.util.VlcFinder.skinsFolder();
+        if (Files.isDirectory(skins)) {
+            candidate = skins;
+        }
+        if (candidate == null || !Files.isDirectory(candidate)) {
+            candidate = Path.of(System.getProperty("user.home"), "vlc-skins");
+            if (!Files.isDirectory(candidate)) {
+                candidate = Path.of(System.getProperty("user.home"));
             }
         }
-        return candidate != null && Files.isDirectory(candidate) ? candidate : null;
+        return Files.isDirectory(candidate) ? candidate : null;
     }
 
     /**

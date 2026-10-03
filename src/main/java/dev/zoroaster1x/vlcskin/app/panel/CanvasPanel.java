@@ -78,7 +78,17 @@ public final class CanvasPanel extends JPanel {
         this.welcome = new WelcomeCard(studio);
         this.surface = new Surface();
         setLayout(new java.awt.BorderLayout());
-        cardHost.add(surface, "canvas");
+        // The original put the preview in a scroll pane with zoom buttons; the
+        // scrollbars and the wheel are how you move around a bigger theme.
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(surface,
+                javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        scroll.setBorder(null);
+        scroll.getViewport().setBackground(new Color(0x16, 0x18, 0x1D));
+        scroll.setWheelScrollingEnabled(true);
+        scroll.getVerticalScrollBar().setUnitIncrement(24);
+        scroll.getHorizontalScrollBar().setUnitIncrement(24);
+        cardHost.add(scroll, "canvas");
         cardHost.add(welcome, "welcome");
         add(cardHost, java.awt.BorderLayout.CENTER);
         add(buildControls(), java.awt.BorderLayout.SOUTH);
@@ -103,8 +113,7 @@ public final class CanvasPanel extends JPanel {
             syncToolButtons();
         });
         pathButton.addActionListener(e -> {
-            setTool(Tool.PATH);
-            syncToolButtons();
+            setTool(Tool.PATH);            syncToolButtons();
         });
         JButton zoomOut = new JButton(dev.zoroaster1x.vlcskin.app.component.Icons.of("zoom-out", 14));
         zoomOut.setToolTipText(Messages.get("APP_CANVAS_ZOOM_OUT", "Zoom out"));
@@ -177,6 +186,7 @@ public final class CanvasPanel extends JPanel {
             welcome.refresh();
             animator.stop();
         } else {
+            updateSurfaceSize();
             int fps = dev.zoroaster1x.vlcskin.render.ImageStore.animationFps(studio.session().index());
             if (fps > 0) {
                 animator.setDelay(Math.max(16, 1000 / fps));
@@ -512,9 +522,12 @@ public final class CanvasPanel extends JPanel {
         if (layout == null) {
             return;
         }
+        Dimension extent = surface.getParent() instanceof javax.swing.JViewport viewport
+                ? viewport.getExtentSize()
+                : new Dimension(Math.max(1, surface.getWidth()), Math.max(1, surface.getHeight()));
         int zoom = Math.max(1, Math.min(16,
-                Math.min(surface.getWidth() / Math.max(1, layout.getWidth()),
-                        surface.getHeight() / Math.max(1, layout.getHeight()))));
+                Math.min(Math.max(1, extent.width - 40) / Math.max(1, layout.getWidth()),
+                        Math.max(1, extent.height - 40) / Math.max(1, layout.getHeight()))));
         studio.settings().setCanvasZoom(zoom);
         refresh();
     }
@@ -552,13 +565,40 @@ public final class CanvasPanel extends JPanel {
 
     /**
      * The painted surface; the layout image lives here, not on the card panel.
+     * It tracks the viewport when the image is smaller and scrolls when bigger.
      */
-    private final class Surface extends JPanel {
+    private final class Surface extends JPanel implements javax.swing.Scrollable {
 
         Surface() {
             setOpaque(true);
             setBackground(new Color(0x16, 0x18, 0x1D));
             setFocusable(true);
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return 24;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return Math.max(24, orientation == javax.swing.SwingConstants.VERTICAL
+                    ? visible.height : visible.width);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return getParent() != null && getPreferredSize().width <= getParent().getWidth();
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return getParent() != null && getPreferredSize().height <= getParent().getHeight();
         }
 
         @Override
@@ -578,6 +618,44 @@ public final class CanvasPanel extends JPanel {
             g.drawImage(image, bounds.x, bounds.y, null);
             g.setColor(new Color(255, 255, 255, 24));
             g.drawRect(bounds.x - 1, bounds.y - 1, bounds.width + 1, bounds.height + 1);
+            if (layout.getItems().isEmpty()) {
+                java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+                g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,
+                        java.awt.RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setFont(g2.getFont().deriveFont(java.awt.Font.BOLD, 13f));
+                java.awt.FontMetrics metrics = g2.getFontMetrics();
+                String line1 = Messages.get("APP_CANVAS_EMPTY1", "This layout is empty.");
+                String line2 = Messages.get("APP_CANVAS_EMPTY2",
+                        "Add controls from the Items panel, or drag one on the canvas.");
+                int centerX = bounds.x + bounds.width / 2;
+                int boxWidth = Math.max(metrics.stringWidth(line1), metrics.stringWidth(line2)) + 28;
+                int boxY = bounds.y + bounds.height / 2 - 30;
+                g2.setColor(new Color(0x1E, 0x1F, 0x22, 200));
+                g2.fillRoundRect(centerX - boxWidth / 2, boxY, boxWidth, 62, 12, 12);
+                g2.setColor(new Color(0xE6, 0xE7, 0xE9));
+                g2.drawString(line1, centerX - metrics.stringWidth(line1) / 2, boxY + 26);
+                g2.setFont(g2.getFont().deriveFont(java.awt.Font.PLAIN, 12f));
+                java.awt.FontMetrics metrics2 = g2.getFontMetrics();
+                g2.setColor(new Color(0xB9, 0xBC, 0xC2));
+                g2.drawString(line2, centerX - metrics2.stringWidth(line2) / 2, boxY + 47);
+                g2.dispose();
+            }
         }
+    }
+
+    /**
+     * Gives the scroll pane the image size plus a margin, so zooming in makes
+     * the view scrollable and zooming out recenters it.
+     */
+    private void updateSurfaceSize() {
+        SkinLayout layout = displayLayout();
+        if (layout == null) {
+            return;
+        }
+        int zoom = Math.max(1, studio.settings().getCanvasZoom());
+        Dimension size = studio.session().renderer().sizeOf(layout, zoom);
+        surface.setPreferredSize(new Dimension(size.width + 40, size.height + 40));
+        surface.revalidate();
+        surface.repaint();
     }
 }

@@ -212,9 +212,11 @@ public final class ThemeBrowserDialog extends JDialog {
                     status.setText(Messages.format("APP_GALLERY_OPENED", "Opened %s", theme.name()));
                     openButton.setEnabled(true);
                 });
-            } catch (Exception ex) {
+            } catch (Throwable ex) {
                 SwingUtilities.invokeLater(() -> {
-                    status.setText(Messages.format("APP_GALLERY_FAILED", "Could not load the gallery: %s", message(ex)));
+                    studio.error("Could not open the theme: " + message(ex));
+                    status.setText(Messages.format("APP_GALLERY_FAILED",
+                            "Could not load the gallery: %s", message(ex)));
                     openButton.setEnabled(true);
                 });
             }
@@ -225,7 +227,7 @@ public final class ThemeBrowserDialog extends JDialog {
         return dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient.themesFolder(theme);
     }
 
-    private static String message(Exception ex) {
+    private static String message(Throwable ex) {
         return ex.getMessage() == null ? ex.toString() : ex.getMessage();
     }
 

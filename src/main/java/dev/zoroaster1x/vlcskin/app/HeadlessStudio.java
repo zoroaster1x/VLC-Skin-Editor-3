@@ -354,6 +354,11 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
+    public void showPanel(String id) {
+        statusBar.setMessage("Panels need the desktop window");
+    }
+
+    @Override
     public java.util.List<String> recentFiles() {
         return java.util.List.copyOf(studio.settings().getRecentFiles());
     }

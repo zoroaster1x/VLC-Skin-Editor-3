@@ -93,8 +93,10 @@ public final class EditorService {
 
     public synchronized ToolOutcome open(String path) {
         try {
-            session = EditorSession.open(Path.of(path));
-            session.setDispatcher(dispatcher);
+            Path file = Path.of(path).toAbsolutePath();
+            SkinParser.Result parsed = SkinParser.parse(file);
+            session.replace(parsed.theme(), file, parsed.issues());
+            session.selectFirstLayout();
             return ToolOutcome.text("Opened " + path, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
@@ -114,8 +116,8 @@ public final class EditorService {
         layout.setHeight(140);
         window.getLayouts().add(layout);
         theme.getWindows().add(window);
-        session = EditorSession.of(theme, null);
-        session.setDispatcher(dispatcher);
+        session.replace(theme, null, List.of());
+        session.selectFirstLayout();
         return ToolOutcome.text("Started a new skin", documentInfo());
     }
 
@@ -151,8 +153,9 @@ public final class EditorService {
                 folder = Path.of(targetFolder);
             }
             Path themeFile = VltCodec.unpack(Path.of(archive), folder);
-            session = EditorSession.open(themeFile);
-            session.setDispatcher(dispatcher);
+            SkinParser.Result parsed = SkinParser.parse(themeFile);
+            session.replace(parsed.theme(), themeFile.toAbsolutePath(), parsed.issues());
+            session.selectFirstLayout();
             return ToolOutcome.text("Imported " + archive + " into " + folder, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
@@ -979,7 +982,9 @@ public final class EditorService {
                     ? Files.createTempDirectory("vlc-skin-example")
                     : Path.of(folder);
             Path themeFile = ExampleSkins.create(target, example);
-            session = EditorSession.open(themeFile);
+            SkinParser.Result parsed = SkinParser.parse(themeFile);
+            session.replace(parsed.theme(), themeFile.toAbsolutePath(), parsed.issues());
+            session.selectFirstLayout();
             return ToolOutcome.text("Created example \"" + example.name() + "\" in " + target, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
