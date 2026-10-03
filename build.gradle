@@ -4,7 +4,7 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
-group = 'io.github.zoroaster1x'
+group = 'dev.zoroaster1x'
 version = providers.gradleProperty('version').getOrElse('1.0.0')
 
 repositories {
@@ -63,7 +63,7 @@ dependencies {
 }
 
 application {
-    mainClass = 'io.github.zoroaster1x.vlcskin.app.VlcSkinStudio'
+    mainClass = 'dev.zoroaster1x.vlcskin.app.VlcSkinStudio'
     applicationName = 'vlc-skin-studio'
 }
 
@@ -99,7 +99,7 @@ tasks.register('uiScreenshots', JavaExec) {
     group = 'verification'
     description = 'Regenerate screenshots/ with the headless UI harness.'
     classpath = sourceSets.test.runtimeClasspath
-    mainClass = 'io.github.zoroaster1x.vlcskin.app.UiShots'
+    mainClass = 'dev.zoroaster1x.vlcskin.app.UiShots'
     workingDir = projectDir
     args = [new File(projectDir, 'screenshots').absolutePath, System.getenv('VELOCITY_THEME') ?: '']
     dependsOn testClasses

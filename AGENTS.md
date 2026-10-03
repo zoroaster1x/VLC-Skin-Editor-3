@@ -48,7 +48,7 @@ Java 25 is required. Gradle comes from the wrapper.
 ```
 
 The fat jar lands at `build/libs/vlc-skin-studio.jar` and its main class is
-`io.github.zoroaster1x.vlcskin.app.VlcSkinStudio`. Any known subcommand runs the
+`dev.zoroaster1x.vlcskin.app.VlcSkinStudio`. Any known subcommand runs the
 CLI; anything else opens the window.
 
 GraalVM 25 can build a native CLI, TUI and MCP binary with
@@ -87,7 +87,7 @@ desktop window docks.
 ## 5. Layout
 
 ```
-src/main/java/io/github/zoroaster1x/vlcskin/
+src/main/java/dev/zoroaster1x/vlcskin/
   model/            theme, windows, layouts, items, resources, SkinIndex
   model/item/       one class per control, sealed Item hierarchy
   model/resource/   bitmap, sub bitmap, font, bitmap font, popup menu, ini
@@ -108,7 +108,7 @@ src/main/java/io/github/zoroaster1x/vlcskin/
   cli/              picocli commands
   tui/              TuiShell, TuiLoop, AsciiRenderer
   example/          ExampleSkins with generated assets
-src/main/java/io/github/zoroaster1x/vlcskin/app/
+src/main/java/dev/zoroaster1x/vlcskin/app/
   VlcSkinStudio     entry point, CLI dispatch or window
   Studio            session, settings and operations
   StudioFrame       menus, toolbar, ModernDocking layout, status bar

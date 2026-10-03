@@ -281,7 +281,7 @@ first run and to give tests a realistic theme.
 ## Architecture
 
 ```
-src/main/java/io/github/zoroaster1x/vlcskin/
+src/main/java/dev/zoroaster1x/vlcskin/
   model, format, render, edit, action, describe, snapshot, mcp, ai,
   cli, tui, example, util
         format, renderer, edit commands, MCP server, AI client, CLI, TUI,
