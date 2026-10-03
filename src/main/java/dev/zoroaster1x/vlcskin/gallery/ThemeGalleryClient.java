@@ -1,6 +1,8 @@
 package dev.zoroaster1x.vlcskin.gallery;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import dev.zoroaster1x.vlcskin.format.VltCodec;
+import dev.zoroaster1x.vlcskin.util.Json;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -10,63 +12,122 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.function.Consumer;
 
 /**
  * Reads the official VideoLAN skins gallery and downloads single themes.
  *
- * <p>The gallery page lists every skin in a JavaScript call per entry; the
- * download link behind the page redirects to the real archive, which is then
- * unpacked with {@link VltCodec}.
+ * <p>The gallery page lists every skin in a JavaScript call per entry. The
+ * parsed list, the preview images and the theme archives are cached under the
+ * user cache folder; a stale list is still served when the network is down, so
+ * the browser keeps working offline.
  */
 public final class ThemeGalleryClient {
 
     public static final String LIST_URL = "https://www.videolan.org/vlc/skins.html";
     public static final String DOWNLOAD_URL = "https://www.videolan.org/vlc/skins2/";
 
+    private static final Duration LIST_TTL = Duration.ofHours(24);
+
     private final HttpClient http;
     private final String listUrl;
     private final String downloadUrl;
+    private final Path cacheRoot;
 
     public ThemeGalleryClient() {
         this(HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NORMAL)
-                .build(), LIST_URL, DOWNLOAD_URL);
+                .build(), LIST_URL, DOWNLOAD_URL, defaultCacheRoot());
     }
 
-    ThemeGalleryClient(HttpClient http, String listUrl, String downloadUrl) {
+    ThemeGalleryClient(HttpClient http, String listUrl, String downloadUrl, Path cacheRoot) {
         this.http = http;
         this.listUrl = listUrl;
         this.downloadUrl = downloadUrl;
+        this.cacheRoot = cacheRoot;
     }
 
     /**
-     * Every theme the gallery page currently lists.
+     * The folder cached gallery data lives in, honouring XDG_CACHE_HOME.
+     */
+    public static Path defaultCacheRoot() {
+        String cacheHome = System.getenv("XDG_CACHE_HOME");
+        Path base = cacheHome != null && !cacheHome.isBlank()
+                ? Path.of(cacheHome)
+                : Path.of(System.getProperty("user.home"), ".cache");
+        return base.resolve("vlc-skin-studio");
+    }
+
+    /**
+     * Every theme the gallery page currently lists, from the cache when it is
+     * fresh.
      */
     public List<GalleryTheme> fetch() throws IOException, InterruptedException {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(listUrl))
-                .timeout(Duration.ofSeconds(30))
-                .header("User-Agent", "vlc-skin-studio")
-                .GET()
-                .build();
-        HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() >= 400) {
-            throw new IOException("The gallery returned HTTP " + response.statusCode());
-        }
-        return parse(response.body());
+        return fetch(false);
     }
 
     /**
-     * Downloads a theme archive and unpacks it into the folder.
+     * @param force true to ignore the cached list and ask the site again
+     */
+    public List<GalleryTheme> fetch(boolean force) throws IOException, InterruptedException {
+        Path listFile = cacheRoot.resolve("gallery").resolve("themes.json");
+        if (!force) {
+            List<GalleryTheme> cached = readThemes(listFile);
+            if (cached != null && isFresh(listFile)) {
+                return cached;
+            }
+        }
+        try {
+            HttpRequest request = HttpRequest.newBuilder(URI.create(listUrl))
+                    .timeout(Duration.ofSeconds(30))
+                    .header("User-Agent", "vlc-skin-studio")
+                    .GET()
+                    .build();
+            HttpResponse<String> response = http.send(request, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 400) {
+                throw new IOException("The gallery returned HTTP " + response.statusCode());
+            }
+            List<GalleryTheme> themes = parse(response.body());
+            writeThemes(listFile, themes);
+            return themes;
+        } catch (IOException | InterruptedException ex) {
+            List<GalleryTheme> cached = readThemes(listFile);
+            if (cached != null) {
+                return cached;
+            }
+            throw ex;
+        }
+    }
+
+    /**
+     * Downloads a theme archive and unpacks it into the folder. The archive is
+     * kept in the cache, so importing the same theme again is instant.
      *
      * @return the unpacked theme.xml
      */
     public Path download(GalleryTheme theme, Path folder, Consumer<String> progress)
             throws IOException, InterruptedException {
+        Path archive = cachedArchive(theme, progress);
+        if (progress != null) {
+            progress.accept("Unpacking " + theme.name() + "...");
+        }
+        return VltCodec.unpack(archive, folder);
+    }
+
+    private Path cachedArchive(GalleryTheme theme, Consumer<String> progress)
+            throws IOException, InterruptedException {
+        Path archive = cacheRoot.resolve("archives").resolve(theme.folderName() + ".vlt");
+        if (Files.isRegularFile(archive) && Files.size(archive) > 0) {
+            return archive;
+        }
         if (progress != null) {
             progress.accept("Downloading " + theme.name() + "...");
         }
@@ -84,38 +145,38 @@ public final class ThemeGalleryClient {
         if (body.length == 0) {
             throw new IOException("The download was empty");
         }
-        Files.createDirectories(folder);
-        Path archive = Files.createTempFile(folder, "gallery-", ".vlt");
-        try {
-            Files.write(archive, body);
-            if (progress != null) {
-                progress.accept("Unpacking " + theme.name() + "...");
-            }
-            return VltCodec.unpack(archive, folder);
-        } finally {
-            Files.deleteIfExists(archive);
-        }
+        writeAtomically(archive, body);
+        return archive;
     }
 
     /**
-     * The bytes of a preview image, or null when it cannot be loaded.
+     * The bytes of a preview image, cached by URL. Returns null when the image
+     * cannot be loaded.
      */
     public byte[] image(String url) {
         if (url == null || url.isBlank()) {
             return null;
         }
+        Path cached = cacheRoot.resolve("previews").resolve(hash(url) + ".img");
         try {
+            if (Files.isRegularFile(cached)) {
+                return Files.readAllBytes(cached);
+            }
             HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                     .timeout(Duration.ofSeconds(15))
                     .header("User-Agent", "vlc-skin-studio")
                     .GET()
                     .build();
             HttpResponse<byte[]> response = http.send(request, HttpResponse.BodyHandlers.ofByteArray());
-            return response.statusCode() < 400 ? response.body() : null;
-        } catch (IOException | InterruptedException ex) {
-            if (ex instanceof InterruptedException) {
-                Thread.currentThread().interrupt();
+            if (response.statusCode() >= 400) {
+                return null;
             }
+            writeAtomically(cached, response.body());
+            return response.body();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            return null;
+        } catch (IOException ex) {
             return null;
         }
     }
@@ -129,6 +190,55 @@ public final class ThemeGalleryClient {
                 ? Path.of(dataHome)
                 : Path.of(System.getProperty("user.home"), ".local", "share");
         return base.resolve("vlc-skin-studio").resolve("themes").resolve(theme.folderName());
+    }
+
+    private List<GalleryTheme> readThemes(Path file) {
+        try {
+            if (!Files.isRegularFile(file)) {
+                return null;
+            }
+            return Json.mapper().readValue(Files.readString(file), new TypeReference<List<GalleryTheme>>() {
+            });
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private void writeThemes(Path file, List<GalleryTheme> themes) {
+        try {
+            writeAtomically(file, Json.write(themes).getBytes(StandardCharsets.UTF_8));
+        } catch (IOException ex) {
+            // The cache is best effort; the list is returned either way.
+        }
+    }
+
+    private static void writeAtomically(Path file, byte[] bytes) throws IOException {
+        Files.createDirectories(file.getParent());
+        Path temp = Files.createTempFile(file.getParent(), file.getFileName().toString(), ".tmp");
+        Files.write(temp, bytes);
+        try {
+            Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException ex) {
+            Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
+        }
+    }
+
+    private static boolean isFresh(Path file) {
+        try {
+            return Instant.now().toEpochMilli() - Files.getLastModifiedTime(file).toMillis()
+                    < LIST_TTL.toMillis();
+        } catch (IOException ex) {
+            return false;
+        }
+    }
+
+    private static String hash(String text) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return HexFormat.of().formatHex(digest.digest(text.getBytes(StandardCharsets.UTF_8)));
+        } catch (Exception ex) {
+            return Integer.toHexString(text.hashCode());
+        }
     }
 
     /**

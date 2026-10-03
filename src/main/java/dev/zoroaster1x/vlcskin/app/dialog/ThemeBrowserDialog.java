@@ -47,7 +47,7 @@ public final class ThemeBrowserDialog extends JDialog {
     public ThemeBrowserDialog(Studio studio, JFrame owner) {
         super(owner, Messages.get("APP_GALLERY_TITLE", "Theme browser"), false);
         this.studio = studio;
-        setSize(900, 560);
+        setSize(1080, 680);
         setLocationRelativeTo(owner);
 
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -73,7 +73,7 @@ public final class ThemeBrowserDialog extends JDialog {
             }
         });
 
-        preview.setPreferredSize(new Dimension(220, 170));
+        preview.setPreferredSize(new Dimension(400, 300));
         preview.setBorder(BorderFactory.createLineBorder(
                 javax.swing.UIManager.getColor("Component.borderColor")));
         table.getSelectionModel().addListSelectionListener(event -> {
@@ -86,7 +86,7 @@ public final class ThemeBrowserDialog extends JDialog {
         openButton.addActionListener(event -> downloadSelected());
         table.getSelectionModel().addListSelectionListener(event -> openButton.setEnabled(selected() != null));
         JButton refresh = new JButton(Messages.get("APP_GALLERY_REFRESH", "Refresh"));
-        refresh.addActionListener(event -> load());
+        refresh.addActionListener(event -> load(true));
         JButton close = new JButton(Messages.get("BUTTON_CLOSE", "Close"));
         close.addActionListener(event -> dispose());
 
@@ -135,11 +135,15 @@ public final class ThemeBrowserDialog extends JDialog {
     }
 
     private void load() {
+        load(false);
+    }
+
+    private void load(boolean force) {
         status.setText(Messages.get("APP_GALLERY_LOADING", "Loading the gallery..."));
         openButton.setEnabled(false);
         executor.submit(() -> {
             try {
-                List<GalleryTheme> themes = client.fetch();
+                List<GalleryTheme> themes = client.fetch(force);
                 SwingUtilities.invokeLater(() -> {
                     model.setThemes(themes);
                     status.setText(Messages.format("APP_GALLERY_COUNT", "%s themes available", themes.size()));
@@ -177,9 +181,14 @@ public final class ThemeBrowserDialog extends JDialog {
                         return;
                     }
                     preview.setText(null);
-                    preview.setIcon(new javax.swing.ImageIcon(image.getScaledInstance(
-                            Math.min(220, image.getWidth()), Math.min(170, image.getHeight()),
-                            java.awt.Image.SCALE_SMOOTH)));
+                    int maxWidth = 400;
+                    int maxHeight = 300;
+                    double scale = Math.min(maxWidth / (double) image.getWidth(),
+                            maxHeight / (double) image.getHeight());
+                    int width = Math.max(1, (int) Math.round(image.getWidth() * scale));
+                    int height = Math.max(1, (int) Math.round(image.getHeight() * scale));
+                    preview.setIcon(new javax.swing.ImageIcon(
+                            image.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH)));
                 } catch (Exception ex) {
                     preview.setText(Messages.get("APP_GALLERY_NO_PREVIEW", "No preview"));
                 }
