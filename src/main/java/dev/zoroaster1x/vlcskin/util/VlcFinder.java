@@ -107,22 +107,24 @@ public final class VlcFinder {
     }
 
     /**
-     * Starts VLC on an installed theme archive.
+     * Starts VLC on an installed theme archive. For a Flatpak VLC the host
+     * archive path is already what the sandbox sees, because the app data
+     * directory is mounted at the same location.
      */
     public static void launch(Path installedArchive) throws IOException {
-        String sandboxPath = "$HOME/.local/share/vlc/skins2/" + installedArchive.getFileName();
         Optional<Path> nativeVlc = find();
         if (nativeVlc.isPresent()) {
             new ProcessBuilder(nativeVlc.get().toString(), "-I", "skins2",
-                    "--skins2-last=" + installedArchive, "--skins2-systray").start();
+                    "--skins2-last=" + installedArchive.toAbsolutePath()).start();
             return;
         }
         Optional<Path> flatpak = onPathNamed("flatpak");
         if (flatpak.isEmpty()) {
             throw new IOException("VLC was not found");
         }
-        new ProcessBuilder(flatpak.get().toString(), "run", FLATPAK_ID, "-I", "skins2",
-                "--skins2-last=" + sandboxPath, "--skins2-systray").start();
+        new ProcessBuilder(flatpak.get().toString(), "run", FLATPAK_ID,
+                "--no-one-instance", "-I", "skins2",
+                "--skins2-last=" + installedArchive.toAbsolutePath()).start();
     }
 
     /**
@@ -130,10 +132,10 @@ public final class VlcFinder {
      */
     public static String describeLaunch(Path installedArchive) {
         if (find().isPresent()) {
-            return "vlc -I skins2 --skins2-last=" + installedArchive;
+            return "vlc -I skins2 --skins2-last=" + installedArchive.toAbsolutePath();
         }
-        return "flatpak run " + FLATPAK_ID + " -I skins2 --skins2-last=$HOME/.local/share/vlc/skins2/"
-                + installedArchive.getFileName();
+        return "flatpak run " + FLATPAK_ID + " --no-one-instance -I skins2 --skins2-last="
+                + installedArchive.toAbsolutePath();
     }
 
     private static Optional<Path> onPath() {

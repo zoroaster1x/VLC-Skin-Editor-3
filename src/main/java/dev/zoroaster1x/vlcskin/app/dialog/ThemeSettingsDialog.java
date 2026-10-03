@@ -72,14 +72,8 @@ public final class ThemeSettingsDialog extends JDialog {
         footer.add(cancel);
         footer.add(ok);
         JButton help = new JButton(Messages.get("BUTTON_HELP", "Help"));
-        help.addActionListener(e -> {
-            try {
-                java.awt.Desktop.getDesktop().browse(java.net.URI.create(
-                        "https://www.videolan.org/vlc/skinedhlp/theme.html"));
-            } catch (Exception ex) {
-                // Opening the browser is best effort.
-            }
-        });
+        help.addActionListener(e -> dev.zoroaster1x.vlcskin.app.dialog.DocumentationDialog
+                .openTopic(this, "handbook-step-2-new-theme"));
         footer.add(help);
 
         content.add(Box.createVerticalStrut(10));

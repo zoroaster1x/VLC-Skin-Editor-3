@@ -48,9 +48,31 @@ public final class InspectorFields {
     }
 
     public void note(String text) {
-        JLabel label = new JLabel("<html><span style='font-size:9px'>" + text + "</span></html>");
-        label.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
+        NotePane label = new NotePane(text);
         form.add(label, "span 2, growx, gapbottom 4");
+    }
+
+    /**
+     * A note that wraps with the inspector width instead of forcing it wider.
+     */
+    private static final class NotePane extends javax.swing.JTextPane {
+        NotePane(String html) {
+            setContentType("text/html");
+            setText("<html><body style='margin:0'>" + html + "</body></html>");
+            setEditable(false);
+            setOpaque(false);
+            setBorder(null);
+            setFocusable(false);
+            setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
+        }
+
+        @Override
+        public Dimension getPreferredSize() {
+            int width = getWidth() > 0 ? getWidth() : 260;
+            setSize(width, Integer.MAX_VALUE);
+            Dimension size = super.getPreferredSize();
+            return new Dimension(width, size.height);
+        }
     }
 
     public void row(String label, JComponent editor) {
@@ -60,6 +82,8 @@ public final class InspectorFields {
 
     public JTextField text(String value, Consumer<String> commit) {
         JTextField field = new JTextField(value == null ? "" : value);
+        field.setPreferredSize(new Dimension(120, field.getPreferredSize().height));
+        field.setMinimumSize(new Dimension(60, field.getPreferredSize().height));
         commitOn(field, commit);
         return field;
     }
@@ -85,6 +109,8 @@ public final class InspectorFields {
 
     public JComboBox<String> combo(String value, List<String> options, Consumer<String> commit) {
         JComboBox<String> box = new JComboBox<>(options.toArray(String[]::new));
+        box.setPreferredSize(new Dimension(120, box.getPreferredSize().height));
+        box.setMinimumSize(new Dimension(60, box.getPreferredSize().height));
         if (value != null && options.contains(value)) {
             box.setSelectedItem(value);
         } else if (value != null) {

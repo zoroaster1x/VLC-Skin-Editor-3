@@ -52,6 +52,9 @@ public final class CanvasPanel extends JPanel {
     private Tool tool = Tool.MOVE;
     private Item hover;
     private Item pressed;
+    private boolean panning;
+    private java.awt.Point panStart;
+    private boolean panMoved;
     private int frameTick;
     private final javax.swing.Timer animator;
     private boolean dragging;
@@ -253,9 +256,17 @@ public final class CanvasPanel extends JPanel {
                 altDown = e.isAltDown();
                 Point layoutPoint = toLayout(e.getPoint());
                 Item hit = hitTest(layoutPoint);
+                if (e.getButton() == MouseEvent.BUTTON2) {
+                    startPan(e);
+                    return;
+                }
                 if (hit == null) {
-                    studio.session().selection().clearItem();
-                    studio.session().fireChanged();
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        startPan(e);
+                    } else {
+                        studio.session().selection().clearItem();
+                        studio.session().fireChanged();
+                    }
                     return;
                 }
                 studio.session().selection().selectItem(hit.getId());
@@ -278,6 +289,10 @@ public final class CanvasPanel extends JPanel {
 
             @Override
             public void mouseDragged(MouseEvent e) {
+                if (panning) {
+                    continuePan(e);
+                    return;
+                }
                 Point layoutPoint = toLayout(e.getPoint());
                 if (pathDragging) {
                     updatePathDrag(layoutPoint);
@@ -298,6 +313,16 @@ public final class CanvasPanel extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
+                if (panning) {
+                    panning = false;
+                    if (!panMoved) {
+                        studio.session().selection().clearItem();
+                        studio.session().fireChanged();
+                    }
+                    surface.setCursor(Cursor.getPredefinedCursor(
+                            tool == Tool.PATH ? Cursor.CROSSHAIR_CURSOR : Cursor.DEFAULT_CURSOR));
+                    return;
+                }
                 if (pressed != null) {
                     pressed = null;
                     invalidateCache();
@@ -356,6 +381,32 @@ public final class CanvasPanel extends JPanel {
         surface.addMouseListener(adapter);
         surface.addMouseMotionListener(adapter);
         surface.addMouseWheelListener(adapter);
+    }
+
+    /**
+     * Starts a view drag on the canvas: the middle button anywhere, or the left
+     * button on the empty background, so the theme can be moved around without
+     * touching the items.
+     */
+    private void startPan(MouseEvent e) {
+        panning = true;
+        panStart = e.getPoint();
+        panMoved = false;
+        surface.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
+    }
+
+    private void continuePan(MouseEvent e) {
+        if (surface.getParent() instanceof javax.swing.JViewport viewport) {
+            Point position = viewport.getViewPosition();
+            position.translate(panStart.x - e.getX(), panStart.y - e.getY());
+            Dimension viewSize = viewport.getViewSize();
+            Dimension extent = viewport.getExtentSize();
+            position.x = Math.max(0, Math.min(position.x, Math.max(0, viewSize.width - extent.width)));
+            position.y = Math.max(0, Math.min(position.y, Math.max(0, viewSize.height - extent.height)));
+            viewport.setViewPosition(position);
+            panStart = e.getPoint();
+            panMoved = true;
+        }
     }
 
     private Item hitTest(Point point) {

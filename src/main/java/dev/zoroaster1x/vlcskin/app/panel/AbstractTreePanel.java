@@ -157,6 +157,36 @@ abstract class AbstractTreePanel extends JPanel {
     /**
      * Rebuilds the model from the session. Must be cheap and idempotent.
      */
+    /**
+     * The expanded node keys, so a rebuild keeps the user's open branches when
+     * something in the tree is clicked or renamed.
+     */
+    protected java.util.Set<String> expandedKeys() {
+        java.util.Set<String> keys = new java.util.HashSet<>();
+        for (int row = 0; row < tree.getRowCount(); row++) {
+            if (!tree.isExpanded(row)) {
+                continue;
+            }
+            Object node = tree.getPathForRow(row).getLastPathComponent();
+            if (node instanceof DefaultMutableTreeNode treeNode
+                    && treeNode.getUserObject() instanceof TreeRef ref) {
+                keys.add(ref.kind() + ":" + ref.id());
+            }
+        }
+        return keys;
+    }
+
+    protected void restoreExpansion(java.util.Set<String> keys) {
+        for (int row = 0; row < tree.getRowCount(); row++) {
+            Object node = tree.getPathForRow(row).getLastPathComponent();
+            if (node instanceof DefaultMutableTreeNode treeNode
+                    && treeNode.getUserObject() instanceof TreeRef ref
+                    && keys.contains(ref.kind() + ":" + ref.id())) {
+                tree.expandRow(row);
+            }
+        }
+    }
+
     public abstract void refresh();
 
     protected void selectionChanged(TreeRef ref) {

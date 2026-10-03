@@ -60,12 +60,25 @@ public final class ResourcesPanel extends AbstractTreePanel {
                         Messages.get("APP_RES_INI_FILE", "IniFile") + ": " + ini.getId())));
             }
         }
+        java.util.Set<String> expanded = expandedKeys();
         root.add(bitmaps);
         root.add(fonts);
         if (other.getChildCount() > 0) {
             root.add(other);
         }
         model.setRoot(root);
+        javax.swing.tree.TreePath path = new javax.swing.tree.TreePath(root);
+        tree.expandPath(path);
+        if (bitmaps.getChildCount() > 0) {
+            tree.expandPath(path.pathByAddingChild(bitmaps));
+        }
+        if (fonts.getChildCount() > 0) {
+            tree.expandPath(path.pathByAddingChild(fonts));
+        }
+        if (other.getChildCount() > 0) {
+            tree.expandPath(path.pathByAddingChild(other));
+        }
+        restoreExpansion(expanded);
         selectResource(studio.session().selection().resourceId());
     }
 

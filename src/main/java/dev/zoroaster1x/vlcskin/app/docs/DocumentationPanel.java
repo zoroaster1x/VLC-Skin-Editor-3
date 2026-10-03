@@ -42,6 +42,7 @@ public final class DocumentationPanel extends JPanel {
     private final JLabel source = new JLabel(" ");
     private final JButton backButton = new JButton(Messages.get("APP_DOCS_BACK", "Back"));
     private final JButton forwardButton = new JButton(Messages.get("APP_DOCS_FORWARD", "Forward"));
+    private final JButton onlineButton = new JButton(Messages.get("APP_DOCS_ONLINE", "Open online"));
     private final Deque<String> history = new ArrayDeque<>();
     private final Deque<String> forwardHistory = new ArrayDeque<>();
     private final Timer debounce;
@@ -112,8 +113,7 @@ public final class DocumentationPanel extends JPanel {
             searchField.setText("");
             showTopicsList("");
         });
-        JButton online = new JButton(Messages.get("APP_DOCS_ONLINE", "Open online"));
-        online.addActionListener(event -> browse(currentSource()));
+        onlineButton.addActionListener(event -> browse(currentSource()));
 
         JPanel toolbar = new JPanel();
         toolbar.setLayout(new javax.swing.BoxLayout(toolbar, javax.swing.BoxLayout.X_AXIS));
@@ -124,7 +124,7 @@ public final class DocumentationPanel extends JPanel {
         toolbar.add(javax.swing.Box.createHorizontalStrut(12));
         toolbar.add(topicsButton);
         toolbar.add(javax.swing.Box.createHorizontalGlue());
-        toolbar.add(online);
+        toolbar.add(onlineButton);
 
         JPanel searchRow = new JPanel(new BorderLayout(6, 2));
         searchRow.setBorder(BorderFactory.createEmptyBorder(8, 8, 4, 8));
@@ -316,6 +316,7 @@ public final class DocumentationPanel extends JPanel {
             viewer.setCaretPosition(0);
             status.setText(topic.section() + " / " + topic.title());
             source.setText(topic.sourceUrl() == null || topic.sourceUrl().isBlank() ? " " : topic.sourceUrl());
+            onlineButton.setEnabled(topic.sourceUrl() != null && topic.sourceUrl().startsWith("http"));
             breadcrumb.setText(topic.section() + "   >   " + topic.title());
         } catch (Exception ex) {
             viewer.setText("<html><body><p>Could not open " + topic.file() + ": " + ex.getMessage() + "</p></body></html>");

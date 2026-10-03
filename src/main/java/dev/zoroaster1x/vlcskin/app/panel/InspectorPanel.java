@@ -44,7 +44,7 @@ public final class InspectorPanel extends JPanel {
     private final Studio studio;
     private final JPanel header = new JPanel(new BorderLayout());
     private final JLabel title = new JLabel(Messages.get("APP_INSPECTOR_NOTHING", "Nothing selected"));
-    private final JPanel form = new JPanel();
+    private final JPanel form = new FormPanel();
     private String lastKey = "";
 
     public InspectorPanel(Studio studio) {
@@ -54,7 +54,45 @@ public final class InspectorPanel extends JPanel {
         title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 12f));
         header.add(title, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
-        add(new JScrollPane(form), BorderLayout.CENTER);
+        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(form,
+                javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+                javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        scroll.setBorder(null);
+        scroll.setWheelScrollingEnabled(true);
+        scroll.getVerticalScrollBar().setUnitIncrement(16);
+        scroll.getVerticalScrollBar().setBlockIncrement(140);
+        add(scroll, BorderLayout.CENTER);
+    }
+
+    /**
+     * The form fills the inspector width, so no horizontal scrollbar and the
+     * rows never spill past the panel.
+     */
+    private static final class FormPanel extends JPanel implements javax.swing.Scrollable {
+        @Override
+        public java.awt.Dimension getPreferredScrollableViewportSize() {
+            return getPreferredSize();
+        }
+
+        @Override
+        public int getScrollableUnitIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return 16;
+        }
+
+        @Override
+        public int getScrollableBlockIncrement(java.awt.Rectangle visible, int orientation, int direction) {
+            return Math.max(16, visible.height);
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            return true;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            return false;
+        }
     }
 
     /**
@@ -233,15 +271,30 @@ public final class InspectorPanel extends JPanel {
 
     private JButton helpButton(String page) {
         JButton help = new JButton(Messages.get("BUTTON_HELP", "Help"));
-        help.addActionListener(e -> {
-            try {
-                java.awt.Desktop.getDesktop().browse(java.net.URI.create(
-                        "https://www.videolan.org/vlc/skinedhlp/" + page));
-            } catch (Exception ex) {
-                studio.status(Messages.get("APP_INSPECTOR_HELP_FAILED", "Could not open the help page"));
-            }
-        });
+        help.addActionListener(e -> dev.zoroaster1x.vlcskin.app.dialog.DocumentationDialog
+                .openTopic(this, helpTopic(page)));
         return help;
+    }
+
+    /**
+     * Maps a legacy help page to the matching topic in our own handbook.
+     */
+    private static String helpTopic(String page) {
+        String name = page == null ? "" : page.replace(".html", "");
+        return switch (name) {
+            case "i-anchor", "resizable" -> "handbook-layouts-and-anchors";
+            case "i-button", "i-checkbox", "i-image" -> "handbook-buttons-checkboxes-and-images";
+            case "i-text", "textvars", "percent" -> "handbook-text-items";
+            case "i-slider", "bezier" -> "handbook-sliders";
+            case "i-sliderbg", "sbgwizard" -> "handbook-slider-backgrounds";
+            case "i-playtree" -> "handbook-playlists-and-playtrees";
+            case "res-bitmap", "res-subbitmap" -> "handbook-bitmaps-and-animations";
+            case "res-font" -> "handbook-fonts-and-bitmap-fonts";
+            case "boolexpr", "layout", "window-theme" -> "handbook-actions-and-variables";
+            case "window", "theme" -> "handbook-step-2-new-theme";
+            case "basics" -> "handbook-getting-started";
+            default -> "handbook-index";
+        };
     }
 
     private void subForm(InspectorFields fields, SubBitmap sub) {

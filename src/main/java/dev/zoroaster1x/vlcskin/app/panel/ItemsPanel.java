@@ -38,10 +38,12 @@ public final class ItemsPanel extends AbstractTreePanel {
                 root.add(node(item));
             }
         }
+        java.util.Set<String> expanded = expandedKeys();
         model.setRoot(root);
         for (int row = 0; row < tree.getRowCount(); row++) {
             tree.expandRow(row);
         }
+        restoreExpansion(expanded);
         select(TreeRef.Kind.ITEM, studio.session().selection().itemId());
     }
 

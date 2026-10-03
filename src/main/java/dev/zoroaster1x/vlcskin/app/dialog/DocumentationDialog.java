@@ -20,6 +20,19 @@ public final class DocumentationDialog extends JDialog {
         setContentPane(panel);
     }
 
+    /**
+     * Opens the viewer on a topic; used by every built-in help button.
+     */
+    public static void openTopic(java.awt.Component parent, String topicId) {
+        JFrame owner = parent == null ? null
+                : (JFrame) javax.swing.SwingUtilities.getWindowAncestor(parent);
+        DocumentationDialog dialog = new DocumentationDialog(owner);
+        if (topicId != null && !topicId.isBlank()) {
+            dialog.panel().selectTopic(topicId);
+        }
+        dialog.setVisible(true);
+    }
+
     public DocumentationPanel panel() {
         return panel;
     }

@@ -27,7 +27,7 @@ public final class DocumentationSearch {
     }
 
     private record IndexedPage(DocumentationBundle.Topic topic, List<Heading> headings, String[] lines,
-                               String titleLower, String sectionLower) {
+                               String titleLower, String sectionLower, String bodyLower) {
     }
 
     private final DocumentationBundle bundle;
@@ -77,7 +77,7 @@ public final class DocumentationSearch {
             return hits;
         }
         for (IndexedPage page : pages) {
-            String bodyLower = String.join("\n", page.lines).toLowerCase(Locale.ROOT);
+            String bodyLower = page.bodyLower();
             boolean all = terms.stream().allMatch(bodyLower::contains);
             if (!all) {
                 continue;
@@ -184,7 +184,8 @@ public final class DocumentationSearch {
         }
         return new IndexedPage(topic, headings, lines,
                 topic.title().toLowerCase(Locale.ROOT),
-                topic.section().toLowerCase(Locale.ROOT));
+                topic.section().toLowerCase(Locale.ROOT),
+                markdown.toLowerCase(Locale.ROOT));
     }
 
     private static int headingLevel(String line) {
@@ -236,7 +237,7 @@ public final class DocumentationSearch {
             return terms;
         }
         for (String part : query.toLowerCase(Locale.ROOT).split("\\s+")) {
-            if (!part.isBlank() && !terms.contains(part)) {
+            if (part.length() >= 2 && !terms.contains(part)) {
                 terms.add(part);
             }
         }
