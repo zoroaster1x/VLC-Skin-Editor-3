@@ -60,13 +60,10 @@ after looking at a fresh screenshot or GIF.
    `EditorControlTest` covering undo/redo, selection, nudge, reorder,
    reparent, XML round trip, preferences via a stub `UiInspector`, and the
    slider background generator.
-2. **Flatten the modules.** Move `core/src` and `app/src` into one `src/main`
-   and `src/test`, merge the two `build.gradle` files into a single project
-   with the `application` and Shadow plugins, and update `settings.gradle`,
-   `run.sh`, the `uiScreenshots` task, `tools/*.py` defaults, `AGENTS.md`,
-   `PRIVATE_AGENTS.md`, `README.md` and the CI workflows from `app/build/...`
-   to `build/...`. Verify with a clean `./gradlew build` and by rerunning the
-   CLI, MCP handshake and screenshot generation.
+2. **Flatten the modules.** Done: one `src/main` and `src/test`, a single
+   `build.gradle` with the `application` and Shadow plugins, every path in
+   `run.sh`, `tools/*.py`, the docs and the CI workflows moved from
+   `app/build/...` to `build/...`.
 3. **Gallery conformance sweep.** Run `tools/gallery-conformance.py` over the
    120 themes in the official pack plus the themes VLC itself ships
    (`share/skins2/default/theme.xml` and `share/skins2/winamp2.xml`, extracted
@@ -81,7 +78,7 @@ after looking at a fresh screenshot or GIF.
    `tools/recreate-velocity-via-mcp.py` on the merged jar, review the step
    renders, fix any tool gaps it exposes, then copy
    `velocity-mcp-recreation.gif` and the final still into `screenshots/`.
-5. **Regenerate the whole screenshot set** with `:app:uiScreenshots` after the
+5. **Regenerate the whole screenshot set** with `uiScreenshots` after the
    merge, look at every GIF and still, and update the README gallery if any
    file name changed.
 6. **GraalVM native image.** With GraalVM CE 25 installed, try

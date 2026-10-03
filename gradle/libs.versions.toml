@@ -25,6 +25,7 @@ modern-docking-ui = { module = "io.github.andrewauclair:modern-docking-ui", vers
 modern-docking-single-app = { module = "io.github.andrewauclair:modern-docking-single-app", version.ref = "modernDocking" }
 jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 picocli = { module = "info.picocli:picocli", version.ref = "picocli" }
+picocli-codegen = { module = "info.picocli:picocli-codegen", version.ref = "picocli" }
 lombok = { module = "org.projectlombok:lombok", version.ref = "lombok" }
 junit-jupiter = { module = "org.junit.jupiter:junit-jupiter", version.ref = "junit" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }

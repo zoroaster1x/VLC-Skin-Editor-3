@@ -4,9 +4,9 @@
 set -euo pipefail
 cd "$(dirname "$0")"
 
-JAR="app/build/libs/vlc-skin-studio.jar"
+JAR="build/libs/vlc-skin-studio.jar"
 if [ ! -f "$JAR" ] || [ "${REBUILD:-0}" = "1" ]; then
-  ./gradlew :app:shadowJar -q
+  ./gradlew shadowJar -q
 fi
 
 if [ "$#" -eq 0 ]; then

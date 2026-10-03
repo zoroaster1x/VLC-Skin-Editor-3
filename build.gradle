@@ -1,38 +1,106 @@
 plugins {
-    alias(libs.plugins.shadow) apply false
+    id 'java'
+    id 'application'
+    alias(libs.plugins.shadow)
 }
 
-allprojects {
-    group = 'io.github.zoroaster1x'
-    version = providers.gradleProperty('version').getOrElse('1.0.0')
+group = 'io.github.zoroaster1x'
+version = providers.gradleProperty('version').getOrElse('1.0.0')
+
+repositories {
+    mavenCentral()
 }
 
-subprojects {
-    apply plugin: 'java'
-
-    repositories {
-        mavenCentral()
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInteger())
     }
+}
 
-    java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(libs.versions.java.get().toInteger())
-        }
-    }
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release = 25
+    // JDK 23 and newer no longer run annotation processors unless asked to.
+    // Lombok generates every model accessor, so this is required.
+    options.compilerArgs.add('-proc:full')
+}
 
-    tasks.withType(JavaCompile).configureEach {
-        options.encoding = 'UTF-8'
-        // options.release = 25
-        // JDK 23 and newer no longer run annotation processors unless asked to.
-        // Lombok generates every model accessor, so this is required.
-        options.compilerArgs.add('-proc:full')
+tasks.withType(Test).configureEach {
+    useJUnitPlatform()
+    testLogging {
+        events 'failed', 'skipped'
+        exceptionFormat 'full'
     }
+}
 
-    tasks.withType(Test).configureEach {
-        useJUnitPlatform()
-        testLogging {
-            events 'failed', 'skipped'
-            exceptionFormat 'full'
-        }
+dependencies {
+    implementation libs.flatlaf
+    implementation libs.flatlaf.extras
+    implementation libs.flatlaf.themes
+    implementation libs.modern.docking.api
+    implementation libs.modern.docking.ui
+    implementation libs.modern.docking.single.app
+    implementation libs.rsyntaxtextarea
+    implementation libs.miglayout.swing
+
+    implementation libs.jackson.databind
+    implementation libs.picocli
+    implementation libs.mcp.core
+    implementation libs.mcp.json.jackson2
+    implementation libs.commons.compress
+    implementation libs.jline
+    implementation libs.slf4j.api
+    runtimeOnly libs.logback.classic
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+    // Generates the reflection metadata picocli needs inside a GraalVM native image.
+    annotationProcessor libs.picocli.codegen
+
+    testImplementation libs.junit.jupiter
+    testImplementation libs.assertj
+    testRuntimeOnly libs.junit.platform.launcher
+}
+
+application {
+    mainClass = 'io.github.zoroaster1x.vlcskin.app.VlcSkinStudio'
+    applicationName = 'vlc-skin-studio'
+}
+
+tasks.named('shadowJar') {
+    archiveBaseName = 'vlc-skin-studio'
+    archiveClassifier = ''
+    archiveVersion = ''
+    manifest {
+        attributes 'Main-Class': application.mainClass.get(),
+                   'Enable-Native-Access': 'ALL-UNNAMED'
     }
+    mergeServiceFiles()
+}
+
+tasks.named('build') {
+    dependsOn tasks.named('shadowJar')
+}
+
+// Writes the runtime classpath to build/runtimecp.txt so scripts and end to end
+// checks can run the CLI and MCP server without another launcher.
+tasks.register('runtimeClasspathFile') {
+    def output = layout.buildDirectory.file('runtimecp.txt')
+    def path = sourceSets.main.runtimeClasspath
+    outputs.file(output)
+    doLast {
+        output.get().asFile.text = path.asPath
+    }
+}
+
+// Regenerates screenshots/ with the headless UI harness: stills and 30fps GIFs.
+// Set VELOCITY_THEME to a VeLoCity theme.xml path to also render that fixture.
+tasks.register('uiScreenshots', JavaExec) {
+    group = 'verification'
+    description = 'Regenerate screenshots/ with the headless UI harness.'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.zoroaster1x.vlcskin.app.UiShots'
+    workingDir = projectDir
+    args = [new File(projectDir, 'screenshots').absolutePath, System.getenv('VELOCITY_THEME') ?: '']
+    dependsOn testClasses
 }

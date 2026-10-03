@@ -28,7 +28,7 @@ the `skins2` interface: `vlc -I skins2 --skins2-last=theme.xml`.
   specific paths. They live in the gitignored `PRIVATE_AGENTS.md` and
   `.testenv`.
 * **Verify before claiming done.** Run `./gradlew build`, and for UI work look
-  at `app/build/reports/screenshots/`. Report measured numbers, not intentions.
+  at `build/reports/screenshots/`. Report measured numbers, not intentions.
 * **Do not pop up windows during tests.** UI tests run through
   `HeadlessStudio`, which paints the real panel tree offscreen and can be fed
   real mouse events. There is no X server requirement.
@@ -39,15 +39,15 @@ Java 25 is required. Gradle comes from the wrapper.
 
 ```bash
 ./gradlew build                     # compile, run every suite, build the jar
-./gradlew :app:shadowJar            # single file jar with all dependencies
-./gradlew :app:run                  # open the desktop window
+./gradlew shadowJar            # single file jar with all dependencies
+./gradlew run                  # open the desktop window
 ./run.sh                            # build once, then run the desktop app
 ./run.sh render skin.xml -o p.png   # CLI render
 ./run.sh mcp                        # MCP server over stdio
 ./run.sh tui skin.xml               # terminal UI
 ```
 
-The fat jar lands at `app/build/libs/vlc-skin-studio.jar` and its main class is
+The fat jar lands at `build/libs/vlc-skin-studio.jar` and its main class is
 `io.github.zoroaster1x.vlcskin.app.VlcSkinStudio`. Any known subcommand runs the
 CLI; anything else opens the window.
 
@@ -75,14 +75,14 @@ The two tools under `tools/` are the acceptance harnesses:
 * `recreate-velocity-via-mcp.py` drives the MCP server from an external Python
   client to rebuild the VeLoCity player window from its own assets.
 
-`app/src/test` writes screenshots to `app/build/reports/screenshots/`, which is
+`src/test` writes screenshots to `build/reports/screenshots/`, which is
 the review path for UI changes. `HeadlessStudio` drives the same panels the
 desktop window docks.
 
 ## 5. Layout
 
 ```
-core/src/main/java/io/github/zoroaster1x/vlcskin/
+src/main/java/io/github/zoroaster1x/vlcskin/
   model/            theme, windows, layouts, items, resources, SkinIndex
   model/item/       one class per control, sealed Item hierarchy
   model/resource/   bitmap, sub bitmap, font, bitmap font, popup menu, ini
@@ -103,7 +103,7 @@ core/src/main/java/io/github/zoroaster1x/vlcskin/
   cli/              picocli commands
   tui/              TuiShell, TuiLoop, AsciiRenderer
   example/          ExampleSkins with generated assets
-app/src/main/java/io/github/zoroaster1x/vlcskin/app/
+src/main/java/io/github/zoroaster1x/vlcskin/app/
   VlcSkinStudio     entry point, CLI dispatch or window
   Studio            session, settings and operations
   StudioFrame       menus, toolbar, ModernDocking layout, status bar
@@ -220,8 +220,8 @@ regressions to avoid, not as work to do.
 ## 8. Verification discipline
 
 * `./gradlew build` is the floor. It runs every suite and builds the fat jar.
-* UI changes need a screenshot: run `:app:test`, then look at
-  `app/build/reports/screenshots/studio-dark.png` and `studio-light.png`.
+* UI changes need a screenshot: run `test`, then look at
+  `build/reports/screenshots/studio-dark.png` and `studio-light.png`.
   Both themes are part of the change.
 * CLI changes need a real run:
   `./run.sh new --example neon /tmp/neon/theme.xml`,
@@ -250,12 +250,12 @@ regressions to avoid, not as work to do.
 * The Release workflow builds, runs the suites, generates the notes from every
   commit since the previous release tag followed by
   `.github/release-template.md` (which carries the funding block), attests the
-  provenance of `app/build/libs/vlc-skin-studio.jar`, and publishes the release
+  provenance of `build/libs/vlc-skin-studio.jar`, and publishes the release
   with that jar plus a SHA-256 checksum file.
 * A push without the marker builds and tests only, which is the normal case.
   `workflow_dispatch` cuts a release for the current version.
 * Manual fallback, only when CI cannot run:
-  `gh release create 1.0.1 --target master app/build/libs/vlc-skin-studio.jar`
+  `gh release create 1.0.1 --target master build/libs/vlc-skin-studio.jar`
   (attestation is then missing, so say so in the report).
 
 ## 11. Local test configuration

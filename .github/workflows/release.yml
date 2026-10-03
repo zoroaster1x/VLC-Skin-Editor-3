@@ -97,7 +97,7 @@ jobs:
       - name: Write the checksum file
         if: steps.version.outputs.version != ''
         run: |
-          cd app/build/libs
+          cd build/libs
           sha256sum vlc-skin-studio.jar > SHA256SUMS
           cat SHA256SUMS
 
@@ -105,7 +105,7 @@ jobs:
         if: steps.version.outputs.version != ''
         uses: actions/attest-build-provenance@v2
         with:
-          subject-path: app/build/libs/vlc-skin-studio.jar
+          subject-path: build/libs/vlc-skin-studio.jar
 
       - name: Publish the release
         if: steps.version.outputs.version != ''
@@ -116,8 +116,8 @@ jobs:
           TITLE="VLC Skin Studio $VERSION"
           if gh release view "$VERSION" >/dev/null 2>&1; then
             gh release edit "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md
-            gh release upload "$VERSION" app/build/libs/vlc-skin-studio.jar app/build/libs/SHA256SUMS --clobber
+            gh release upload "$VERSION" build/libs/vlc-skin-studio.jar build/libs/SHA256SUMS --clobber
           else
-            gh release create "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md --target "${{ github.sha }}" app/build/libs/vlc-skin-studio.jar app/build/libs/SHA256SUMS
+            gh release create "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md --target "${{ github.sha }}" build/libs/vlc-skin-studio.jar build/libs/SHA256SUMS
           fi
           echo "Released $VERSION."
