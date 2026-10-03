@@ -27,7 +27,22 @@ import javax.imageio.ImageIO;
  */
 public final class ImageStore {
 
-    private static final BufferedImage BROKEN = brokenPlaceholder();
+    private static final java.util.concurrent.atomic.AtomicReference<BufferedImage> BROKEN_REF =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
+    /**
+     * The placeholder is created lazily so a CLI or MCP run that never draws an
+     * image does not have to initialize AWT (which matters inside a native
+     * image).
+     */
+    private static BufferedImage broken() {
+        BufferedImage broken = BROKEN_REF.get();
+        if (broken == null) {
+            broken = brokenPlaceholder();
+            BROKEN_REF.set(broken);
+        }
+        return broken;
+    }
 
     private final Path skinFolder;
     private final Map<String, BufferedImage> images = new HashMap<>();
@@ -93,8 +108,8 @@ public final class ImageStore {
         }
         BufferedImage whole = wholeImage(index, ref.bitmap());
         if (whole == null) {
-            images.put(key, BROKEN);
-            return BROKEN;
+            images.put(key, broken());
+            return broken();
         }
         BufferedImage result;
         if (ref.sub() != null) {
@@ -142,8 +157,8 @@ public final class ImageStore {
         }
         if (bitmap.getFile() == null || bitmap.getFile().isBlank()) {
             problems.put(bitmap.getId(), "Bitmap \"" + bitmap.getId() + "\" has no file");
-            wholeImages.put(bitmap.getId(), BROKEN);
-            return BROKEN;
+            wholeImages.put(bitmap.getId(), broken());
+            return broken();
         }
         File file = skinFolder.resolve(bitmap.getFile().replace('\\', '/')).toFile();
         try {
@@ -156,8 +171,8 @@ public final class ImageStore {
             return keyed;
         } catch (IOException ex) {
             problems.put(bitmap.getId(), "Could not load " + bitmap.getFile() + ": " + ex.getMessage());
-            wholeImages.put(bitmap.getId(), BROKEN);
-            return BROKEN;
+            wholeImages.put(bitmap.getId(), broken());
+            return broken();
         }
     }
 
@@ -168,7 +183,7 @@ public final class ImageStore {
         int height = Math.min(sub.getHeight(), whole.getHeight() - y);
         if (width <= 0 || height <= 0) {
             problems.put(id, "SubBitmap \"" + id + "\" is outside its parent bitmap");
-            return BROKEN;
+            return broken();
         }
         if (x + width > whole.getWidth() || y + height > whole.getHeight()) {
             problems.put(id, "SubBitmap \"" + id + "\" is clipped by its parent bitmap");
