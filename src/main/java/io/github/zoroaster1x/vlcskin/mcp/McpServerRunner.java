@@ -30,7 +30,10 @@ public final class McpServerRunner {
                                        String version) {
         McpSyncServer server = McpServer.sync(transport)
                 .serverInfo(SERVER_NAME, version)
-                .capabilities(McpSchema.ServerCapabilities.builder().tools(true).build())
+                // listChanged stays false: the tool set is fixed at startup, and
+                // emitting change notifications before a client connects fails
+                // inside a native image.
+                .capabilities(McpSchema.ServerCapabilities.builder().tools(false).build())
                 .instructions(INSTRUCTIONS)
                 .build();
         for (ToolSpec spec : new McpToolset(service).tools()) {

@@ -17,9 +17,12 @@ fi
 ./gradlew shadowJar -q
 mkdir -p build/native
 
+REFLECT_CONFIG="$PWD/src/main/resources/META-INF/native-image/io.github.zoroaster1x/vlc-skin-studio/reflect-config.json"
+
 "$GRAALVM_HOME/bin/native-image" \
   --no-fallback \
   -H:+ReportExceptionStackTraces \
+  -H:ReflectionConfigurationFiles="$REFLECT_CONFIG" \
   -cp build/libs/vlc-skin-studio.jar \
   -o build/native/vlc-skin-studio \
   io.github.zoroaster1x.vlcskin.app.VlcSkinStudio

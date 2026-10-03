@@ -1,6 +1,5 @@
 [
   {
-    "comment": "libawt and libfontmanager call FindClass from JNI_OnLoad, so these classes must stay reflectively reachable in a native image.",
     "name": "java.awt.GraphicsEnvironment",
     "allDeclaredConstructors": true,
     "allPublicConstructors": true,
