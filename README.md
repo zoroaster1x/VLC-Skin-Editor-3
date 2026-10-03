@@ -5,9 +5,9 @@ terminal UI, a CLI and an MCP server so AI clients can inspect and build skins
 with you. It is a from scratch port of the original VLC Skin Editor (0.8.6)
 to Java 25.
 
-![Dark theme](docs/screenshot-dark.png)
+![Dark theme](screenshots/studio-dark-overview.png)
 
-![Light theme](docs/screenshot-light.png)
+![Light theme](screenshots/studio-light-overview.png)
 
 ## What it does
 
@@ -281,16 +281,19 @@ first run and to give tests a realistic theme.
 ## Architecture
 
 ```
-core   model, parser, writer, validator, renderer, edit commands, MCP server,
-       AI client, CLI, TUI, examples. No Swing.
-app    Swing UI on FlatLaf and ModernDocking, panels, dialogs, inspector,
-       headless UI harness, MCP UI bridge.
+src/main/java/io/github/zoroaster1x/vlcskin/
+  model, format, render, edit, action, describe, snapshot, mcp, ai,
+  cli, tui, example, util
+        format, renderer, edit commands, MCP server, AI client, CLI, TUI,
+        examples. No Swing.
+  app   Swing UI on FlatLaf and ModernDocking, panels, dialogs, inspector,
+        headless UI harness, MCP UI bridge.
 ```
 
-The core is UI free, so it can render, validate and serve MCP in a terminal or
-a server. The app adds the desktop window and never reaches into model
-internals directly: every change goes through `EditorService` or an undoable
-`ValueCommand`.
+The format, render and tooling packages are UI free, so the CLI, TUI and MCP
+server run without a display. The app adds the desktop window and never reaches
+into model internals directly: every change goes through `EditorService` or an
+undoable `ValueCommand`.
 
 ## Tests
 
@@ -298,13 +301,13 @@ internals directly: every change goes through `EditorService` or an undoable
 ./gradlew build
 ```
 
-62 tests across 12 suites cover round trips, escaping, unknown content, bezier
+64 tests across 12 suites cover round trips, escaping, unknown content, bezier
 maths, boolean expressions, rendering, hit testing, bitmap animation, slider
-backgrounds, VLT archives, the editor service, the MCP control surface, the
-converted translations and the examples. The UI suite builds the whole panel
-tree offscreen, paints it in both themes, dispatches real mouse events to move
-an item and undo it, and writes screenshots to
-`build/reports/screenshots/`.
+backgrounds, VLT archives (including a zip that bundles further themes), the
+editor service, the MCP control surface, the converted translations and the
+examples. The UI suite builds the whole panel tree offscreen, paints it in both
+themes, dispatches real mouse events to move an item and undo it, and writes
+screenshots to `build/reports/screenshots/`.
 
 Against real skins: the VeLoCity theme imports through the VLT codec and
 validates clean, and `tools/gallery-conformance.py` sweeps every theme in the
@@ -326,6 +329,9 @@ numbers are in `docs/skin-gallery-report.md`.
   hinting differences may look a pixel or two off from VLC on another platform.
 * The toolbar is docked at the top; unlike the original it is not a floating
   palette, since floating panels already cover that need.
+* The GraalVM native image covers the CLI, TUI and MCP entry points; the Swing
+  window is tested on the JVM only. The renderer works in the native image, but
+  the image needs the `.so` files native-image writes next to the binary.
 
 ## License
 

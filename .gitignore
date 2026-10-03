@@ -11,9 +11,6 @@ PRIVATE_AGENTS.md
 # Local test configuration with real theme and VLC paths.
 .testenv
 
-# Screenshots and reports produced while checking the UI.
-app/build/reports/
-
 # Editor and tool caches.
 .idea/
 .vscode/
