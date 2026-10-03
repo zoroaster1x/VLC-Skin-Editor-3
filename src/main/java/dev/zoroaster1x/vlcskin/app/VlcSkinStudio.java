@@ -127,6 +127,9 @@ public final class VlcSkinStudio {
             if (settings.isAutoUpdate()) {
                 studio.checkForUpdates(frame);
             }
+            if (System.getProperty("vlcskin.browser") != null) {
+                new dev.zoroaster1x.vlcskin.app.dialog.ThemeBrowserDialog(studio, frame).setVisible(true);
+            }
             if (System.getProperty("vlcskin.debug") != null) {
                 javax.swing.Timer dumpTimer = new javax.swing.Timer(3000, event -> {
                     System.err.println("frame " + frame.getWidth() + "x" + frame.getHeight()

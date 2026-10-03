@@ -355,6 +355,16 @@ public final class McpToolset {
         tools.add(new ToolSpec("check_for_updates", "Check for updates",
                 "Compare the running version with the latest GitHub release.",
                 Schema.object().build(), args -> control.checkForUpdates()));
+        tools.add(new ToolSpec("list_gallery_themes", "List gallery themes",
+                "The official VideoLAN skins gallery; filter by name or author.",
+                Schema.object().string("query", "Optional filter").build(),
+                args -> control.listGalleryThemes(str(args, "query"))));
+        tools.add(new ToolSpec("import_gallery_theme", "Import a gallery theme",
+                "Download one theme from the official gallery, unpack it and open it.",
+                Schema.object().string("name", "Theme name or archive file")
+                        .string("folder", "Optional target folder")
+                        .required("name").build(),
+                args -> control.importGalleryTheme(str(args, "name"), str(args, "folder"))));
         tools.add(new ToolSpec("reset_skin", "New empty skin",
                 "Start a new empty skin, the same as File > New without the path prompt.",
                 Schema.object().build(), args -> control.resetSkin()));

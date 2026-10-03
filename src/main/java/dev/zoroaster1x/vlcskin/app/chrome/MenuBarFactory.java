@@ -47,6 +47,8 @@ public final class MenuBarFactory {
         file.add(item("Save as...", null, 0, e -> actions.saveAs()));
         file.addSeparator();
         file.add(item("Import VLT...", null, 0, e -> actions.importVlt()));
+        file.add(item(Messages.get("APP_GALLERY_MENU", "Browse themes..."), "open", KeyEvent.VK_B,
+                e -> actions.browseThemes()));
         JMenuItem exportVlt = item(Messages.get("MENU_FILE_VLT", "Export as VLT..."), null, 0, e -> actions.exportVlt());
         exportVlt.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
                 Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.SHIFT_DOWN_MASK));

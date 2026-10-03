@@ -563,6 +563,11 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     @Override
+    public void browseThemes() {
+        new dev.zoroaster1x.vlcskin.app.dialog.ThemeBrowserDialog(studio, this).setVisible(true);
+    }
+
+    @Override
     public void exit() {
         if (studio.session().isDirty()) {
             int choice = JOptionPane.showConfirmDialog(this, "Save changes before closing?", Version.NAME,

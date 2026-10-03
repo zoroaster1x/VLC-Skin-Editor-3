@@ -346,6 +346,11 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
+    public void browseThemes() {
+        statusBar.setMessage("The theme browser needs the desktop window");
+    }
+
+    @Override
     public void openSettings() {
         statusBar.setMessage("Skin settings open in the desktop window");
     }

@@ -28,6 +28,8 @@ to Java 25.
 * Packages and unpacks `.vlt` archives (gzip tar, plus plain zip archives found
   in the wild) with all referenced assets.
 * Validates ids, references, sizes, colors and files before VLC has to.
+* Browses the official VideoLAN skins gallery and imports a theme in one click,
+  preview included, under File > Browse themes; the same is available over MCP.
 * Speaks the original editor's language files: 21 translations converted from
   the original VLC Skin Editor bundles cover menus, toolbar, panel titles and
   the common dialogs, and new surfaces fall back to English until translated.
@@ -203,6 +205,7 @@ The server speaks MCP over stdio and exposes the editor:
   `get_variables`, `list_actions`, `list_examples`, `create_example`
 * `get_preferences`, `set_preferences`, `set_canvas`, `show_panel`,
   `open_settings`, `check_for_updates`
+* `list_gallery_themes`, `import_gallery_theme` (the official VideoLAN gallery)
 * `describe_editor_ui`, `screenshot_editor` (available when the desktop window
   is running in the same process)
 

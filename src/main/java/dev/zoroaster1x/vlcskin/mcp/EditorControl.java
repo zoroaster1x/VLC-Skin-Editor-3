@@ -590,6 +590,68 @@ public final class EditorControl {
         return ToolOutcome.text("Started a new empty skin", service.documentInfo());
     }
 
+    /**
+     * Lists the official VideoLAN theme gallery, optionally filtered.
+     */
+    public ToolOutcome listGalleryThemes(String query) {
+        try {
+            List<dev.zoroaster1x.vlcskin.gallery.GalleryTheme> themes =
+                    new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient().fetch();
+            String needle = query == null ? "" : query.toLowerCase(Locale.ROOT).trim();
+            List<Map<String, Object>> entries = new ArrayList<>();
+            for (var theme : themes) {
+                if (!needle.isEmpty()
+                        && !theme.name().toLowerCase(Locale.ROOT).contains(needle)
+                        && !theme.author().toLowerCase(Locale.ROOT).contains(needle)
+                        && !theme.file().toLowerCase(Locale.ROOT).contains(needle)) {
+                    continue;
+                }
+                Map<String, Object> entry = new LinkedHashMap<>();
+                entry.put("name", theme.name());
+                entry.put("author", theme.author());
+                entry.put("file", theme.file());
+                entry.put("size", theme.size());
+                entry.put("downloads", theme.downloads());
+                entry.put("date", theme.date());
+                entries.add(entry);
+            }
+            return ToolOutcome.text(entries.size() + " gallery themes", Map.of("themes", entries));
+        } catch (Exception ex) {
+            return ToolOutcome.error("Could not read the gallery: " + ex.getMessage());
+        }
+    }
+
+    /**
+     * Downloads one gallery theme and opens it.
+     */
+    public ToolOutcome importGalleryTheme(String name, String folder) {
+        if (name == null || name.isBlank()) {
+            return ToolOutcome.error("A theme name or file is required");
+        }
+        try {
+            dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient client =
+                    new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient();
+            var match = client.fetch().stream()
+                    .filter(theme -> theme.name().equalsIgnoreCase(name) || theme.file().equalsIgnoreCase(name))
+                    .findFirst()
+                    .orElse(null);
+            if (match == null) {
+                return ToolOutcome.error("No gallery theme named \"" + name + "\"");
+            }
+            Path target = folder == null || folder.isBlank()
+                    ? dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient.themesFolder(match)
+                    : Path.of(folder);
+            Path themeFile = client.download(match, target, null);
+            ToolOutcome opened = service.open(themeFile.toString());
+            if (opened.error()) {
+                return opened;
+            }
+            return ToolOutcome.text("Imported " + match.name() + " into " + target, service.documentInfo());
+        } catch (Exception ex) {
+            return ToolOutcome.error("Could not import the theme: " + ex.getMessage());
+        }
+    }
+
     public ToolOutcome duplicateResource(String id, String pattern) {
         Resource resource = index().findResource(id);
         if (resource == null) {

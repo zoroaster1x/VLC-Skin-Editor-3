@@ -53,6 +53,11 @@ public interface ChromeActions {
      */
     void resetLayout();
 
+    /**
+     * Opens the official theme gallery browser.
+     */
+    void browseThemes();
+
     void openSettings();
 
     void showVariables();
