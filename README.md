@@ -126,7 +126,6 @@ sweep over every theme in the official VideoLAN gallery pack is
 | Variables | simulates player state: booleans such as `vlc.isPlaying`, text variables such as `$N`, slider position |
 | Problems | validation results; double click jumps to the element |
 | Skin XML | the generated XML with syntax highlighting, editable with an Apply step |
-| AI assistant | chat with any OpenAI compatible endpoint using the same tools as MCP |
 
 Shortcuts: `Ctrl+N` new, `Ctrl+O` open, `Ctrl+S` save, `Ctrl+Z/Y` undo/redo,
 `Ctrl+Up/Down/Left/Right` nudge the selected item, `Delete` removes it,
@@ -256,14 +255,10 @@ The binary is about 68 MB. `picocli-codegen` runs at compile time for the CLI
 metadata, and the AWT reflection and JNI entries collected with GraalVM's
 tracing agent live under `src/main/resources/META-INF/native-image/`.
 
-## AI assistant panel
+## Automation and MCP
 
-The AI panel in the desktop window talks to any OpenAI compatible
-`/chat/completions` endpoint (OpenAI, a local llama.cpp, Ollama's `/v1`, ...).
-It reuses the MCP tool catalog for tool calling and can attach renders as
-images when the model accepts them. The API key is read from the environment
-variable named in the panel (`OPENAI_API_KEY` by default) or pasted into the
-field, which is kept in memory only and never written to disk.
+Scripts, editors and AI clients drive the same `EditorService` over the MCP
+server, so every operation the window can do is reproducible from a terminal.
 
 ## Format support
 
@@ -331,8 +326,9 @@ original editor, including the remaining differences, is in
 ## Known limits
 
 * Localization covers the original editor's surfaces (menus, toolbar, panel
-  titles, common dialogs). The newer panels and the AI assistant stay English
-  until a translation exists; the bundle mechanism is in place.
+  titles, common dialogs). The newer panels stay English until a translation
+  exists; the bundle mechanism is in place, and translations can be dropped
+  into the config `lang` folder without rebuilding.
 * The update check opens the GitHub releases page and can compare the latest
   release tag on startup; there is no self-updater, because releases are cut
   and attested by CI.

@@ -59,6 +59,11 @@ public interface ChromeActions {
     void browseThemes();
 
     /**
+     * Opens the bundled documentation viewer.
+     */
+    void browseDocumentation();
+
+    /**
      * The most recent files, newest first.
      */
     java.util.List<String> recentFiles();
@@ -71,8 +76,6 @@ public interface ChromeActions {
     void openSettings();
 
     void showVariables();
-
-    void showAi();
 
     void toggleCheckerboard();
 

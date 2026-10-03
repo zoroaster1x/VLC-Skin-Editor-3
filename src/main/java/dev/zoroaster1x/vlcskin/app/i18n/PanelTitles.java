@@ -43,10 +43,6 @@ public final class PanelTitles {
         return Messages.get("WIN_XML_TITLE", "Skin XML");
     }
 
-    public static String ai() {
-        return Messages.get("WIN_AI_TITLE", "AI assistant");
-    }
-
     public static String toolbarLabel(CanvasPanel.Tool tool) {
         return tool == CanvasPanel.Tool.MOVE
                 ? Messages.get("TOOLBAR_MOVE", "Move tool")

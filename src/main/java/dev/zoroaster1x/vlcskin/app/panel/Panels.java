@@ -15,7 +15,6 @@ public final class Panels {
     public final VariablesPanel variables;
     public final ProblemsPanel problems;
     public final XmlPanel xml;
-    public final AiPanel ai;
 
     private boolean refreshing;
 
@@ -29,7 +28,6 @@ public final class Panels {
         variables = new VariablesPanel(studio);
         problems = new ProblemsPanel(studio);
         xml = new XmlPanel(studio);
-        ai = new AiPanel(studio);
         studio.session().addListener(this::refresh);
         refresh();
     }

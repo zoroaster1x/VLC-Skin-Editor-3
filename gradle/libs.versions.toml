@@ -14,6 +14,7 @@ commonsCompress = "1.28.0"
 rsyntax = "4.0.1"
 miglayout = "11.4.3"
 jline = "4.4.6"
+commonmark = "0.24.0"
 shadow = "9.6.1"
 
 [libraries]
@@ -36,6 +37,8 @@ mcp-core = { module = "io.modelcontextprotocol.sdk:mcp-core", version.ref = "mcp
 mcp-json-jackson2 = { module = "io.modelcontextprotocol.sdk:mcp-json-jackson2", version.ref = "mcp" }
 commons-compress = { module = "org.apache.commons:commons-compress", version.ref = "commonsCompress" }
 rsyntaxtextarea = { module = "com.fifesoft:rsyntaxtextarea", version.ref = "rsyntax" }
+commonmark = { module = "org.commonmark:commonmark", version.ref = "commonmark" }
+commonmark-tables = { module = "org.commonmark:commonmark-ext-gfm-tables", version.ref = "commonmark" }
 miglayout-swing = { module = "com.miglayout:miglayout-swing", version.ref = "miglayout" }
 jline = { module = "org.jline:jline", version.ref = "jline" }
 

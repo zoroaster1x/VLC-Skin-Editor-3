@@ -109,7 +109,6 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         registerDockable("variables", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables(), panels.variables);
         registerDockable("problems", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
         registerDockable("xml", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
-        registerDockable("ai", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai(), panels.ai);
 
         dockDefaultLayout();
         restoreLayout();
@@ -501,7 +500,6 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             case "variables", "globals" -> "variables";
             case "problems", "validation" -> "problems";
             case "xml", "source" -> "xml";
-            case "ai", "assistant" -> "ai";
             default -> null;
         };
         if (id == null) {
@@ -509,11 +507,6 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         }
         Docking.bringToFront(id);
         return true;
-    }
-
-    @Override
-    public void showAi() {
-        Docking.bringToFront("ai");
     }
 
     @Override
@@ -574,7 +567,6 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         Docking.dock("problems", "canvas", DockingRegion.SOUTH, 0.25);
         Docking.dock("xml", "problems", DockingRegion.CENTER);
         Docking.dock("variables", "inspector", DockingRegion.SOUTH, 0.4);
-        Docking.dock("ai", "variables", DockingRegion.CENTER);
     }
 
     @Override
@@ -593,6 +585,11 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     @Override
     public void browseThemes() {
         new dev.zoroaster1x.vlcskin.app.dialog.ThemeBrowserDialog(studio, this).setVisible(true);
+    }
+
+    @Override
+    public void browseDocumentation() {
+        new dev.zoroaster1x.vlcskin.app.dialog.DocumentationDialog(this).setVisible(true);
     }
 
     @Override

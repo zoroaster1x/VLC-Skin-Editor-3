@@ -105,8 +105,7 @@ src/main/java/dev/zoroaster1x/vlcskin/
   action/           ActionCatalog, ActionChain, GlobalVariableCatalog
   describe/         LayoutDescriber, LayoutDescription, GeometryNode for LLM readers
   snapshot/         PreviewSnapshot, UiInspector
-  mcp/              EditorService, McpToolset, McpServerRunner, PropertyAccess, Schema
-  ai/               AiAssistant (OpenAI compatible, uses the MCP toolset)
+  mcp/             EditorService, McpToolset, McpServerRunner, PropertyAccess, Schema
   cli/              picocli commands
   tui/              TuiShell, TuiLoop, AsciiRenderer
   example/          ExampleSkins with generated assets
@@ -191,7 +190,7 @@ regressions to avoid, not as work to do.
 ## 7. UI patterns that earned their place
 
 * Panels are dockable with ModernDocking, so the user can move the resources,
-  structure, items, canvas, inspector, variables, problems, XML and AI panels
+  structure, items, canvas, inspector, variables, problems and XML panels
   anywhere, including floating windows. Window layout persists to
   `layout.xml` next to the settings.
 * Every edit goes through `EditorService` or `ValueCommand` on

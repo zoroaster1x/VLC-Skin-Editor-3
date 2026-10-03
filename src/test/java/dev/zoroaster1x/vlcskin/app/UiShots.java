@@ -290,8 +290,8 @@ public final class UiShots {
         onEdt(() -> studio.setDarkTheme(true));
         tour.caption("And back to dark");
         tour.add(frame(), HOLD_MS);
-        onEdt(() -> headless.showRightTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai()));
-        tour.caption("The AI panel drives the same tools the MCP server exposes");
+        onEdt(() -> headless.showRightTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables()));
+        tour.caption("Global variables drive the live preview");
         tour.add(frame(), HOLD_MS);
         onEdt(() -> headless.showRightTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.inspector()));
         tour.caption("Ready for the next skin");

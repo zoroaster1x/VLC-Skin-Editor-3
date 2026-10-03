@@ -79,8 +79,8 @@ after looking at a fresh screenshot or GIF.
 * Settings saving is atomic, keeps `settings.json.bak` and recovers from a
   corrupt file; gallery cache writes are atomic too.
 * Threading: session change notifications are dispatched onto the event
-  thread, status updates and the AI transcript are EDT-safe, and the update
-  check, AI call and progress dialog run on virtual threads.
+  thread, status updates are EDT-safe, and the update check and the progress
+  dialog run on virtual threads.
 * Parity gaps closed from the audit: sub bitmap duplication, adding an item
   beside a nested selection, the items tree clearing on window selection,
   focus scoped Delete, persisted floating toolbar position, recent files menu

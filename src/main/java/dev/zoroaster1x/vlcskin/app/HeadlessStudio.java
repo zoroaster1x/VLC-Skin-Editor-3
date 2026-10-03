@@ -62,7 +62,6 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         panels.variables.putClientProperty("panelName", "Variables");
         panels.problems.putClientProperty("panelName", "Problems");
         panels.xml.putClientProperty("panelName", "Skin XML");
-        panels.ai.putClientProperty("panelName", "AI assistant");
 
         leftTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources(), panels.resources);
         leftTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.windows(), panels.structure);
@@ -70,7 +69,6 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
 
         rightTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.inspector(), panels.inspector);
         rightTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables(), panels.variables);
-        rightTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai(), panels.ai);
 
         JTabbedPane bottom = bottomTabs;
         bottom.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
@@ -351,6 +349,11 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
+    public void browseDocumentation() {
+        statusBar.setMessage("The documentation viewer needs the desktop window");
+    }
+
+    @Override
     public java.util.List<String> recentFiles() {
         return java.util.List.copyOf(studio.settings().getRecentFiles());
     }
@@ -368,11 +371,6 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     @Override
     public void showVariables() {
         showRightTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables());
-    }
-
-    @Override
-    public void showAi() {
-        showRightTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai());
     }
 
     @Override

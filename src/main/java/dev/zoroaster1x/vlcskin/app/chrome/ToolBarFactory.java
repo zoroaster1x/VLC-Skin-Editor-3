@@ -39,7 +39,6 @@ public final class ToolBarFactory {
         bar.addSeparator();
         bar.add(tool(Messages.get("MENU_EDIT_THEME", "Skin settings"), "layout", e -> actions.openSettings()));
         bar.add(tool("Global variables", "checkbox", e -> actions.showVariables()));
-        bar.add(tool("AI assistant", "chat", e -> actions.showAi()));
         return bar;
     }
 

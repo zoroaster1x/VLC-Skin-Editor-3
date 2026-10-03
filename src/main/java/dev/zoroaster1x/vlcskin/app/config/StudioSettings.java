@@ -30,10 +30,7 @@ public final class StudioSettings {
     private boolean autoUpdate;
     private String language = "en";
     private int canvasZoom = 2;
-    private String aiBaseUrl = "";
-    private String aiModel = "gpt-4o-mini";
-    private String aiKeyEnv = "OPENAI_API_KEY";
-    private boolean aiShowToolCalls;
+    private boolean showToolCalls;
     private String lastExample = "neon";
 
     public void remember(String file) {

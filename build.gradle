@@ -41,6 +41,8 @@ dependencies {
     implementation libs.modern.docking.ui
     implementation libs.modern.docking.single.app
     implementation libs.rsyntaxtextarea
+    implementation libs.commonmark
+    implementation libs.commonmark.tables
     implementation libs.miglayout.swing
 
     implementation libs.jackson.databind

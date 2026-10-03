@@ -141,10 +141,12 @@ public final class MenuBarFactory {
 
         JMenu help = new JMenu(Messages.get("MENU_HELP", "Help"));
         help.setMnemonic(KeyEvent.VK_H);
-        JMenuItem onlineHelp = item(Messages.get("MENU_HELP_DOC", "Online help"), "help", 0,
-                e -> browse("https://www.videolan.org/vlc/skinedhlp/"));
-        onlineHelp.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
-        help.add(onlineHelp);
+        JMenuItem documentation = item(Messages.get("MENU_HELP_DOCS", "Documentation"), "help", 0,
+                e -> actions.browseDocumentation());
+        documentation.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0));
+        help.add(documentation);
+        help.add(item(Messages.get("MENU_HELP_DOC", "Online help"), "help", 0,
+                e -> browse("https://www.videolan.org/vlc/skinedhlp/")));
         help.add(item("Check for updates", null, 0,
                 e -> browse("https://github.com/zoroaster1x/vlc-skin-editor/releases")));
         JCheckBoxMenuItem autoUpdate = new JCheckBoxMenuItem("Check for updates on startup",

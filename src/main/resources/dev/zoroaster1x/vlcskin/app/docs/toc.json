@@ -1,0 +1,254 @@
+[
+  {
+    "id": "handbook-format-reference",
+    "section": "Reference",
+    "title": "Format reference",
+    "file": "pages/handbook-format-reference.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "skinedhlp-basics",
+    "section": "Original Skin Editor help",
+    "title": "The basics of creating a skin",
+    "file": "pages/skinedhlp-basics.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/basics.html"
+  },
+  {
+    "id": "skinedhlp-bezier",
+    "section": "Original Skin Editor help",
+    "title": "Bezier curves",
+    "file": "pages/skinedhlp-bezier.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/bezier.html"
+  },
+  {
+    "id": "skinedhlp-boolexpr",
+    "section": "Original Skin Editor help",
+    "title": "Boolean expressions",
+    "file": "pages/skinedhlp-boolexpr.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/boolexpr.html"
+  },
+  {
+    "id": "skinedhlp-i-anchor",
+    "section": "Original Skin Editor help",
+    "title": "Anchor",
+    "file": "pages/skinedhlp-i-anchor.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-anchor.html"
+  },
+  {
+    "id": "skinedhlp-i-button",
+    "section": "Original Skin Editor help",
+    "title": "Button",
+    "file": "pages/skinedhlp-i-button.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-button.html"
+  },
+  {
+    "id": "skinedhlp-i-checkbox",
+    "section": "Original Skin Editor help",
+    "title": "Checkbox",
+    "file": "pages/skinedhlp-i-checkbox.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-checkbox.html"
+  },
+  {
+    "id": "skinedhlp-i-group",
+    "section": "Original Skin Editor help",
+    "title": "Group",
+    "file": "pages/skinedhlp-i-group.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-group.html"
+  },
+  {
+    "id": "skinedhlp-i-image",
+    "section": "Original Skin Editor help",
+    "title": "Image",
+    "file": "pages/skinedhlp-i-image.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-image.html"
+  },
+  {
+    "id": "skinedhlp-i-panel",
+    "section": "Original Skin Editor help",
+    "title": "Panel",
+    "file": "pages/skinedhlp-i-panel.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-panel.html"
+  },
+  {
+    "id": "skinedhlp-i-playtree",
+    "section": "Original Skin Editor help",
+    "title": "Playtree",
+    "file": "pages/skinedhlp-i-playtree.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-playtree.html"
+  },
+  {
+    "id": "skinedhlp-i-slider",
+    "section": "Original Skin Editor help",
+    "title": "Slider",
+    "file": "pages/skinedhlp-i-slider.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-slider.html"
+  },
+  {
+    "id": "skinedhlp-i-sliderbg",
+    "section": "Original Skin Editor help",
+    "title": "Slider Background",
+    "file": "pages/skinedhlp-i-sliderbg.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-sliderbg.html"
+  },
+  {
+    "id": "skinedhlp-i-text",
+    "section": "Original Skin Editor help",
+    "title": "Text",
+    "file": "pages/skinedhlp-i-text.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-text.html"
+  },
+  {
+    "id": "skinedhlp-i-video",
+    "section": "Original Skin Editor help",
+    "title": "Video",
+    "file": "pages/skinedhlp-i-video.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-video.html"
+  },
+  {
+    "id": "skinedhlp-index",
+    "section": "Original Skin Editor help",
+    "title": "VLC Skin Editor - Online Help",
+    "file": "pages/skinedhlp-index.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/index.html"
+  },
+  {
+    "id": "skinedhlp-layout",
+    "section": "Original Skin Editor help",
+    "title": "Layout",
+    "file": "pages/skinedhlp-layout.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/layout.html"
+  },
+  {
+    "id": "skinedhlp-notes",
+    "section": "Original Skin Editor help",
+    "title": "Notes",
+    "file": "pages/skinedhlp-notes.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "skinedhlp-percent",
+    "section": "Original Skin Editor help",
+    "title": "Percentage variables",
+    "file": "pages/skinedhlp-percent.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/percent.html"
+  },
+  {
+    "id": "skinedhlp-res-bitmap",
+    "section": "Original Skin Editor help",
+    "title": "Bitmap",
+    "file": "pages/skinedhlp-res-bitmap.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-bitmap.html"
+  },
+  {
+    "id": "skinedhlp-res-font",
+    "section": "Original Skin Editor help",
+    "title": "Font",
+    "file": "pages/skinedhlp-res-font.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-font.html"
+  },
+  {
+    "id": "skinedhlp-res-subbitmap",
+    "section": "Original Skin Editor help",
+    "title": "SubBitmap",
+    "file": "pages/skinedhlp-res-subbitmap.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-subbitmap.html"
+  },
+  {
+    "id": "skinedhlp-resizable",
+    "section": "Original Skin Editor help",
+    "title": "How to create a resizable window",
+    "file": "pages/skinedhlp-resizable.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/resizable.html"
+  },
+  {
+    "id": "skinedhlp-sbgwizard",
+    "section": "Original Skin Editor help",
+    "title": "How to use the SliderBackground Generator",
+    "file": "pages/skinedhlp-sbgwizard.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/sbgwizard.html"
+  },
+  {
+    "id": "skinedhlp-textvars",
+    "section": "Original Skin Editor help",
+    "title": "Text Variables",
+    "file": "pages/skinedhlp-textvars.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/textvars.html"
+  },
+  {
+    "id": "skinedhlp-theme",
+    "section": "Original Skin Editor help",
+    "title": "Theme settings",
+    "file": "pages/skinedhlp-theme.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/theme.html"
+  },
+  {
+    "id": "skinedhlp-window",
+    "section": "Original Skin Editor help",
+    "title": "Window",
+    "file": "pages/skinedhlp-window.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/window.html"
+  },
+  {
+    "id": "skins2-create-index",
+    "section": "Creating skins2 themes",
+    "title": "Index",
+    "file": "pages/skins2-create-index.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "skins2-create-notes",
+    "section": "Creating skins2 themes",
+    "title": "Notes",
+    "file": "pages/skins2-create-notes.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "skins2-create-skins2-create",
+    "section": "Creating skins2 themes",
+    "title": "HowTo create your own skin",
+    "file": "pages/skins2-create-skins2-create.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skins2-create.html"
+  },
+  {
+    "id": "readthedocs-addons-extensions",
+    "section": "VLC user documentation",
+    "title": "Extensions",
+    "file": "pages/readthedocs-addons-extensions.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/extensions.html"
+  },
+  {
+    "id": "readthedocs-addons-index",
+    "section": "VLC user documentation",
+    "title": "Add-ons",
+    "file": "pages/readthedocs-addons-index.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/index.html"
+  },
+  {
+    "id": "readthedocs-addons-skins",
+    "section": "VLC user documentation",
+    "title": "Skins",
+    "file": "pages/readthedocs-addons-skins.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/skins.html"
+  },
+  {
+    "id": "readthedocs-index",
+    "section": "VLC user documentation",
+    "title": "Index",
+    "file": "pages/readthedocs-index.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "readthedocs-notes",
+    "section": "VLC user documentation",
+    "title": "Notes",
+    "file": "pages/readthedocs-notes.md",
+    "sourceUrl": ""
+  },
+  {
+    "id": "readthedocs-support-index",
+    "section": "VLC user documentation",
+    "title": "Support",
+    "file": "pages/readthedocs-support-index.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/support/index.html"
+  }
+]
