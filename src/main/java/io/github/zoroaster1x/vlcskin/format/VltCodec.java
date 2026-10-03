@@ -34,11 +34,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
  */
 public final class VltCodec {
 
-    public record Contents(String themeXml, Map<String, byte[]> assets) {
-
-        public String themeEntryName() {
-            return "theme.xml";
-        }
+    public record Contents(String themeXml, String themeEntryName, Map<String, byte[]> assets) {
     }
 
     private VltCodec() {
@@ -54,6 +50,7 @@ public final class VltCodec {
 
     private static Contents readZip(byte[] bytes) throws IOException {
         String themeXml = null;
+        String themeEntry = null;
         Map<String, byte[]> assets = new LinkedHashMap<>();
         try (ZipInputStream zip = new ZipInputStream(new java.io.ByteArrayInputStream(bytes))) {
             ZipEntry entry;
@@ -65,16 +62,18 @@ public final class VltCodec {
                 String name = entry.getName();
                 if (isThemeXml(name)) {
                     themeXml = new String(data, StandardCharsets.UTF_8);
+                    themeEntry = name;
                 } else {
                     assets.put(name, data);
                 }
             }
         }
-        return new Contents(themeXml, assets);
+        return new Contents(themeXml, themeEntry, assets);
     }
 
     private static Contents readTarGz(byte[] bytes) throws IOException {
         String themeXml = null;
+        String themeEntry = null;
         Map<String, byte[]> assets = new LinkedHashMap<>();
         try (InputStream in = new BufferedInputStream(new java.io.ByteArrayInputStream(bytes));
              TarArchiveInputStream tar = new TarArchiveInputStream(new GZIPInputStream(in))) {
@@ -87,12 +86,13 @@ public final class VltCodec {
                 String name = entry.getName();
                 if (isThemeXml(name)) {
                     themeXml = new String(data, StandardCharsets.UTF_8);
+                    themeEntry = name;
                 } else {
                     assets.put(name, data);
                 }
             }
         }
-        return new Contents(themeXml, assets);
+        return new Contents(themeXml, themeEntry, assets);
     }
 
     private static boolean isThemeXml(String name) {
@@ -221,15 +221,38 @@ public final class VltCodec {
     private static Path extract(Contents contents, Path targetFolder) throws IOException {
         Files.createDirectories(targetFolder);
         Files.writeString(targetFolder.resolve("theme.xml"), contents.themeXml(), StandardCharsets.UTF_8);
+        String prefix = folderPrefix(contents.themeEntryName());
+        Path normalizedTarget = targetFolder.normalize();
         for (Map.Entry<String, byte[]> asset : contents.assets().entrySet()) {
-            Path file = targetFolder.resolve(asset.getKey().replace('\\', '/')).normalize();
-            if (!file.startsWith(targetFolder.normalize())) {
+            String relative = stripPrefix(asset.getKey(), prefix);
+            Path file = targetFolder.resolve(relative.replace('\\', '/')).normalize();
+            if (!file.startsWith(normalizedTarget)) {
                 throw new IOException("The archive tries to write outside the target folder: " + asset.getKey());
             }
             Files.createDirectories(file.getParent());
             Files.write(file, asset.getValue());
         }
         return targetFolder.resolve("theme.xml");
+    }
+
+    /**
+     * Many gallery zips keep the whole theme under one folder, for example
+     * {@code CoolSkin/theme.xml} and {@code CoolSkin/image.png}. The folder is
+     * dropped so the theme lands flat in the target.
+     */
+    private static String folderPrefix(String themeEntryName) {
+        if (themeEntryName == null) {
+            return "";
+        }
+        int slash = themeEntryName.lastIndexOf('/');
+        return slash >= 0 ? themeEntryName.substring(0, slash + 1) : "";
+    }
+
+    private static String stripPrefix(String name, String prefix) {
+        if (!prefix.isEmpty() && name.startsWith(prefix)) {
+            return name.substring(prefix.length());
+        }
+        return name;
     }
 
     private static boolean looksLikeArchive(byte[] bytes) {

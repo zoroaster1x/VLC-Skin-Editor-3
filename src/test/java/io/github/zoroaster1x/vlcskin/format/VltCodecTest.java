@@ -52,6 +52,25 @@ class VltCodecTest {
     }
 
     @Test
+    void zipWithAFolderPrefixUnpacksFlat(@TempDir Path folder) throws Exception {
+        Path zip = folder.resolve("skin.zip");
+        try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zip))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("CoolSkin/theme.xml"));
+            out.write("<Theme version=\"2.0\"><Window id=\"w\"><Layout id=\"l\" width=\"10\" height=\"10\"/></Theme>"
+                    .getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            out.closeEntry();
+            out.putNextEntry(new java.util.zip.ZipEntry("CoolSkin/image.png"));
+            out.write(new byte[] {1, 2, 3});
+            out.closeEntry();
+        }
+        Path unpacked = folder.resolve("unpacked");
+        VltCodec.unpack(zip, unpacked);
+        assertThat(unpacked.resolve("theme.xml")).exists();
+        assertThat(unpacked.resolve("image.png")).exists();
+        assertThat(unpacked.resolve("CoolSkin")).doesNotExist();
+    }
+
+    @Test
     void aZipBundlingVltFilesUnpacksEveryTheme(@TempDir Path folder) throws Exception {
         Path skinFolder = folder.resolve("skin");
         Path themeFile = ExampleSkins.create(skinFolder, ExampleSkins.NEON);
