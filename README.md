@@ -310,13 +310,14 @@ undoable `ValueCommand`.
 ./gradlew build
 ```
 
-64 tests across 12 suites cover round trips, escaping, unknown content, bezier
+71 tests across 15 suites cover round trips, escaping, unknown content, bezier
 maths, boolean expressions, rendering, hit testing, bitmap animation, slider
 backgrounds, VLT archives (including a zip that bundles further themes), the
-editor service, the MCP control surface, the converted translations and the
-examples. The UI suite builds the whole panel tree offscreen, paints it in both
-themes, dispatches real mouse events to move an item and undo it, and writes
-screenshots to `build/reports/screenshots/`.
+editor service, the MCP control surface, the theme gallery parser and cache,
+the settings store, the converted translations and the examples. The UI suite
+builds the whole panel tree offscreen, paints it in both themes, dispatches
+real mouse events to move an item and undo it, and writes screenshots to
+`build/reports/screenshots/`.
 
 Against real skins: the VeLoCity theme imports through the VLT codec and
 validates clean, and `tools/gallery-conformance.py` sweeps every theme in the

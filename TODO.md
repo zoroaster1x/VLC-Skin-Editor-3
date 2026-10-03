@@ -72,6 +72,25 @@ after looking at a fresh screenshot or GIF.
 * MCP server wired into OpenCode under `mcp.servers` and exercised live from
   the session: examples, add/move/edit/undo, variables, nudge, reorder,
   reparent, slider background generation, validation and PNG previews.
+* Theme browser over the official VideoLAN gallery: 138 themes, filter,
+  previews, one click import, plus `list_gallery_themes` and
+  `import_gallery_theme` over MCP. The list, previews and archives are cached
+  under the user cache folder, with a stale list as offline fallback.
+* Settings saving is atomic, keeps `settings.json.bak` and recovers from a
+  corrupt file; gallery cache writes are atomic too.
+* Threading: session change notifications are dispatched onto the event
+  thread, status updates and the AI transcript are EDT-safe, and the update
+  check, AI call and progress dialog run on virtual threads.
+* Parity gaps closed from the audit: sub bitmap duplication, adding an item
+  beside a nested selection, the items tree clearing on window selection,
+  focus scoped Delete, persisted floating toolbar position, recent files menu
+  and user replaceable translations under `lang/`.
+* The desktop window has a working default panel layout (resources left,
+  canvas centre, inspector right) and a responsive welcome card;
+  View > Reset panel layout restores it.
+* `docs/feature-parity.md` records the full comparison with the original
+  editor, including the differences that stay (self-updater replaced by a
+  release check, popup menu entries preserved without an editor, and so on).
 * The package root is `dev.zoroaster1x` end to end: Java packages, imports,
   the conversion bundles under `src/main/resources`, the Gradle group and main
   class, the native-image metadata folder and every doc path.
