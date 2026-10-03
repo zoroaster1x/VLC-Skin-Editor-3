@@ -41,6 +41,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -274,7 +275,9 @@ public final class EditorService {
                                             Integer y, Map<String, String> properties) {
         ItemType itemType;
         try {
-            itemType = ItemType.valueOf(type.toUpperCase().replace(" ", "_"));
+            itemType = ItemType.valueOf(type.replaceAll("([a-z0-9])([A-Z])", "$1_$2")
+                    .toUpperCase(Locale.ROOT)
+                    .replace(" ", "_"));
         } catch (IllegalArgumentException ex) {
             return ToolOutcome.error("Unknown item type \"" + type + "\"");
         }
