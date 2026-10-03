@@ -11,10 +11,10 @@ import dev.zoroaster1x.vlcskin.model.resource.Resource;
  */
 public final class SelectionState {
 
-    private String windowId;
-    private String layoutId;
-    private String itemId;
-    private String resourceId;
+    private volatile String windowId;
+    private volatile String layoutId;
+    private volatile String itemId;
+    private volatile String resourceId;
 
     public String windowId() {
         return windowId;

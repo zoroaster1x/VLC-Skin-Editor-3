@@ -36,7 +36,8 @@ public final class EditorSession {
     private final SelectionState selection = new SelectionState();
     private final PreviewVariables variables = new PreviewVariables();
     private final List<Runnable> listeners = new ArrayList<>();
-    private long revision;
+    private volatile java.util.function.Consumer<Runnable> dispatcher = Runnable::run;
+    private volatile long revision;
 
     private EditorSession(SkinTheme theme, Path file) {
         rebuild(theme, file);
@@ -132,14 +133,26 @@ public final class EditorSession {
     }
 
     public void addListener(Runnable listener) {
-        listeners.add(listener);
+        synchronized (listeners) {
+            listeners.add(listener);
+        }
     }
 
     public void fireChanged() {
         revision++;
-        for (Runnable listener : List.copyOf(listeners)) {
-            listener.run();
+        List<Runnable> snapshot;
+        synchronized (listeners) {
+            snapshot = List.copyOf(listeners);
         }
+        dispatcher.accept(() -> snapshot.forEach(Runnable::run));
+    }
+
+    /**
+     * How change notifications reach listeners. The desktop app marshals them
+     * onto the event thread; the default runs them on the calling thread.
+     */
+    public void setDispatcher(java.util.function.Consumer<Runnable> dispatcher) {
+        this.dispatcher = dispatcher == null ? Runnable::run : dispatcher;
     }
 
     /**

@@ -170,6 +170,16 @@ class EditorControlTest {
     }
 
     @Test
+    void duplicateSubBitmap(@TempDir Path folder) throws Exception {
+        EditorControl control = control(folder);
+        assertThat(control.service().addSubBitmap("play", "play_part", 0, 0, 4, 4).error()).isFalse();
+        assertThat(control.duplicateResource("play_part", "%oldid%_copy").error()).isFalse();
+        var copy = control.service().session().index().findImage("play_part_copy");
+        assertThat(copy).isNotNull();
+        assertThat(copy.sub()).isNotNull();
+    }
+
+    @Test
     void sliderBackgroundGenerator(@TempDir Path folder) throws Exception {
         EditorControl control = control(folder);
         BufferedImage middle = new BufferedImage(8, 8, BufferedImage.TYPE_INT_ARGB);

@@ -43,6 +43,21 @@ public final class MenuBarFactory {
         file.setMnemonic(KeyEvent.VK_F);
         file.add(item(Messages.get("MENU_FILE_NEW", "New"), "new", KeyEvent.VK_N, e -> actions.newSkin()));
         file.add(item(Messages.get("MENU_FILE_OPEN", "Open..."), "open", KeyEvent.VK_O, e -> actions.openSkin()));
+        JMenu recent = new JMenu(Messages.get("MENU_FILE_RECENT", "Recent files"));
+        java.util.List<String> recents = actions.recentFiles();
+        if (recents == null || recents.isEmpty()) {
+            JMenuItem none = new JMenuItem(Messages.get("APP_WELCOME_NO_RECENT", "No recent files yet"));
+            none.setEnabled(false);
+            recent.add(none);
+        } else {
+            for (String path : recents) {
+                JMenuItem entry = new JMenuItem(new java.io.File(path).getName());
+                entry.setToolTipText(path);
+                entry.addActionListener(e -> actions.openRecent(path));
+                recent.add(entry);
+            }
+        }
+        file.add(recent);
         file.add(item(Messages.get("MENU_FILE_SAVE", "Save"), "save", KeyEvent.VK_S, e -> actions.save()));
         file.add(item("Save as...", null, 0, e -> actions.saveAs()));
         file.addSeparator();

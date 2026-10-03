@@ -32,7 +32,7 @@ public final class Studio {
 
     private final EditorService service;
     private final SettingsStore settingsStore;
-    private StudioSettings settings;
+    private volatile StudioSettings settings;
     private final List<Consumer<String>> statusListeners = new ArrayList<>();
     private boolean darkTheme = true;
 
@@ -41,6 +41,14 @@ public final class Studio {
         this.settingsStore = settingsStore;
         this.settings = settings;
         this.darkTheme = ThemeManager.byId(settings.getTheme()).dark();
+        // Session changes can arrive from an MCP thread; the panels are Swing.
+        service.setDispatcher(runnable -> {
+            if (SwingUtilities.isEventDispatchThread()) {
+                runnable.run();
+            } else {
+                SwingUtilities.invokeLater(runnable);
+            }
+        });
     }
 
     public EditorService service() {
@@ -82,12 +90,21 @@ public final class Studio {
     }
 
     public void addStatusListener(Consumer<String> listener) {
-        statusListeners.add(listener);
+        synchronized (statusListeners) {
+            statusListeners.add(listener);
+        }
     }
 
     public void status(String message) {
-        for (Consumer<String> listener : List.copyOf(statusListeners)) {
-            listener.accept(message);
+        List<Consumer<String>> snapshot;
+        synchronized (statusListeners) {
+            snapshot = List.copyOf(statusListeners);
+        }
+        Runnable notify = () -> snapshot.forEach(listener -> listener.accept(message));
+        if (SwingUtilities.isEventDispatchThread()) {
+            notify.run();
+        } else {
+            SwingUtilities.invokeLater(notify);
         }
     }
 
@@ -361,7 +378,7 @@ public final class Studio {
      * is announced with a dialog; failures only reach the status bar.
      */
     public void checkForUpdates(java.awt.Component parent) {
-        Thread worker = new Thread(() -> {
+        Thread.ofVirtual().name("vlc-skin-studio-update-check").start(() -> {
             String tag;
             try {
                 tag = latestReleaseTag();
@@ -381,9 +398,7 @@ public final class Studio {
             } else {
                 status(Version.NAME + " " + Version.VERSION + " is up to date");
             }
-        }, "vlc-skin-studio-update-check");
-        worker.setDaemon(true);
-        worker.start();
+        });
     }
 
     @SuppressWarnings("unchecked")

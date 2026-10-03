@@ -323,7 +323,9 @@ validates clean, and `tools/gallery-conformance.py` sweeps every theme in the
 official VideoLAN pack plus the two themes VLC itself ships. The latest run
 imported, validated and rendered all 123 themes; the numbers, the per theme
 table and the classification of the validation messages old themes carry are
-in `docs/skin-gallery-report.md`.
+in `docs/skin-gallery-report.md`. The feature by feature comparison with the
+original editor, including the remaining differences, is in
+`docs/feature-parity.md`.
 
 ## Known limits
 

@@ -166,7 +166,11 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             toolbarHolder.setIconImage(getIconImage());
             toolbarHolder.add(toolbar, BorderLayout.CENTER);
             toolbarHolder.pack();
-            toolbarHolder.setLocationRelativeTo(null);
+            if (settings.getToolbarX() >= 0 && settings.getToolbarY() >= 0) {
+                toolbarHolder.setLocation(settings.getToolbarX(), settings.getToolbarY());
+            } else {
+                toolbarHolder.setLocationRelativeTo(null);
+            }
             toolbarHolder.setVisible(settings.isShowToolbar());
         }
     }
@@ -309,8 +313,12 @@ public final class StudioFrame extends JFrame implements ChromeActions {
 
     @Override
     public void deleteSelected() {
+        String focus = focusedArea();
+        boolean itemsFocused = "items".equals(focus);
+        boolean resourcesFocused = "resources".equals(focus);
+        boolean structureFocused = "structure".equals(focus);
         Item item = studio.session().selection().item(studio.session().index());
-        if (item != null) {
+        if (item != null && (itemsFocused || (!resourcesFocused && !structureFocused))) {
             if (!confirmDelete(item.getId())) {
                 return;
             }
@@ -324,7 +332,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             return;
         }
         Resource resource = studio.session().selection().resource(studio.session().index());
-        if (resource != null) {
+        if (resource != null && (resourcesFocused || (!itemsFocused && !structureFocused))) {
             if (studio.session().index().isResourceUsed(resource.getId())) {
                 JOptionPane.showMessageDialog(this,
                         Messages.get("ERROR_RES_DEL_INUSE",
@@ -346,7 +354,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             return;
         }
         SkinLayout layout = studio.session().selection().layout(studio.session().index());
-        if (layout != null) {
+        if (layout != null && (structureFocused || (!itemsFocused && !resourcesFocused))) {
             SkinWindow window = studio.session().selection().window(studio.session().index());
             if (window == null) {
                 return;
@@ -367,7 +375,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             return;
         }
         SkinWindow window = studio.session().selection().window(studio.session().index());
-        if (window == null) {
+        if (window == null || !(structureFocused || (!itemsFocused && !resourcesFocused))) {
             return;
         }
         if (studio.session().theme().getWindows().size() <= 1) {
@@ -389,6 +397,26 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         return JOptionPane.showConfirmDialog(this, "Delete \"" + id + "\"?",
                 Messages.get("DEL_CONFIRM_TITLE", "Deletion confirmation"),
                 JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+
+    /**
+     * Which tree has keyboard focus, so Delete acts on that area.
+     */
+    private String focusedArea() {
+        java.awt.Component focus = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+        if (focus == null) {
+            return "";
+        }
+        if (javax.swing.SwingUtilities.isDescendingFrom(focus, panels.resources)) {
+            return "resources";
+        }
+        if (javax.swing.SwingUtilities.isDescendingFrom(focus, panels.items)) {
+            return "items";
+        }
+        if (javax.swing.SwingUtilities.isDescendingFrom(focus, panels.structure)) {
+            return "structure";
+        }
+        return "";
     }
 
     @Override
@@ -568,6 +596,16 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     @Override
+    public java.util.List<String> recentFiles() {
+        return java.util.List.copyOf(studio.settings().getRecentFiles());
+    }
+
+    @Override
+    public void openRecent(String path) {
+        studio.openFile(Path.of(path));
+    }
+
+    @Override
     public void exit() {
         if (studio.session().isDirty()) {
             int choice = JOptionPane.showConfirmDialog(this, "Save changes before closing?", Version.NAME,
@@ -589,6 +627,10 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         }
         settings.setToolbarFloating(toolbar.getTopLevelAncestor() != this);
         settings.setToolbarOrientation(toolbar.getOrientation());
+        if (toolbarHolder != null && toolbarHolder.isVisible()) {
+            settings.setToolbarX(toolbarHolder.getX());
+            settings.setToolbarY(toolbarHolder.getY());
+        }
         studio.saveSettings();
         saveLayout();
         dispose();

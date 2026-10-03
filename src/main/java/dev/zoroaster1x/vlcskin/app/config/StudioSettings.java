@@ -25,6 +25,8 @@ public final class StudioSettings {
     private boolean showToolbar = true;
     private boolean toolbarFloating;
     private int toolbarOrientation;
+    private int toolbarX = -1;
+    private int toolbarY = -1;
     private boolean autoUpdate;
     private String language = "en";
     private int canvasZoom = 2;

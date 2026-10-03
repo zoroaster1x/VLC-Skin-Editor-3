@@ -222,6 +222,16 @@ public final class DeepCopy {
     }
 
     /**
+     * Deep copies one sub bitmap with a rename pattern.
+     */
+    public static dev.zoroaster1x.vlcskin.model.resource.SubBitmap subBitmap(
+            dev.zoroaster1x.vlcskin.model.resource.SubBitmap source, SkinIndex index, String pattern) {
+        var copy = source.copy();
+        copy.setId(index.uniqueCopy(pattern, source.getId()));
+        return copy;
+    }
+
+    /**
      * Deep copies a resource with a rename pattern.
      */
     public static Resource resource(Resource source, SkinIndex index, String pattern) {

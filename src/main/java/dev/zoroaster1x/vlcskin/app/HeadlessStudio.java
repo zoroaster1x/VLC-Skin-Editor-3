@@ -351,6 +351,16 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
+    public java.util.List<String> recentFiles() {
+        return java.util.List.copyOf(studio.settings().getRecentFiles());
+    }
+
+    @Override
+    public void openRecent(String path) {
+        studio.openFile(java.nio.file.Path.of(path));
+    }
+
+    @Override
     public void openSettings() {
         statusBar.setMessage("Skin settings open in the desktop window");
     }

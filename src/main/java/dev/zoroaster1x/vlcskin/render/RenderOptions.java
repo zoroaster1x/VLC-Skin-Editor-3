@@ -56,7 +56,7 @@ public record RenderOptions(
     }
 
     public RenderOptions withoutOverlays() {
-        return new RenderOptions(zoom, variables, selection, hover, pressed, checkerboard, false, anchorHelpers,
+        return new RenderOptions(zoom, variables, selection, hover, pressed, checkerboard, false, false,
                 frameTick);
     }
 }

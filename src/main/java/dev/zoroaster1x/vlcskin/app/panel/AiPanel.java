@@ -124,17 +124,16 @@ public final class AiPanel extends JPanel {
             return;
         }
         assistant = new AiAssistant(studio.service(), config);
-        Thread worker = new Thread(() -> {
+        Thread.ofVirtual().name("vlc-skin-ai").start(() -> {
             try {
                 String answer = assistant.send(message);
-                append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", answer));
+                SwingUtilities.invokeLater(() -> append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", answer)));
             } catch (Exception ex) {
-                append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", ex.getMessage()));
+                SwingUtilities.invokeLater(() ->
+                        append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", ex.getMessage())));
             }
             SwingUtilities.invokeLater(() -> studio.session().fireChanged());
-        }, "vlc-skin-ai");
-        worker.setDaemon(true);
-        worker.start();
+        });
     }
 
     private void append(String text) {

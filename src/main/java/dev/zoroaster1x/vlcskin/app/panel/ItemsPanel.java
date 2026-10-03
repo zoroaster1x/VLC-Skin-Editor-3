@@ -31,10 +31,8 @@ public final class ItemsPanel extends AbstractTreePanel {
     @Override
     public void refresh() {
         DefaultMutableTreeNode root = new DefaultMutableTreeNode("root");
+        // Only the selected layout shows items; selecting a window clears the tree.
         SkinLayout layout = studio.session().selection().layout(studio.session().index());
-        if (layout == null) {
-            layout = studio.session().currentLayout();
-        }
         if (layout != null) {
             for (Item item : layout.getItems()) {
                 root.add(node(item));
@@ -131,8 +129,16 @@ public final class ItemsPanel extends AbstractTreePanel {
             return;
         }
         Item selected = studio.session().selection().item(studio.session().index());
-        String parentId = selected != null && isContainerType(selected) && type != ItemType.SLIDER ? selected.getId()
-                : null;
+        String parentId = null;
+        if (selected != null) {
+            if (isContainerType(selected) && type != ItemType.SLIDER) {
+                parentId = selected.getId();
+            } else {
+                // Adding with a nested item selected adds a sibling in its list.
+                Item parent = studio.session().index().parentItemOf(selected.getId());
+                parentId = parent == null ? null : parent.getId();
+            }
+        }
         if (type == ItemType.SLIDER && selected != null && selected.type() == ItemType.PLAYTREE) {
             var outcome = studio.service().addItem("Slider", null, null, selected.getId(), null, null, null);
             if (outcome.error()) {

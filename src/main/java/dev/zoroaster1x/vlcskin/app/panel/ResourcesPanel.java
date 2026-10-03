@@ -175,17 +175,30 @@ public final class ResourcesPanel extends AbstractTreePanel {
 
     private void duplicate() {
         TreeRef ref = selectedRef();
-        if (ref == null || ref.kind() == TreeRef.Kind.SUB_BITMAP) {
-            return;
-        }
-        Resource resource = studio.session().index().findResource(ref.id());
-        if (resource == null) {
+        if (ref == null) {
             return;
         }
         String pattern = javax.swing.JOptionPane.showInputDialog(this,
                 Messages.get("DUPLICATE_MSG", "Rename pattern for the copy (%oldid% is the current id):"),
                 "%oldid%_copy");
         if (pattern == null || pattern.isBlank()) {
+            return;
+        }
+        if (ref.kind() == TreeRef.Kind.SUB_BITMAP) {
+            var imageRef = studio.session().index().findImage(ref.id());
+            if (imageRef == null || imageRef.sub() == null) {
+                return;
+            }
+            var copy = dev.zoroaster1x.vlcskin.edit.DeepCopy.subBitmap(
+                    imageRef.sub(), studio.session().index(), pattern);
+            studio.session().apply(new dev.zoroaster1x.vlcskin.edit.commands.AddNodeCommand<>(
+                    imageRef.bitmap().getSubBitmaps(), copy, imageRef.bitmap().getSubBitmaps().size(),
+                    "Duplicate SubBitmap"));
+            studio.session().images().invalidate(imageRef.bitmap().getId());
+            return;
+        }
+        Resource resource = studio.session().index().findResource(ref.id());
+        if (resource == null) {
             return;
         }
         Resource copy = dev.zoroaster1x.vlcskin.edit.DeepCopy.resource(resource, studio.session().index(),

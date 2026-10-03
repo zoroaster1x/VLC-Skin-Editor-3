@@ -653,11 +653,21 @@ public final class EditorControl {
     }
 
     public ToolOutcome duplicateResource(String id, String pattern) {
+        String renamePattern = pattern == null ? "%oldid%_copy" : pattern;
         Resource resource = index().findResource(id);
         if (resource == null) {
+            SkinIndex.ImageRef ref = index().findImage(id);
+            if (ref != null && ref.sub() != null) {
+                var copy = DeepCopy.subBitmap(ref.sub(), index(), renamePattern);
+                session().apply(new dev.zoroaster1x.vlcskin.edit.commands.AddNodeCommand<>(
+                        ref.bitmap().getSubBitmaps(), copy, ref.bitmap().getSubBitmaps().size(),
+                        "Duplicate SubBitmap"));
+                session().images().invalidate(ref.bitmap().getId());
+                return ToolOutcome.text("Duplicated sub bitmap as \"" + copy.getId() + "\"");
+            }
             return ToolOutcome.error("No resource with id \"" + id + "\"");
         }
-        Resource copy = DeepCopy.resource(resource, index(), pattern == null ? "%oldid%_copy" : pattern);
+        Resource copy = DeepCopy.resource(resource, index(), renamePattern);
         session().apply(new dev.zoroaster1x.vlcskin.edit.commands.AddNodeCommand<>(
                 session().theme().getResources(), copy, session().theme().getResources().size(),
                 "Duplicate " + resource.typeName()));

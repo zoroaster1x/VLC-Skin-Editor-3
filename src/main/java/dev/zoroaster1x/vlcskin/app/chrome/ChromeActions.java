@@ -58,6 +58,16 @@ public interface ChromeActions {
      */
     void browseThemes();
 
+    /**
+     * The most recent files, newest first.
+     */
+    java.util.List<String> recentFiles();
+
+    /**
+     * Opens one entry of the recent files list.
+     */
+    void openRecent(String path);
+
     void openSettings();
 
     void showVariables();

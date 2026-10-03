@@ -23,10 +23,19 @@ public final class Messages {
 
     public static final String DEFAULT_LANGUAGE = "en";
     private static final String RESOURCE_ROOT = "/dev/zoroaster1x/vlcskin/app/messages/";
-    private static final Map<String, ResourceBundle> BUNDLES = new LinkedHashMap<>();
-    private static String language = DEFAULT_LANGUAGE;
+    private static final Map<String, ResourceBundle> BUNDLES = new java.util.HashMap<>();
+    private static volatile String language = DEFAULT_LANGUAGE;
 
     private Messages() {
+    }
+
+    /**
+     * The folder a user translation can be dropped into, one properties file
+     * per language, without rebuilding.
+     */
+    private static java.nio.file.Path userLanguageFolder() {
+        return dev.zoroaster1x.vlcskin.app.config.SettingsStore.defaultPath()
+                .resolveSibling("lang");
     }
 
     public static void setLanguage(String code) {
@@ -94,20 +103,52 @@ public final class Messages {
         if (languages.stream().noneMatch(item -> item.code().equals(DEFAULT_LANGUAGE))) {
             languages.add(0, new Language(DEFAULT_LANGUAGE, "English"));
         }
+        java.nio.file.Path userFolder = userLanguageFolder();
+        try {
+            if (java.nio.file.Files.isDirectory(userFolder)) {
+                try (var files = java.nio.file.Files.list(userFolder)) {
+                    files.filter(java.nio.file.Files::isRegularFile).forEach(path -> {
+                        String name = path.getFileName().toString();
+                        if (!name.startsWith("messages_") || !name.endsWith(".properties")) {
+                            return;
+                        }
+                        String code = name.substring("messages_".length(), name.length() - ".properties".length());
+                        if (languages.stream().noneMatch(item -> item.code().equalsIgnoreCase(code))) {
+                            languages.add(new Language(code, code));
+                        }
+                    });
+                }
+            }
+        } catch (IOException ex) {
+            // User translations are a bonus; the classpath list is enough.
+        }
         return languages;
     }
 
-    private static ResourceBundle bundle(String code) {
+    private static synchronized ResourceBundle bundle(String code) {
         if (BUNDLES.containsKey(code)) {
             return BUNDLES.get(code);
         }
         ResourceBundle bundle = null;
-        try (InputStream in = Messages.class.getResourceAsStream(RESOURCE_ROOT + "messages_" + code + ".properties")) {
-            if (in != null) {
-                bundle = new PropertyResourceBundle(new InputStreamReader(in, StandardCharsets.UTF_8));
+        java.nio.file.Path userFile = userLanguageFolder()
+                .resolve("messages_" + code + ".properties");
+        try {
+            if (java.nio.file.Files.isRegularFile(userFile)) {
+                try (InputStream in = java.nio.file.Files.newInputStream(userFile)) {
+                    bundle = new PropertyResourceBundle(new InputStreamReader(in, StandardCharsets.UTF_8));
+                }
             }
-        } catch (IOException | MissingResourceException ex) {
+        } catch (IOException ex) {
             bundle = null;
+        }
+        if (bundle == null) {
+            try (InputStream in = Messages.class.getResourceAsStream(RESOURCE_ROOT + "messages_" + code + ".properties")) {
+                if (in != null) {
+                    bundle = new PropertyResourceBundle(new InputStreamReader(in, StandardCharsets.UTF_8));
+                }
+            } catch (IOException | MissingResourceException ex) {
+                bundle = null;
+            }
         }
         BUNDLES.put(code, bundle);
         return bundle;

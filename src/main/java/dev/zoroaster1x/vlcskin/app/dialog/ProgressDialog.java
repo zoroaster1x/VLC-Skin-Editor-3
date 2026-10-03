@@ -5,8 +5,7 @@ import java.awt.Component;
 import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.FutureTask;
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -42,35 +41,25 @@ public final class ProgressDialog extends JDialog {
      * event thread in every case.
      */
     public <T> T run(String title, String message, Callable<T> work) throws Exception {
-        AtomicReference<T> result = new AtomicReference<>();
-        AtomicReference<Throwable> failure = new AtomicReference<>();
-        CountDownLatch shown = new CountDownLatch(1);
-        Thread worker = new Thread(() -> {
-            try {
-                shown.await();
-                result.set(work.call());
-            } catch (Throwable ex) {
-                failure.set(ex);
-            } finally {
+        FutureTask<T> task = new FutureTask<>(work) {
+            @Override
+            protected void done() {
                 disposeOnEventThread();
             }
-        }, "vlc-skin-studio-progress");
-        worker.setDaemon(true);
-        worker.start();
-        shown.countDown();
+        };
+        Thread.ofVirtual().name("vlc-skin-studio-progress").start(task);
         showAndWait(title, message);
-        worker.join();
-        Throwable thrown = failure.get();
-        if (thrown instanceof Exception ex) {
-            throw ex;
+        try {
+            return task.get();
+        } catch (java.util.concurrent.ExecutionException ex) {
+            if (ex.getCause() instanceof Exception exception) {
+                throw exception;
+            }
+            if (ex.getCause() instanceof Error error) {
+                throw error;
+            }
+            throw new RuntimeException(ex.getCause());
         }
-        if (thrown instanceof Error error) {
-            throw error;
-        }
-        if (thrown != null) {
-            throw new RuntimeException(thrown);
-        }
-        return result.get();
     }
 
     private void showAndWait(String title, String message) throws InterruptedException, InvocationTargetException {

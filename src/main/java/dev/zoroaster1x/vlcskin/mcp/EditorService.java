@@ -53,13 +53,24 @@ public final class EditorService {
 
     private EditorSession session;
     private UiInspector ui;
+    private volatile java.util.function.Consumer<Runnable> dispatcher = Runnable::run;
 
     public EditorService(EditorSession session) {
         this.session = session;
+        session.setDispatcher(dispatcher);
     }
 
     public EditorService() {
         this(EditorSession.empty());
+    }
+
+    /**
+     * How session change notifications reach the UI. The desktop app passes a
+     * dispatcher that marshals onto the event thread; the default runs inline.
+     */
+    public synchronized void setDispatcher(java.util.function.Consumer<Runnable> dispatcher) {
+        this.dispatcher = dispatcher == null ? Runnable::run : dispatcher;
+        session.setDispatcher(this.dispatcher);
     }
 
     public synchronized void setUi(UiInspector inspector) {
@@ -76,12 +87,14 @@ public final class EditorService {
 
     public synchronized void useSession(EditorSession newSession) {
         this.session = newSession;
+        newSession.setDispatcher(dispatcher);
     }
 
 
     public synchronized ToolOutcome open(String path) {
         try {
             session = EditorSession.open(Path.of(path));
+            session.setDispatcher(dispatcher);
             return ToolOutcome.text("Opened " + path, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
@@ -102,6 +115,7 @@ public final class EditorService {
         window.getLayouts().add(layout);
         theme.getWindows().add(window);
         session = EditorSession.of(theme, null);
+        session.setDispatcher(dispatcher);
         return ToolOutcome.text("Started a new skin", documentInfo());
     }
 
@@ -138,6 +152,7 @@ public final class EditorService {
             }
             Path themeFile = VltCodec.unpack(Path.of(archive), folder);
             session = EditorSession.open(themeFile);
+            session.setDispatcher(dispatcher);
             return ToolOutcome.text("Imported " + archive + " into " + folder, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
