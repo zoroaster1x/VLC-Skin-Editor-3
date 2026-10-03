@@ -1,6 +1,7 @@
 package io.github.zoroaster1x.vlcskin.app.dialog;
 
 import io.github.zoroaster1x.vlcskin.app.Studio;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import io.github.zoroaster1x.vlcskin.edit.ValueCommand;
 import io.github.zoroaster1x.vlcskin.model.resource.BitmapResource;
 import io.github.zoroaster1x.vlcskin.model.resource.SubBitmap;
@@ -42,7 +43,7 @@ public final class SubBitmapEditorDialog extends JDialog {
     private final BufferedImage parentImage;
 
     public SubBitmapEditorDialog(Studio studio, BitmapResource bitmap, SubBitmap sub) {
-        super((java.awt.Frame) null, "Edit SubBitmap " + sub.getId(), true);
+        super((java.awt.Frame) null, Messages.get("WIN_SBMP_EDIT_TITLE", "Edit SubBitmap") + " " + sub.getId(), true);
         this.studio = studio;
         this.bitmap = bitmap;
         this.sub = sub;
@@ -61,17 +62,17 @@ public final class SubBitmapEditorDialog extends JDialog {
         JSpinner framesField = spinner(Math.max(1, sub.getNbframes()), 1, 100);
         JSpinner fpsField = spinner(Math.max(0, sub.getFps()), 0, 240);
         JPanel fields = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        fields.add(new JLabel("X"));
+        fields.add(new JLabel(Messages.get("WIN_ITEM_X", "X")));
         fields.add(xField);
-        fields.add(new JLabel("Y"));
+        fields.add(new JLabel(Messages.get("WIN_ITEM_Y", "Y")));
         fields.add(yField);
-        fields.add(new JLabel("Width"));
+        fields.add(new JLabel(Messages.get("WIN_ITEM_WIDTH", "Width")));
         fields.add(widthField);
-        fields.add(new JLabel("Height"));
+        fields.add(new JLabel(Messages.get("WIN_ITEM_HEIGHT", "Height")));
         fields.add(heightField);
-        fields.add(new JLabel("Frames"));
+        fields.add(new JLabel(Messages.get("WIN_BITMAP_NBFRAMES", "Frames")));
         fields.add(framesField);
-        fields.add(new JLabel("FPS"));
+        fields.add(new JLabel(Messages.get("WIN_BITMAP_FPS", "FPS")));
         fields.add(fpsField);
         add(fields, BorderLayout.NORTH);
         framesSpinner = framesField;
@@ -91,9 +92,9 @@ public final class SubBitmapEditorDialog extends JDialog {
         });
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton(Messages.get("BUTTON_CANCEL", "Cancel"));
         cancel.addActionListener(e -> dispose());
-        JButton ok = new JButton("OK");
+        JButton ok = new JButton(Messages.get("BUTTON_OK", "OK"));
         ok.addActionListener(e -> {
             apply();
             dispose();
@@ -120,9 +121,11 @@ public final class SubBitmapEditorDialog extends JDialog {
         int fps = (Integer) fpsSpinner.getValue();
         if (parentImage != null && (x + width > parentImage.getWidth() || y + height > parentImage.getHeight())) {
             JOptionPane.showMessageDialog(this,
-                    "The rectangle extends beyond the parent bitmap (" + parentImage.getWidth() + "x"
-                            + parentImage.getHeight() + ").",
-                    "SubBitmap outside its parent", JOptionPane.WARNING_MESSAGE);
+                    Messages.format("APP_SBMP_OUTSIDE_MSG",
+                            "The rectangle extends beyond the parent bitmap (%s).",
+                            parentImage.getWidth() + "x" + parentImage.getHeight()),
+                    Messages.get("APP_SBMP_OUTSIDE_TITLE", "SubBitmap outside its parent"),
+                    JOptionPane.WARNING_MESSAGE);
             return;
         }
         int oldX = sub.getX();

@@ -2,6 +2,7 @@ package io.github.zoroaster1x.vlcskin.app.inspector;
 
 import io.github.zoroaster1x.vlcskin.app.Studio;
 import io.github.zoroaster1x.vlcskin.app.component.Icons;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import io.github.zoroaster1x.vlcskin.model.resource.BitmapResource;
 import io.github.zoroaster1x.vlcskin.model.resource.FontResource;
 import io.github.zoroaster1x.vlcskin.model.resource.Resource;
@@ -107,11 +108,12 @@ public final class InspectorFields {
         panel.add(field, java.awt.BorderLayout.CENTER);
         JButton swatch = new JButton();
         swatch.setPreferredSize(new Dimension(28, 22));
-        swatch.setToolTipText("Choose color");
+        swatch.setToolTipText(Messages.get("WIN_PLAYTREE_CHOOSER_TITLE", "Choose color"));
         paintSwatch(swatch, value);
         swatch.addActionListener(e -> {
             Color chosen = JColorChooser.showDialog(studio.service().session().currentLayout() == null
-                    ? null : swatch, "Choose color", parseColor(field.getText()));
+                    ? null : swatch, Messages.get("WIN_PLAYTREE_CHOOSER_TITLE", "Choose color"),
+                    parseColor(field.getText()));
             if (chosen != null) {
                 String hex = String.format("#%02X%02X%02X", chosen.getRed(), chosen.getGreen(), chosen.getBlue());
                 field.setText(hex);
@@ -171,7 +173,7 @@ public final class InspectorFields {
         panel.setOpaque(false);
         JTextField field = new JTextField(value == null ? "none" : value);
         JButton edit = new JButton(Icons.of("playlist", 14));
-        edit.setToolTipText("Edit actions");
+        edit.setToolTipText(Messages.get("APP_INSPECTOR_EDIT_ACTIONS", "Edit actions"));
         edit.addActionListener(e -> {
             String result = io.github.zoroaster1x.vlcskin.app.dialog.ActionEditorDialog.edit(studio, field.getText());
             if (result != null) {
@@ -190,7 +192,8 @@ public final class InspectorFields {
      */
     public JComponent points(String value, Consumer<String> commit) {
         JTextField field = new JTextField(value == null ? "(0,0)" : value);
-        field.setToolTipText("Bezier control points as (x,y),(x,y). Use the path tool on the canvas to drag them.");
+        field.setToolTipText(Messages.get("APP_INSPECTOR_POINTS_TIP",
+                "Bezier control points as (x,y),(x,y). Use the path tool on the canvas to drag them."));
         commitOn(field, commit);
         return field;
     }

@@ -1,6 +1,7 @@
 package io.github.zoroaster1x.vlcskin.app.dialog;
 
 import io.github.zoroaster1x.vlcskin.app.Studio;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import io.github.zoroaster1x.vlcskin.edit.ValueCommand;
 import io.github.zoroaster1x.vlcskin.model.resource.BitmapResource;
 import io.github.zoroaster1x.vlcskin.model.item.SliderBackground;
@@ -41,10 +42,10 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
     private final JSpinner marginRight = new JSpinner(new SpinnerNumberModel(0, 0, 1000, 1));
     private final JSpinner marginTop = new JSpinner(new SpinnerNumberModel(0, 0, 1000, 1));
     private final JSpinner marginBottom = new JSpinner(new SpinnerNumberModel(0, 0, 1000, 1));
-    private final JRadioButton horizontal = new JRadioButton("Left to right", true);
-    private final JRadioButton vertical = new JRadioButton("Bottom to top");
-    private final JCheckBox tileBackground = new JCheckBox("Tile background", true);
-    private final JCheckBox tileMiddle = new JCheckBox("Tile middle", true);
+    private final JRadioButton horizontal = new JRadioButton(Messages.get("APP_SBG_LEFT_RIGHT", "Left to right"), true);
+    private final JRadioButton vertical = new JRadioButton(Messages.get("APP_SBG_BOTTOM_TOP", "Bottom to top"));
+    private final JCheckBox tileBackground = new JCheckBox(Messages.get("APP_SBG_TILE_BACKGROUND", "Tile background"), true);
+    private final JCheckBox tileMiddle = new JCheckBox(Messages.get("APP_SBG_TILE_MIDDLE", "Tile middle"), true);
     private Path backgroundFile;
     private Path edge1File;
     private Path middleFile;
@@ -52,7 +53,7 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
     private Path overlayFile;
 
     public SliderBackgroundGeneratorDialog(Studio studio, SliderBackground background) {
-        super((java.awt.Frame) null, "Slider background generator", true);
+        super((java.awt.Frame) null, Messages.get("SBGGEN_TITLE", "Slider background generator"), true);
         this.studio = studio;
         this.background = background;
         setLayout(new BorderLayout(8, 8));
@@ -64,33 +65,34 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
         ButtonGroup group = new ButtonGroup();
         group.add(horizontal);
         group.add(vertical);
-        orientation.add(new JLabel("Direction"));
+        orientation.add(new JLabel(Messages.get("APP_SBG_DIRECTION", "Direction")));
         orientation.add(horizontal);
         orientation.add(vertical);
         content.add(orientation);
         content.add(Box.createVerticalStrut(6));
-        content.add(row("Width / height", width, height));
-        content.add(row("Left / right margin", marginLeft, marginRight));
-        content.add(row("Top / bottom margin", marginTop, marginBottom));
+        content.add(row(Messages.get("APP_SBG_SIZE", "Width / height"), width, height));
+        content.add(row(Messages.get("APP_SBG_MARGIN_H", "Left / right margin"), marginLeft, marginRight));
+        content.add(row(Messages.get("APP_SBG_MARGIN_V", "Top / bottom margin"), marginTop, marginBottom));
         content.add(Box.createVerticalStrut(6));
-        content.add(fileRow("Background", file -> backgroundFile = file));
-        content.add(fileRow("Start edge", file -> edge1File = file));
-        content.add(fileRow("Middle (required)", file -> middleFile = file));
-        content.add(fileRow("End edge", file -> edge2File = file));
-        content.add(fileRow("Overlay", file -> overlayFile = file));
+        content.add(fileRow(Messages.get("SBGGEN_BG", "Background"), file -> backgroundFile = file));
+        content.add(fileRow(Messages.get("APP_SBG_START_EDGE", "Start edge"), file -> edge1File = file));
+        content.add(fileRow(Messages.get("SBGGEN_MIDDLE", "Middle (required)"), file -> middleFile = file));
+        content.add(fileRow(Messages.get("APP_SBG_END_EDGE", "End edge"), file -> edge2File = file));
+        content.add(fileRow(Messages.get("SBGGEN_OVERLAY", "Overlay"), file -> overlayFile = file));
         content.add(Box.createVerticalStrut(6));
         JPanel options = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         options.add(tileBackground);
         options.add(tileMiddle);
         content.add(options);
-        JLabel note = new JLabel("<html><span style='font-size:9px'>The strip gets one frame per pixel of "
-                + "travel, which is how VLC picks the filled part.</span></html>");
+        JLabel note = new JLabel(Messages.get("APP_SBG_NOTE",
+                "<html><span style='font-size:9px'>The strip gets one frame per pixel of "
+                        + "travel, which is how VLC picks the filled part.</span></html>"));
         content.add(note);
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton(Messages.get("BUTTON_CANCEL", "Cancel"));
         cancel.addActionListener(e -> dispose());
-        JButton generate = new JButton("Generate and use");
+        JButton generate = new JButton(Messages.get("SBGGEN_FINISH", "Generate and use"));
         generate.addActionListener(e -> generate());
         footer.add(cancel);
         footer.add(generate);
@@ -119,12 +121,13 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
         JPanel row = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
         JLabel name = new JLabel(label);
         name.setPreferredSize(new Dimension(150, 22));
-        JLabel value = new JLabel("(none)");
+        JLabel value = new JLabel(Messages.get("APP_SBG_NO_FILE", "(none)"));
         value.setPreferredSize(new Dimension(220, 22));
-        JButton pick = new JButton("Choose...");
+        JButton pick = new JButton(Messages.get("WIN_BITMAP_CHOOSE", "Choose..."));
         pick.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
-            chooser.setFileFilter(new FileNameExtensionFilter("PNG image (*.png)", "png"));
+            chooser.setFileFilter(new FileNameExtensionFilter(
+                    Messages.get("ADD_BMP_FILE_FILTER_DESC", "PNG image (*.png)"), "png"));
             Path start = studio.session().file() == null ? null : studio.session().file().getParent();
             if (start != null) {
                 chooser.setCurrentDirectory(start.toFile());
@@ -144,8 +147,10 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
 
     private void generate() {
         if (middleFile == null) {
-            JOptionPane.showMessageDialog(this, "Choose the middle image first.", "Slider background generator",
-                    JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, Messages.get("ERROR_SBGGEN_MIDDLE_MSG",
+                            "Could not load middle image!\nAt least the middle part of the slider is needed "
+                                    + "to generate a slider background."),
+                    Messages.get("SBGGEN_TITLE", "Slider background generator"), JOptionPane.WARNING_MESSAGE);
             return;
         }
         try {
@@ -168,11 +173,13 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
                 registerBitmap(relative, strip);
             }
             dispose();
-            JOptionPane.showMessageDialog(null, "Generated " + target.getFileName(),
-                    "Slider background generator", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null,
+                    Messages.format("APP_SBG_GENERATED", "Generated %s", target.getFileName()),
+                    Messages.get("SBGGEN_TITLE", "Slider background generator"), JOptionPane.INFORMATION_MESSAGE);
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Could not generate the background: " + ex.getMessage(),
-                    "Slider background generator", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    Messages.format("APP_SBG_FAILED", "Could not generate the background: %s", ex.getMessage()),
+                    Messages.get("SBGGEN_TITLE", "Slider background generator"), JOptionPane.ERROR_MESSAGE);
         }
     }
 

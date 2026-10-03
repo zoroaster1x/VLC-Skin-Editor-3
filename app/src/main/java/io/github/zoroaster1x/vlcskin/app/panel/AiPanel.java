@@ -2,6 +2,7 @@ package io.github.zoroaster1x.vlcskin.app.panel;
 
 import io.github.zoroaster1x.vlcskin.ai.AiAssistant;
 import io.github.zoroaster1x.vlcskin.app.Studio;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -48,10 +49,10 @@ public final class AiPanel extends JPanel {
         settings.setBorder(BorderFactory.createEmptyBorder(6, 8, 0, 8));
         baseUrl.setText(studio.settings().getAiBaseUrl());
         model.setText(studio.settings().getAiModel());
-        baseUrl.setToolTipText("For example https://api.openai.com/v1");
-        settings.add(labeled("Endpoint", baseUrl));
-        settings.add(labeled("Model", model));
-        settings.add(labeled("API key", key));
+        baseUrl.setToolTipText(Messages.get("APP_AI_ENDPOINT_TIP", "For example https://api.openai.com/v1"));
+        settings.add(labeled(Messages.get("APP_AI_ENDPOINT", "Endpoint"), baseUrl));
+        settings.add(labeled(Messages.get("APP_AI_MODEL", "Model"), model));
+        settings.add(labeled(Messages.get("APP_AI_API_KEY", "API key"), key));
         state.setForeground(Color.GRAY);
         state.setText(keyHint());
         settings.add(state);
@@ -61,7 +62,7 @@ public final class AiPanel extends JPanel {
         JScrollPane inputScroll = new JScrollPane(input);
         inputScroll.setPreferredSize(new Dimension(100, 70));
         composer.add(inputScroll, BorderLayout.CENTER);
-        JButton send = new JButton("Send");
+        JButton send = new JButton(Messages.get("APP_AI_SEND", "Send"));
         send.addActionListener(this::send);
         composer.add(send, BorderLayout.EAST);
 
@@ -88,9 +89,11 @@ public final class AiPanel extends JPanel {
         String env = studio.settings().getAiKeyEnv();
         String value = System.getenv(env);
         if (value != null && !value.isBlank()) {
-            return "A key is available from $" + env + "; leaving the field empty uses it.";
+            return Messages.format("APP_AI_KEY_AVAILABLE",
+                    "A key is available from $%s; leaving the field empty uses it.", env);
         }
-        return "No key in $" + env + "; paste one above (it is kept in memory only).";
+        return Messages.format("APP_AI_KEY_MISSING",
+                "No key in $%s; paste one above (it is kept in memory only).", env);
     }
 
     private void updateState() {
@@ -103,7 +106,7 @@ public final class AiPanel extends JPanel {
             return;
         }
         input.setText("");
-        append("you: " + message);
+        append(Messages.format("APP_AI_YOU", "you: %s", message));
         String apiKey = new String(key.getPassword());
         if (apiKey.isBlank()) {
             String env = studio.settings().getAiKeyEnv();
@@ -115,17 +118,18 @@ public final class AiPanel extends JPanel {
         AiAssistant.Config config = new AiAssistant.Config(baseUrl.getText().trim(), apiKey,
                 model.getText().trim(), true);
         if (!config.usable()) {
-            append("assistant: Set an endpoint and a model first. Any OpenAI compatible server works, "
-                    + "for example a local llama.cpp or Ollama /v1 endpoint.");
+            append(Messages.get("APP_AI_NOT_CONFIGURED",
+                    "assistant: Set an endpoint and a model first. Any OpenAI compatible server works, "
+                            + "for example a local llama.cpp or Ollama /v1 endpoint."));
             return;
         }
         assistant = new AiAssistant(studio.service(), config);
         Thread worker = new Thread(() -> {
             try {
                 String answer = assistant.send(message);
-                append("assistant: " + answer);
+                append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", answer));
             } catch (Exception ex) {
-                append("assistant: " + ex.getMessage());
+                append(Messages.format("APP_AI_ASSISTANT", "assistant: %s", ex.getMessage()));
             }
             SwingUtilities.invokeLater(() -> studio.session().fireChanged());
         }, "vlc-skin-ai");

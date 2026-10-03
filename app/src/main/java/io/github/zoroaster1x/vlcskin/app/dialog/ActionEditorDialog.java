@@ -3,6 +3,7 @@ package io.github.zoroaster1x.vlcskin.app.dialog;
 import io.github.zoroaster1x.vlcskin.action.ActionCatalog;
 import io.github.zoroaster1x.vlcskin.action.ActionChain;
 import io.github.zoroaster1x.vlcskin.app.Studio;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -34,7 +35,7 @@ public final class ActionEditorDialog {
      * Returns the new action attribute, or null when cancelled.
      */
     public static String edit(Studio studio, String current) {
-        JDialog dialog = new JDialog((java.awt.Frame) null, "Actions", true);
+        JDialog dialog = new JDialog((java.awt.Frame) null, Messages.get("ACTIONS_PU", "Actions"), true);
         dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         DefaultListModel<String> model = new DefaultListModel<>();
         ActionChain chain = ActionChain.parse(current);
@@ -55,18 +56,18 @@ public final class ActionEditorDialog {
         content.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
-        JButton add = new JButton("Add action");
+        JButton add = new JButton(Messages.get("APP_ACTION_ADD", "Add action"));
         add.addActionListener(e -> showAddMenu(studio, add, model));
-        JButton remove = new JButton("Remove");
+        JButton remove = new JButton(Messages.get("APP_ACTION_REMOVE", "Remove"));
         remove.addActionListener(e -> {
             int index = list.getSelectedIndex();
             if (index >= 0) {
                 model.remove(index);
             }
         });
-        JButton up = new JButton("Up");
+        JButton up = new JButton(Messages.get("APP_ACTION_UP", "Up"));
         up.addActionListener(e -> move(model, list.getSelectedIndex(), -1));
-        JButton down = new JButton("Down");
+        JButton down = new JButton(Messages.get("APP_ACTION_DOWN", "Down"));
         down.addActionListener(e -> move(model, list.getSelectedIndex(), 1));
         buttons.add(add);
         buttons.add(remove);
@@ -74,21 +75,22 @@ public final class ActionEditorDialog {
         buttons.add(down);
 
         JPanel actions = new JPanel(new BorderLayout());
-        actions.add(new JLabel("The actions run in order, left to right."), BorderLayout.NORTH);
+        actions.add(new JLabel(Messages.get("APP_ACTION_ORDER_NOTE", "The actions run in order, left to right.")),
+                BorderLayout.NORTH);
         actions.add(new JScrollPane(list), BorderLayout.CENTER);
         actions.add(buttons, BorderLayout.SOUTH);
 
         boolean[] cancelled = {true};
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        JButton none = new JButton("Do nothing");
+        JButton none = new JButton(Messages.get("ACTION_DESC_NONE", "Do nothing"));
         none.addActionListener(e -> {
             model.clear();
             cancelled[0] = false;
             dialog.dispose();
         });
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton(Messages.get("BUTTON_CANCEL", "Cancel"));
         cancel.addActionListener(e -> dialog.dispose());
-        JButton ok = new JButton("OK");
+        JButton ok = new JButton(Messages.get("BUTTON_OK", "OK"));
         ok.addActionListener(e -> {
             cancelled[0] = false;
             dialog.dispose();
@@ -126,8 +128,10 @@ public final class ActionEditorDialog {
         switch (action.kind()) {
             case STATIC -> model.addElement(action.code());
             case BOOLEAN -> {
-                String[] options = {"Activate", "Deactivate"};
-                int choice = JOptionPane.showOptionDialog(null, action.display(), "Action parameter",
+                String[] options = {Messages.get("ACTION_ACTIVATE", "Activate"),
+                        Messages.get("ACTION_DEACTIVATE", "Deactivate")};
+                int choice = JOptionPane.showOptionDialog(null, action.display(),
+                        Messages.get("APP_ACTION_PARAMETER_TITLE", "Action parameter"),
                         JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
                 if (choice >= 0) {
                     model.addElement(action.code().replace("()", "(" + (choice == 0) + ")"));
@@ -155,7 +159,8 @@ public final class ActionEditorDialog {
                 if (found != null) {
                     found.getLayouts().forEach(layout -> layouts.addItem(layout.getId()));
                 }
-                int result = JOptionPane.showConfirmDialog(null, layouts, "Layout for " + window,
+                int result = JOptionPane.showConfirmDialog(null, layouts,
+                        Messages.format("APP_ACTION_LAYOUT_TITLE", "Layout for %s", window),
                         JOptionPane.OK_CANCEL_OPTION);
                 if (result == JOptionPane.OK_OPTION) {
                     model.addElement(window + ".setLayout(" + layouts.getSelectedItem() + ")");

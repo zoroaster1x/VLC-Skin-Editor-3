@@ -81,7 +81,8 @@ public final class VariablesPanel extends JPanel {
         content.add(textGrid);
         content.add(Box.createVerticalStrut(8));
         JLabel note = new JLabel(Messages.get("WIN_VARS_NOTE",
-                "These variables only affect the preview. They simulate the state of VLC."));
+                "<html><span style='font-size:9px'>These variables only affect the preview. "
+                        + "They simulate the state of VLC.</span></html>"));
         note.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
         note.setAlignmentX(LEFT_ALIGNMENT);
         content.add(note);

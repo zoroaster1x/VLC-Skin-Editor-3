@@ -1,6 +1,7 @@
 package io.github.zoroaster1x.vlcskin.app.dialog;
 
 import io.github.zoroaster1x.vlcskin.app.Studio;
+import io.github.zoroaster1x.vlcskin.app.i18n.Messages;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -21,7 +22,7 @@ import javax.swing.SpinnerNumberModel;
 public final class ThemeSettingsDialog extends JDialog {
 
     public ThemeSettingsDialog(Studio studio) {
-        super((java.awt.Frame) null, "Skin settings", true);
+        super((java.awt.Frame) null, Messages.get("WIN_THEME_TITLE", "Skin settings"), true);
         var theme = studio.session().theme();
         var info = theme.getThemeInfo();
 
@@ -37,23 +38,23 @@ public final class ThemeSettingsDialog extends JDialog {
         JSpinner alpha = new JSpinner(new SpinnerNumberModel(theme.getAlpha(), 1, 255, 1));
         JSpinner movealpha = new JSpinner(new SpinnerNumberModel(theme.getMovealpha(), 1, 255, 1));
 
-        content.add(row("Name", name));
-        content.add(row("Author", author));
-        content.add(row("Email", email));
-        content.add(row("Webpage", webpage));
+        content.add(row(Messages.get("WIN_THEME_NAME", "Name"), name));
+        content.add(row(Messages.get("WIN_THEME_AUTHOR", "Author"), author));
+        content.add(row(Messages.get("WIN_THEME_EMAIL", "Email"), email));
+        content.add(row(Messages.get("WIN_THEME_WEB", "Webpage"), webpage));
         content.add(Box.createVerticalStrut(8));
-        content.add(row("Magnet", magnet));
-        content.add(row("Opacity", alpha));
-        content.add(row("Opacity while moving", movealpha));
+        content.add(row(Messages.get("WIN_THEME_MAGNET", "Magnet"), magnet));
+        content.add(row(Messages.get("WIN_THEME_ALPHA", "Opacity"), alpha));
+        content.add(row(Messages.get("WIN_THEME_MOVEALPHA", "Opacity while moving"), movealpha));
         content.add(Box.createVerticalStrut(8));
-        JLabel note = new JLabel("Magnet is the snapping distance in pixels.");
+        JLabel note = new JLabel(Messages.get("APP_THEME_MAGNET_NOTE", "Magnet is the snapping distance in pixels."));
         note.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
         content.add(note);
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
-        JButton cancel = new JButton("Cancel");
+        JButton cancel = new JButton(Messages.get("BUTTON_CANCEL", "Cancel"));
         cancel.addActionListener(e -> dispose());
-        JButton ok = new JButton("OK");
+        JButton ok = new JButton(Messages.get("BUTTON_OK", "OK"));
         ok.addActionListener(e -> {
             var command = io.github.zoroaster1x.vlcskin.edit.ValueCommand
                     .builder("Edit theme")
@@ -70,7 +71,7 @@ public final class ThemeSettingsDialog extends JDialog {
         });
         footer.add(cancel);
         footer.add(ok);
-        JButton help = new JButton("Help");
+        JButton help = new JButton(Messages.get("BUTTON_HELP", "Help"));
         help.addActionListener(e -> {
             try {
                 java.awt.Desktop.getDesktop().browse(java.net.URI.create(

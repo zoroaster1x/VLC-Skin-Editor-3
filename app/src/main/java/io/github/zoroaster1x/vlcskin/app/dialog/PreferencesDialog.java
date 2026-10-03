@@ -48,18 +48,20 @@ public final class PreferencesDialog extends JDialog {
             }
         }
 
-        JCheckBox checkerboard = new JCheckBox("Checkerboard behind the preview",
+        JCheckBox checkerboard = new JCheckBox(Messages.get("APP_PREFS_CHECKERBOARD", "Checkerboard behind the preview"),
                 studio.settings().isCheckerboard());
-        JCheckBox showToolbar = new JCheckBox("Show the toolbar", studio.settings().isShowToolbar());
+        JCheckBox showToolbar = new JCheckBox(Messages.get("WIN_PREFS_TBAR_L", "Show the toolbar"),
+                studio.settings().isShowToolbar());
 
-        content.add(row("Look and feel", themeBox));
-        content.add(row("Language", languageBox));
+        content.add(row(Messages.get("WIN_PREFS_LAF_L", "Look and feel"), themeBox));
+        content.add(row(Messages.get("WIN_PREFS_LANG_L", "Language"), languageBox));
         content.add(Box.createVerticalStrut(8));
         content.add(checkerboard);
         content.add(showToolbar);
         content.add(Box.createVerticalStrut(6));
-        JLabel note = new JLabel("<html><span style='font-size:9px'>Menu and dialog labels use the original "
-                + "editor translations where one exists; newer panels stay in English until translated.</span></html>");
+        JLabel note = new JLabel(Messages.get("APP_PREFS_NOTE",
+                "<html><span style='font-size:9px'>Menu and dialog labels use the original "
+                        + "editor translations where one exists; newer panels stay in English until translated.</span></html>"));
         note.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
         content.add(note);
         content.add(Box.createVerticalStrut(10));
@@ -89,7 +91,7 @@ public final class PreferencesDialog extends JDialog {
             }
             studio.saveSettings();
             studio.session().fireChanged();
-            studio.status("Preferences saved");
+            studio.status(Messages.get("APP_PREFS_SAVED", "Preferences saved"));
             dispose();
         });
         footer.add(cancel);

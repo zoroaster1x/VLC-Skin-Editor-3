@@ -49,7 +49,8 @@ final class WelcomeCard extends JPanel {
         JLabel title = new JLabel(Messages.get("WELCOME_TITLE", "VLC Skin Studio"));
         title.setFont(title.getFont().deriveFont(Font.BOLD, 24f));
         title.setAlignmentX(LEFT_ALIGNMENT);
-        JLabel subtitle = new JLabel("Design VLC skins2 themes with a live preview.");
+        JLabel subtitle = new JLabel(Messages.get("APP_WELCOME_SUBTITLE",
+                "Design VLC skins2 themes with a live preview."));
         subtitle.setForeground(UIManager.getColor("Label.disabledForeground"));
         subtitle.setAlignmentX(LEFT_ALIGNMENT);
 
@@ -58,7 +59,7 @@ final class WelcomeCard extends JPanel {
         actions.setAlignmentX(LEFT_ALIGNMENT);
         actions.add(button(Messages.get("WELCOME_NEW", "New skin"), "new", e -> studio.newSkin()));
         actions.add(button(Messages.get("WELCOME_OPEN", "Open skin"), "open", e -> studio.openDialog(this)));
-        actions.add(button("Examples", "layers", e -> showExamples()));
+        actions.add(button(Messages.get("APP_WELCOME_EXAMPLES", "Examples"), "layers", e -> showExamples()));
         actions.setMaximumSize(new Dimension(520, 40));
 
         recentPanel.setOpaque(false);
@@ -71,11 +72,11 @@ final class WelcomeCard extends JPanel {
         card.add(Box.createVerticalStrut(22));
         card.add(actions);
         card.add(Box.createVerticalStrut(18));
-        card.add(sectionLabel("Recent"));
+        card.add(sectionLabel(Messages.get("APP_WELCOME_RECENT", "Recent")));
         card.add(Box.createVerticalStrut(6));
         card.add(recentPanel);
         card.add(Box.createVerticalStrut(14));
-        card.add(sectionLabel("Examples"));
+        card.add(sectionLabel(Messages.get("APP_WELCOME_EXAMPLES", "Examples")));
         card.add(Box.createVerticalStrut(6));
         for (ExampleSkins.Example example : ExampleSkins.catalog()) {
             card.add(exampleRow(example));
@@ -106,7 +107,7 @@ final class WelcomeCard extends JPanel {
                 + example.description() + "</span></html>");
         label.setHorizontalAlignment(SwingConstants.LEFT);
         row.add(label, BorderLayout.CENTER);
-        JButton create = new JButton("Create");
+        JButton create = new JButton(Messages.get("APP_WELCOME_CREATE", "Create"));
         create.addActionListener(e -> {
             Path folder = studio.settings().getLastDirectory() != null
                     ? Path.of(studio.settings().getLastDirectory()).resolve("vlc-skin-" + example.id())
@@ -115,7 +116,7 @@ final class WelcomeCard extends JPanel {
             if (outcome.error()) {
                 studio.error(outcome.text());
             } else {
-                studio.status("Created example in " + folder);
+                studio.status(Messages.format("APP_WELCOME_EXAMPLE_CREATED", "Created example in %s", folder));
                 studio.session().fireChanged();
             }
         });
@@ -157,7 +158,7 @@ final class WelcomeCard extends JPanel {
             recentPanel.add(link);
         }
         if (studio.settings().getRecentFiles().isEmpty()) {
-            JLabel none = new JLabel("No recent files yet");
+            JLabel none = new JLabel(Messages.get("APP_WELCOME_NO_RECENT", "No recent files yet"));
             none.setForeground(UIManager.getColor("Label.disabledForeground"));
             none.setAlignmentX(LEFT_ALIGNMENT);
             recentPanel.add(none);
