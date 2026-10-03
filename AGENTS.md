@@ -51,6 +51,10 @@ The fat jar lands at `build/libs/vlc-skin-studio.jar` and its main class is
 `io.github.zoroaster1x.vlcskin.app.VlcSkinStudio`. Any known subcommand runs the
 CLI; anything else opens the window.
 
+GraalVM 25 can build a native CLI, TUI and MCP binary with
+`tools/build-native.sh`; the desktop Swing window stays on the JVM. The script
+documents the exact flags and the runtime libraries the binary needs.
+
 ## 4. Test suites
 
 | Suite | Covers |

@@ -224,6 +224,7 @@ def main():
     if not args.jar.exists():
         print(f"jar not found: {args.jar}", file=sys.stderr)
         return 1
+    args.jar = args.jar.resolve()
     args.out.mkdir(parents=True, exist_ok=True)
     args.work.mkdir(parents=True, exist_ok=True)
 

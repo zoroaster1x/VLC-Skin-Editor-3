@@ -230,6 +230,23 @@ A typical AI session: create an example, ask for the geometry, change a few
 attributes, ask for a render and look at it. The server returns the PNG as
 image content and the geometry as structured data in the same reply.
 
+## Native image (optional)
+
+GraalVM 25 can build a self-contained binary for the CLI, TUI and MCP entry
+points. The desktop Swing window stays on the JVM; the native path is for fast
+`mcp` startup and scripted use.
+
+```bash
+sdk install java 25.4.4.1+1-graalce
+tools/build-native.sh
+build/native/vlc-skin-studio --version
+build/native/vlc-skin-studio mcp
+```
+
+The binary is about 60 MB and needs the `.so` files native-image places next to
+it. `picocli-codegen` runs at compile time so the CLI's reflection metadata is
+already in the jar. The desktop UI is not covered by native testing.
+
 ## AI assistant panel
 
 The AI panel in the desktop window talks to any OpenAI compatible
