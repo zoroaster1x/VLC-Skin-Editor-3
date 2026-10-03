@@ -38,13 +38,13 @@ the `skins2` interface: `vlc -I skins2 --skins2-last=theme.xml`.
 Java 25 is required. Gradle comes from the wrapper.
 
 ```bash
-./gradlew build                     # compile, run every suite, build the jar
-./gradlew shadowJar            # single file jar with all dependencies
-./gradlew run                  # open the desktop window
-./run.sh                            # build once, then run the desktop app
-./run.sh render skin.xml -o p.png   # CLI render
-./run.sh mcp                        # MCP server over stdio
-./run.sh tui skin.xml               # terminal UI
+./gradlew build                       # compile, run every suite, build the jar
+./gradlew shadowJar                   # single file jar with all dependencies
+./gradlew run                         # open the desktop window
+./run.sh                              # build once, then run the desktop app
+./run.sh render skin.xml -o p.png     # CLI render
+./run.sh mcp                          # MCP server over stdio
+./run.sh tui skin.xml                 # terminal UI
 ```
 
 The fat jar lands at `build/libs/vlc-skin-studio.jar` and its main class is

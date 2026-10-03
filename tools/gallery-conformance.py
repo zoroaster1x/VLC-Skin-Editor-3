@@ -20,6 +20,7 @@ Usage:
 """
 
 import argparse
+import collections
 import concurrent.futures
 import json
 import os
@@ -119,9 +120,9 @@ def check_theme(jar, theme, name, work, record):
     record["issues"] = int(match.group(1)) if match else -1
     record["errors"] = int(match.group(2)) if match else -1
     record["problems"] = [
-        line for line in validated["stdout"].splitlines()
-        if ": ERROR" in line or ": WARNING" in line
-    ][:5]
+        line.strip() for line in validated["stdout"].splitlines()
+        if line.startswith("ERROR:") or line.startswith("WARNING:")
+    ][:10]
 
     first = next(
         (entry for entry in info.get("layoutsDetail", []) if entry.get("layout")), None
@@ -147,6 +148,26 @@ def check_theme(jar, theme, name, work, record):
     return record
 
 
+def classify_problem(problem):
+    """Collapse a validator message to the kind of issue it describes."""
+    text = problem.split(":", 1)[1].strip() if ":" in problem else problem
+    if "File not found" in text:
+        return "missing referenced file"
+    if text.startswith("Duplicate resource id") or "already used by a resource" in text:
+        return "duplicate resource id"
+    if "item id" in text and "used" in text:
+        return "duplicate item id"
+    if "references missing resource" in text or "image is missing" in text:
+        return "missing resource reference"
+    if "has a non positive size" in text:
+        return "non positive size"
+    if "has no slider" in text:
+        return "playtree without slider"
+    if "outside its parent" in text:
+        return "sub bitmap outside its parent"
+    return text[:70]
+
+
 def write_report(records, out_dir):
     total = len(records)
     ok = sum(1 for record in records if record.get("status") == "ok")
@@ -155,6 +176,16 @@ def write_report(records, out_dir):
     issues = sum(record.get("issues", 0) for record in records)
     items = sum(record.get("items", 0) for record in records)
     render_ms = [record["render_ms"] for record in records if record.get("render_ms")]
+
+    error_kinds = collections.Counter()
+    warning_kinds = collections.Counter()
+    for record in records:
+        for problem in record.get("problems", []):
+            kind = classify_problem(problem)
+            if problem.startswith("ERROR:"):
+                error_kinds[kind] += 1
+            else:
+                warning_kinds[kind] += 1
 
     lines = []
     lines.append("# VLC skins gallery conformance report")
@@ -172,6 +203,22 @@ def write_report(records, out_dir):
         lines.append(f"* Render time: median {sorted(render_ms)[len(render_ms) // 2]} ms, "
                      f"max {max(render_ms)} ms")
     lines.append("")
+    if error_kinds or warning_kinds:
+        lines.append("## Validation messages")
+        lines.append("")
+        lines.append("These are issues the themes already carry, mostly ids shared by two "
+                     "controls or resources and referenced files the download does not "
+                     "ship. VLC resolves duplicate ids by first match, and none of them "
+                     "stop an import or a render. Counts cover the first ten messages per "
+                     "theme.")
+        lines.append("")
+        lines.append("| Severity | Kind | Count |")
+        lines.append("|---|---|---|")
+        for kind, count in error_kinds.most_common(10):
+            lines.append(f"| error | {kind} | {count} |")
+        for kind, count in warning_kinds.most_common(10):
+            lines.append(f"| warning | {kind} | {count} |")
+        lines.append("")
     if failed:
         lines.append("## Not rendered")
         lines.append("")
@@ -199,7 +246,7 @@ def write_report(records, out_dir):
     lines.append("")
     lines.append("VeLoCity is MIT licensed and is checked separately by "
                  "tools/recreate-velocity-via-mcp.py; this report covers the "
-                 "VideoLAN gallery only.")
+                 "VideoLAN gallery plus the two themes VLC itself ships.")
     report = out_dir / "skin-gallery-report.md"
     report.write_text("\n".join(lines) + "\n", encoding="utf-8")
     (out_dir / "skin-gallery-report.json").write_text(

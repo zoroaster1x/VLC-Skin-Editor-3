@@ -311,8 +311,10 @@ screenshots to `build/reports/screenshots/`.
 
 Against real skins: the VeLoCity theme imports through the VLT codec and
 validates clean, and `tools/gallery-conformance.py` sweeps every theme in the
-official VideoLAN pack plus the default theme VLC itself ships. The latest
-numbers are in `docs/skin-gallery-report.md`.
+official VideoLAN pack plus the two themes VLC itself ships. The latest run
+imported, validated and rendered all 123 themes; the numbers, the per theme
+table and the classification of the validation messages old themes carry are
+in `docs/skin-gallery-report.md`.
 
 ## Known limits
 
