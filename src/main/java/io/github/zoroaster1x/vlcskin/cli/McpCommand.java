@@ -15,12 +15,27 @@ import picocli.CommandLine.Option;
 @Command(name = "mcp", description = "Run the MCP server over stdio.")
 public final class McpCommand implements Callable<Integer> {
 
+    /**
+     * Installed by the desktop entry point so a standalone MCP process can read
+     * and write the same preferences file the window uses. Null means no host.
+     */
+    public static final java.util.concurrent.atomic.AtomicReference<java.util.function.Supplier<
+            io.github.zoroaster1x.vlcskin.snapshot.UiInspector>> HOST =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
     @Option(names = {"-f", "--file"}, paramLabel = "SKIN", description = "Open this skin before serving.")
     Path skin;
 
     @Override
     public Integer call() throws Exception {
         EditorService service = new EditorService();
+        var supplier = HOST.get();
+        if (supplier != null) {
+            var host = supplier.get();
+            if (host != null) {
+                service.setUi(host);
+            }
+        }
         if (skin != null) {
             var outcome = service.open(skin.toAbsolutePath().toString());
             if (outcome.error()) {

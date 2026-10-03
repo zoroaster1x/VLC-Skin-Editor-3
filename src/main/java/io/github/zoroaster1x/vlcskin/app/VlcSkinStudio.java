@@ -25,6 +25,12 @@ public final class VlcSkinStudio {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
         if (args.length > 0 && isCliInvocation(args[0])) {
+            // CLI, TUI and MCP never need a display; keep AWT headless.
+            System.setProperty("java.awt.headless", "true");
+            SettingsStore store = new SettingsStore();
+            StudioSettings settings = store.load();
+            io.github.zoroaster1x.vlcskin.cli.McpCommand.HOST.set(
+                    () -> new io.github.zoroaster1x.vlcskin.app.snapshot.SettingsHost(store, settings));
             int code = new CommandLine(new SkinStudioCli()).execute(args);
             System.exit(code);
         }

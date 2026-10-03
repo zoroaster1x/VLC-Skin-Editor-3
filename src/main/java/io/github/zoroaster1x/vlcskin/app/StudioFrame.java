@@ -121,7 +121,8 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         installShortcuts();
 
         studio.addStatusListener(statusBar::setMessage);
-        studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window"));
+        studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window",
+                () -> panels.canvas, this::showPanel));
         studio.session().addListener(this::onSessionChanged);
 
         addWindowListener(new WindowAdapter() {
@@ -461,6 +462,30 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     @Override
     public void showVariables() {
         Docking.bringToFront("variables");
+    }
+
+    /**
+     * Focuses a dockable panel by its tool name, for the MCP show_panel tool.
+     */
+    private boolean showPanel(String name) {
+        String key = name == null ? "" : name.toLowerCase(java.util.Locale.ROOT).trim();
+        String id = switch (key) {
+            case "resources", "resource" -> "resources";
+            case "structure", "windows", "window", "layouts" -> "structure";
+            case "items", "item" -> "items";
+            case "canvas", "preview" -> "canvas";
+            case "inspector", "properties" -> "inspector";
+            case "variables", "globals" -> "variables";
+            case "problems", "validation" -> "problems";
+            case "xml", "source" -> "xml";
+            case "ai", "assistant" -> "ai";
+            default -> null;
+        };
+        if (id == null) {
+            return false;
+        }
+        Docking.bringToFront(id);
+        return true;
     }
 
     @Override

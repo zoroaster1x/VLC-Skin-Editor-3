@@ -89,4 +89,19 @@ public final class SettingsHost implements UiInspector {
         store.save(settings);
         return true;
     }
+
+    @Override
+    public boolean setCanvas(Integer zoom, String tool, Boolean checkerboard) {
+        if (zoom != null) {
+            settings.setCanvasZoom(Math.max(1, Math.min(16, zoom)));
+        }
+        if (checkerboard != null) {
+            settings.setCheckerboard(checkerboard);
+        }
+        if (zoom == null && checkerboard == null) {
+            return false;
+        }
+        store.save(settings);
+        return true;
+    }
 }

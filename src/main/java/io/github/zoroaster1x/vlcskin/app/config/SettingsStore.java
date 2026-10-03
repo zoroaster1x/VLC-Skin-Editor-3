@@ -40,7 +40,19 @@ public final class SettingsStore {
         } catch (IOException ex) {
             // A broken settings file must never stop the editor from starting.
         }
-        return new StudioSettings();
+        StudioSettings settings = new StudioSettings();
+        settings.setLanguage(defaultLanguage());
+        return settings;
+    }
+
+    /**
+     * First run: follow the system locale when the editor speaks it.
+     */
+    private static String defaultLanguage() {
+        String code = java.util.Locale.getDefault().getLanguage();
+        boolean known = io.github.zoroaster1x.vlcskin.app.i18n.Messages.available().stream()
+                .anyMatch(language -> language.code().equalsIgnoreCase(code));
+        return known ? code.toLowerCase(java.util.Locale.ROOT) : "en";
     }
 
     public void save(StudioSettings settings) {
