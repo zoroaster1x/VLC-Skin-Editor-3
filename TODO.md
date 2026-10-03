@@ -72,6 +72,13 @@ after looking at a fresh screenshot or GIF.
 * MCP server wired into OpenCode under `mcp.servers` and exercised live from
   the session: examples, add/move/edit/undo, variables, nudge, reorder,
   reparent, slider background generation, validation and PNG previews.
+* The package root is `dev.zoroaster1x` end to end: Java packages, imports,
+  the conversion bundles under `src/main/resources`, the Gradle group and main
+  class, the native-image metadata folder and every doc path.
+* The MCP stdio server exits when its client closes stdin instead of waiting
+  for a signal, which matters for scripted clients and leaks no processes.
+* The native image carries GraalVM agent metadata for AWT: JNI field and method
+  registrations for Java2D plus the FindClass entries in `jni-config.json`.
 
 ## Next, in order
 
