@@ -29,14 +29,16 @@ public final class AboutDialog extends JDialog {
         content.setBorder(BorderFactory.createEmptyBorder(16, 18, 12, 18));
         JLabel title = new JLabel(Version.NAME + " " + Version.VERSION);
         title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 18f));
-        JLabel body = new JLabel("<html>A modern editor for VLC skins2 themes.<br><br>"
-                + "Copyright 2007-2026 The VideoLAN Team and contributors.<br>"
-                + "GPL-3.0-or-later, derivative of the original VLC Skin Editor 0.8.6 "
-                + "by Daniel Dreibrodt (GPL-2.0-or-later).<br><br>"
-                + "Desktop UI with dockable panels, a terminal UI, a CLI and an MCP server.<br>"
-                + "Built with Java 25, FlatLaf, ModernDocking and the official MCP Java SDK.<br>"
-                + "Skin format: VLC skins2 V2.0.<br><br>"
-                + "Website: <a href=\"" + WEBSITE + "\">github.com/zoroaster1x/vlc-skin-editor</a></html>");
+        JLabel body = new JLabel("""
+                <html>A modern editor for VLC skins2 themes.<br><br>\
+                Copyright 2007-2026 The VideoLAN Team and contributors.<br>\
+                GPL-3.0-or-later, derivative of the original VLC Skin Editor 0.8.6 \
+                by Daniel Dreibrodt (GPL-2.0-or-later).<br><br>\
+                Desktop UI with dockable panels, a terminal UI, a CLI and an MCP server.<br>\
+                Built with Java 25, FlatLaf, ModernDocking and the official MCP Java SDK.<br>\
+                Skin format: VLC skins2 V2.0.<br><br>\
+                Website: <a href="%s">github.com/zoroaster1x/vlc-skin-editor</a></html>\
+                """.formatted(WEBSITE));
         body.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         body.addMouseListener(new MouseAdapter() {
             @Override

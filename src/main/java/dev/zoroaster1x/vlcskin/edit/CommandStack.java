@@ -53,12 +53,12 @@ public final class CommandStack {
     public void run(Command command) {
         command.apply();
         while (commands.size() > cursor) {
-            commands.remove(commands.size() - 1);
+            commands.removeLast();
         }
         commands.add(command);
         cursor++;
         if (commands.size() > limit) {
-            commands.remove(0);
+            commands.removeFirst();
             cursor--;
         }
         fire();

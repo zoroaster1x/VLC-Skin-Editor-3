@@ -38,9 +38,9 @@ public final class StudioSettings {
 
     public void remember(String file) {
         recentFiles.remove(file);
-        recentFiles.add(0, file);
+        recentFiles.addFirst(file);
         while (recentFiles.size() > 12) {
-            recentFiles.remove(recentFiles.size() - 1);
+            recentFiles.removeLast();
         }
     }
 }
