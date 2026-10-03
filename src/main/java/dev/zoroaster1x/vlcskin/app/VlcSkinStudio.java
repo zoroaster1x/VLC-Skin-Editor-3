@@ -21,6 +21,10 @@ public final class VlcSkinStudio {
     }
 
     public static void main(String[] args) {
+        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+            System.err.println("Uncaught exception on " + thread.getName());
+            throwable.printStackTrace();
+        });
         // Inside a native image java.home is not set, and AWT's font configuration
         // looks for it before it falls back to the platform fonts.
         if (System.getProperty("java.home") == null) {
@@ -92,6 +96,8 @@ public final class VlcSkinStudio {
     private static void startGui(String[] args) {
         SettingsStore store = new SettingsStore();
         StudioSettings settings = store.load();
+        System.err.println("VLC Skin Studio " + dev.zoroaster1x.vlcskin.Version.VERSION);
+        System.err.println("Settings: " + store.file());
         try {
             ThemeManager.apply(settings.getTheme());
         } catch (Exception ex) {
@@ -121,7 +127,48 @@ public final class VlcSkinStudio {
             if (settings.isAutoUpdate()) {
                 studio.checkForUpdates(frame);
             }
+            if (System.getProperty("vlcskin.debug") != null) {
+                javax.swing.Timer dumpTimer = new javax.swing.Timer(3000, event -> {
+                    System.err.println("frame " + frame.getWidth() + "x" + frame.getHeight()
+                            + ", displayable=" + frame.isDisplayable()
+                            + ", valid=" + frame.isValid()
+                            + ", rootPane " + frame.getRootPane().getWidth() + "x" + frame.getRootPane().getHeight()
+                            + ", rootPaneLayout=" + frame.getRootPane().getLayout()
+                            + ", content " + frame.getContentPane().getWidth()
+                            + "x" + frame.getContentPane().getHeight()
+                            + ", valid=" + frame.getContentPane().isValid()
+                            + ", layout=" + frame.getContentPane().getLayout());
+                    dump(frame.getContentPane(), 0);
+                    if (Boolean.getBoolean("vlcskin.debug.exit")) {
+                        System.exit(0);
+                    }
+                });
+                dumpTimer.setRepeats(false);
+                dumpTimer.start();
+            }
         });
+    }
+
+    /**
+     * Prints the panel tree with bounds, for the vlcskin.debug flag.
+     */
+    private static void dump(java.awt.Component component, int depth) {
+        String name = component instanceof javax.swing.JComponent jComponent
+                ? String.valueOf(jComponent.getClientProperty("panelName")) : "null";
+        if (component instanceof javax.swing.JLabel label && label.getText() != null
+                && !label.getText().isBlank()) {
+            name = name + " \"" + label.getText().substring(0, Math.min(20, label.getText().length())) + "\"";
+        }
+        System.err.println("  ".repeat(depth) + component.getClass().getSimpleName()
+                + " " + name
+                + " " + component.getX() + "," + component.getY()
+                + " " + component.getWidth() + "x" + component.getHeight()
+                + (component.isVisible() ? "" : " hidden"));
+        if (component instanceof java.awt.Container container) {
+            for (java.awt.Component child : container.getComponents()) {
+                dump(child, depth + 1);
+            }
+        }
     }
 
     private static boolean isMac() {

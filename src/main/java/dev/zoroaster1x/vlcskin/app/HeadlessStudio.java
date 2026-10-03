@@ -335,7 +335,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     }
 
     @Override
-    public void validate() {
+    public void validateSkin() {
         panels.problems.validate();
         statusBar.setMessage("Validation finished");
     }

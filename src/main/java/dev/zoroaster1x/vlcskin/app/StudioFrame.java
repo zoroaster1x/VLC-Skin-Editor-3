@@ -83,18 +83,23 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         setJMenuBar(MenuBarFactory.build(this, themeControl));
         toolbar = ToolBarFactory.build(this);
         restoreToolbar(studio.settings());
+        // ModernDocking computes the split sizes from the window size, so the
+        // geometry has to be in place before the panels are docked.
+        applyWindowGeometry();
 
         Docking.initialize(this);
         DockingUI.initialize();
         RootDockingPanel root = new RootDockingPanel(this);
-        JPanel content = new JPanel(new BorderLayout());
-        content.add(root, BorderLayout.CENTER);
+        // ModernDocking tracks the frame's content pane, so the panels are added
+        // to it instead of replacing it with a wrapper.
+        java.awt.Container content = getContentPane();
+        content.setLayout(new java.awt.BorderLayout());
+        content.add(root, java.awt.BorderLayout.CENTER);
         if (toolbar.getParent() == null) {
             content.add(toolbar, studio.settings().getToolbarOrientation() == JToolBar.VERTICAL
-                    ? BorderLayout.WEST : BorderLayout.NORTH);
+                    ? java.awt.BorderLayout.WEST : java.awt.BorderLayout.NORTH);
         }
-        content.add(statusBar, BorderLayout.SOUTH);
-        setContentPane(content);
+        content.add(statusBar, java.awt.BorderLayout.SOUTH);
 
         registerDockable("resources", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources(), panels.resources);
         registerDockable("structure", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.windows(), panels.structure);
@@ -117,7 +122,6 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         Docking.dock("ai", "variables", DockingRegion.CENTER);
 
         restoreLayout();
-        applyWindowGeometry();
         installShortcuts();
 
         studio.addStatusListener(statusBar::setMessage);
@@ -435,7 +439,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     @Override
-    public void validate() {
+    public void validateSkin() {
         panels.problems.validate();
         studio.status("Validation finished");
     }

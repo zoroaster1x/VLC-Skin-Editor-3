@@ -34,7 +34,7 @@ public final class ToolBarFactory {
         bar.add(tool("Zoom in", "zoom-in", e -> actions.zoomIn()));
         bar.add(tool("Fit window", "grid", e -> actions.fitToWindow()));
         bar.addSeparator();
-        bar.add(tool("Validate the skin", "validate", e -> actions.validate()));
+        bar.add(tool("Validate the skin", "validate", e -> actions.validateSkin()));
         bar.add(tool("Render the preview to PNG", "image", e -> actions.renderPreview()));
         bar.addSeparator();
         bar.add(tool(Messages.get("MENU_EDIT_THEME", "Skin settings"), "layout", e -> actions.openSettings()));

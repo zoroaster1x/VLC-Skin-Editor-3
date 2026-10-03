@@ -46,7 +46,7 @@ public interface ChromeActions {
 
     void setTool(CanvasPanel.Tool tool);
 
-    void validate();
+    void validateSkin();
 
     void openSettings();
 
