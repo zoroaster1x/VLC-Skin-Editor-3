@@ -33,6 +33,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     private final Panels panels;
     private final JTabbedPane leftTabs = new JTabbedPane();
     private final JTabbedPane rightTabs = new JTabbedPane();
+    private final JTabbedPane bottomTabs = new JTabbedPane();
     private final JPanel canvasHost = new JPanel(new java.awt.BorderLayout());
     private final JToolBar toolbar;
     private final StatusBar statusBar = new StatusBar();
@@ -71,7 +72,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         rightTabs.addTab(io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables(), panels.variables);
         rightTabs.addTab(io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.ai(), panels.ai);
 
-        JTabbedPane bottom = new JTabbedPane();
+        JTabbedPane bottom = bottomTabs;
         bottom.addTab(io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
         bottom.addTab(io.github.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
 
@@ -107,7 +108,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
             ToolBarFactory.syncToolButtons(toolbar, panels.canvas.tool());
         });
         studio.service().setUi(new io.github.zoroaster1x.vlcskin.app.snapshot.SwingUiInspector(
-                () -> this, studio, "Headless studio"));
+                () -> this, studio, "Headless studio", () -> panels.canvas, this::showNamedPanel));
         statusBar.update(studio);
     }
 
@@ -204,6 +205,27 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
             if (title.equals(leftTabs.getTitleAt(i))) {
                 leftTabs.setSelectedIndex(i);
                 return;
+            }
+        }
+    }
+
+    /**
+     * Brings a named panel to the front, by translated or English name.
+     */
+    public void showNamedPanel(String name) {
+        if (name == null) {
+            return;
+        }
+        for (JTabbedPane tabs : java.util.List.of(leftTabs, rightTabs, bottomTabs)) {
+            for (int i = 0; i < tabs.getTabCount(); i++) {
+                String title = tabs.getTitleAt(i);
+                java.awt.Component component = tabs.getComponentAt(i);
+                String panelName = component instanceof javax.swing.JComponent jComponent
+                        ? String.valueOf(jComponent.getClientProperty("panelName")) : "";
+                if (name.equalsIgnoreCase(title) || name.equalsIgnoreCase(panelName)) {
+                    tabs.setSelectedIndex(i);
+                    return;
+                }
             }
         }
     }

@@ -52,6 +52,13 @@ public final class EditorControl {
         this.service = service;
     }
 
+    /**
+     * The service this control drives.
+     */
+    public EditorService service() {
+        return service;
+    }
+
     private EditorSession session() {
         return service.session();
     }
@@ -280,6 +287,9 @@ public final class EditorControl {
             Path target = Path.of(path);
             if (!target.getFileName().toString().toLowerCase(Locale.ROOT).endsWith(".png")) {
                 target = target.resolveSibling(target.getFileName() + ".png");
+            }
+            if (target.getParent() != null) {
+                Files.createDirectories(target.getParent());
             }
             Files.write(target, rendered.png());
             return ToolOutcome.text("Wrote " + target);
