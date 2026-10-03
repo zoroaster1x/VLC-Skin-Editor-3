@@ -85,7 +85,8 @@ def main():
         source = args.source / area
         if not source.is_dir():
             continue
-        markdown_files = sorted(path for path in source.rglob("*.md") if path.is_file())
+        markdown_files = sorted(path for path in source.rglob("*.md")
+                                if path.is_file() and path.name != "notes.md")
         if not markdown_files:
             continue
         for file in markdown_files:
@@ -138,6 +139,25 @@ def main():
     if not topics:
         print("no crawled markdown found; nothing bundled", file=sys.stderr)
         return 1
+
+    section_order = [
+        "Start here",
+        "Making a skin",
+        "Extras and tools",
+        "Troubleshooting",
+        "Appendix: the format explained",
+        "Original Skin Editor help",
+        "Creating skins2 themes",
+        "VLC user documentation",
+    ]
+
+    def sort_key(topic):
+        section = topic["section"]
+        section_index = section_order.index(section) if section in section_order else len(section_order)
+        is_index = 0 if topic["id"].endswith("-index") else 1
+        return (section_index, is_index, topic["title"].lower())
+
+    topics.sort(key=sort_key)
 
     (TARGET / "toc.json").write_text(json.dumps(topics, indent=2), encoding="utf-8")
 

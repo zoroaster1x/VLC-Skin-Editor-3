@@ -23,7 +23,7 @@ public final class MarkdownRenderer {
     }
 
     public String toHtml(String markdown, Path bundleFolder, String currentFile) {
-        String body = renderer.render(parser.parse(markdown));
+        String body = renderer.render(parser.parse(stripFrontMatter(markdown)));
         String images = bundleFolder.toUri().toString();
         if (!images.endsWith("/")) {
             images = images + "/";
@@ -73,6 +73,21 @@ public final class MarkdownRenderer {
             index = end + 1;
         }
         return out.toString();
+    }
+
+    /**
+     * Drops a leading YAML front matter block so it never shows in the page.
+     */
+    private static String stripFrontMatter(String markdown) {
+        if (markdown == null || !markdown.startsWith("---")) {
+            return markdown;
+        }
+        int end = markdown.indexOf("\n---", 3);
+        if (end < 0) {
+            return markdown;
+        }
+        int after = markdown.indexOf('\n', end + 1);
+        return after < 0 ? "" : markdown.substring(after + 1);
     }
 
     private static String markTerms(String text, List<String> terms) {

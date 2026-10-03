@@ -38,6 +38,27 @@ class DocumentationTest {
     }
 
     @Test
+    void searchReachesHeadingsInsidePages() {
+        assumeTrue(bundle.available(), "documentation bundle not built yet");
+        DocumentationSearch search = new DocumentationSearch(bundle);
+        List<DocumentationSearch.Hit> hits = search.search("bezier", 50);
+        assertThat(hits).isNotEmpty();
+        assertThat(hits).anyMatch(hit -> !hit.path().isEmpty());
+    }
+
+    @Test
+    void handbookPagesResolveTheirImages() throws Exception {
+        assumeTrue(bundle.available(), "documentation bundle not built yet");
+        DocumentationBundle.Topic topic = bundle.topic("handbook-theme-structure");
+        assumeTrue(topic != null, "handbook not bundled yet");
+        java.nio.file.Path folder = bundle.materialize();
+        MarkdownRenderer renderer = new MarkdownRenderer();
+        String html = renderer.toHtml(bundle.markdown(topic), folder, topic.file());
+        assertThat(html).contains("images/handbook-theme-structure.png");
+        assertThat(folder.resolve("images/handbook-theme-structure.png")).exists();
+    }
+
+    @Test
     void searchUsesEveryTerm() {
         assumeTrue(bundle.available(), "documentation bundle not built yet");
         DocumentationSearch search = new DocumentationSearch(bundle);

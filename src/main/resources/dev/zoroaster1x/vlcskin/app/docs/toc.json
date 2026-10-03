@@ -1,17 +1,262 @@
 [
   {
-    "id": "handbook-format-reference",
-    "section": "Reference",
-    "title": "Format reference",
-    "file": "pages/handbook-format-reference.md",
-    "sourceUrl": ""
+    "id": "handbook-index",
+    "section": "Start here",
+    "title": "VLC skins2 handbook",
+    "file": "pages/handbook-index.md",
+    "sourceUrl": "rewritten"
   },
   {
-    "id": "skinedhlp-basics",
+    "id": "handbook-editor-guide",
+    "section": "Start here",
+    "title": "Editor guide",
+    "file": "pages/handbook-editor-guide.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-getting-started",
+    "section": "Start here",
+    "title": "Getting started",
+    "file": "pages/handbook-getting-started.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-menus-and-shortcuts",
+    "section": "Start here",
+    "title": "Menus and shortcuts",
+    "file": "pages/handbook-menus-and-shortcuts.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-welcome-and-first-skin",
+    "section": "Start here",
+    "title": "Welcome and your first skin",
+    "file": "pages/handbook-welcome-and-first-skin.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-window-tour",
+    "section": "Start here",
+    "title": "Window tour",
+    "file": "pages/handbook-window-tour.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-bitmaps-and-animations",
+    "section": "Making a skin",
+    "title": "Bitmaps and animations",
+    "file": "pages/handbook-bitmaps-and-animations.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-buttons-checkboxes-and-images",
+    "section": "Making a skin",
+    "title": "Buttons, checkboxes and images",
+    "file": "pages/handbook-buttons-checkboxes-and-images.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-fonts-and-bitmap-fonts",
+    "section": "Making a skin",
+    "title": "Fonts and bitmap fonts",
+    "file": "pages/handbook-fonts-and-bitmap-fonts.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-playlists-and-playtrees",
+    "section": "Making a skin",
+    "title": "Playlists and playtrees",
+    "file": "pages/handbook-playlists-and-playtrees.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-slider-backgrounds",
+    "section": "Making a skin",
+    "title": "Slider backgrounds",
+    "file": "pages/handbook-slider-backgrounds.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-sliders",
+    "section": "Making a skin",
+    "title": "Sliders",
+    "file": "pages/handbook-sliders.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-1-prepare-artwork",
+    "section": "Making a skin",
+    "title": "Step 1: prepare your artwork",
+    "file": "pages/handbook-step-1-prepare-artwork.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-2-new-theme",
+    "section": "Making a skin",
+    "title": "Step 2: start a new theme",
+    "file": "pages/handbook-step-2-new-theme.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-3-add-and-place-controls",
+    "section": "Making a skin",
+    "title": "Step 3: add and place controls",
+    "file": "pages/handbook-step-3-add-and-place-controls.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-4-text-and-variables",
+    "section": "Making a skin",
+    "title": "Step 4: text and variables",
+    "file": "pages/handbook-step-4-text-and-variables.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-5-sliders-and-backgrounds",
+    "section": "Making a skin",
+    "title": "Step 5: sliders and backgrounds",
+    "file": "pages/handbook-step-5-sliders-and-backgrounds.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-6-animations-and-playlists",
+    "section": "Making a skin",
+    "title": "Step 6: animations and playlists",
+    "file": "pages/handbook-step-6-animations-and-playlists.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-step-7-validate-test-export",
+    "section": "Making a skin",
+    "title": "Step 7: validate, test and export",
+    "file": "pages/handbook-step-7-validate-test-export.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-text-items",
+    "section": "Making a skin",
+    "title": "Text items",
+    "file": "pages/handbook-text-items.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-documentation-viewer",
+    "section": "Extras and tools",
+    "title": "Documentation viewer",
+    "file": "pages/handbook-documentation-viewer.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-mcp-for-automation",
+    "section": "Extras and tools",
+    "title": "MCP for automation",
+    "file": "pages/handbook-mcp-for-automation.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-mcp-and-ai",
+    "section": "Extras and tools",
+    "title": "MCP tool reference",
+    "file": "pages/handbook-mcp-and-ai.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-theme-browser",
+    "section": "Extras and tools",
+    "title": "Theme browser",
+    "file": "pages/handbook-theme-browser.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-vlt-archives",
+    "section": "Extras and tools",
+    "title": "VLT archives",
+    "file": "pages/handbook-vlt-archives.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-common-problems",
+    "section": "Troubleshooting",
+    "title": "Common problems",
+    "file": "pages/handbook-common-problems.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-faq",
+    "section": "Troubleshooting",
+    "title": "FAQ",
+    "file": "pages/handbook-faq.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-validation-and-troubleshooting",
+    "section": "Troubleshooting",
+    "title": "Validation and troubleshooting",
+    "file": "pages/handbook-validation-and-troubleshooting.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-actions-and-variables",
+    "section": "Appendix: the format explained",
+    "title": "Actions and variables",
+    "file": "pages/handbook-actions-and-variables.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-format-basics",
+    "section": "Appendix: the format explained",
+    "title": "Format basics",
+    "file": "pages/handbook-format-basics.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-format-reference",
+    "section": "Appendix: the format explained",
+    "title": "Format reference (under the hood)",
+    "file": "pages/handbook-format-reference.md",
+    "sourceUrl": "generated"
+  },
+  {
+    "id": "handbook-items-overview",
+    "section": "Appendix: the format explained",
+    "title": "Items overview",
+    "file": "pages/handbook-items-overview.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-layouts-and-anchors",
+    "section": "Appendix: the format explained",
+    "title": "Layouts and anchors",
+    "file": "pages/handbook-layouts-and-anchors.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-popupmenus-and-inifiles",
+    "section": "Appendix: the format explained",
+    "title": "Popup menus and ini files",
+    "file": "pages/handbook-popupmenus-and-inifiles.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "handbook-theme-structure",
+    "section": "Appendix: the format explained",
+    "title": "Theme structure",
+    "file": "pages/handbook-theme-structure.md",
+    "sourceUrl": "rewritten"
+  },
+  {
+    "id": "skinedhlp-index",
     "section": "Original Skin Editor help",
-    "title": "The basics of creating a skin",
-    "file": "pages/skinedhlp-basics.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/basics.html"
+    "title": "VLC Skin Editor - Online Help",
+    "file": "pages/skinedhlp-index.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/index.html"
+  },
+  {
+    "id": "skinedhlp-i-anchor",
+    "section": "Original Skin Editor help",
+    "title": "Anchor",
+    "file": "pages/skinedhlp-i-anchor.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-anchor.html"
   },
   {
     "id": "skinedhlp-bezier",
@@ -21,18 +266,18 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/bezier.html"
   },
   {
+    "id": "skinedhlp-res-bitmap",
+    "section": "Original Skin Editor help",
+    "title": "Bitmap",
+    "file": "pages/skinedhlp-res-bitmap.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-bitmap.html"
+  },
+  {
     "id": "skinedhlp-boolexpr",
     "section": "Original Skin Editor help",
     "title": "Boolean expressions",
     "file": "pages/skinedhlp-boolexpr.md",
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/boolexpr.html"
-  },
-  {
-    "id": "skinedhlp-i-anchor",
-    "section": "Original Skin Editor help",
-    "title": "Anchor",
-    "file": "pages/skinedhlp-i-anchor.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-anchor.html"
   },
   {
     "id": "skinedhlp-i-button",
@@ -49,11 +294,32 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-checkbox.html"
   },
   {
+    "id": "skinedhlp-res-font",
+    "section": "Original Skin Editor help",
+    "title": "Font",
+    "file": "pages/skinedhlp-res-font.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-font.html"
+  },
+  {
     "id": "skinedhlp-i-group",
     "section": "Original Skin Editor help",
     "title": "Group",
     "file": "pages/skinedhlp-i-group.md",
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-group.html"
+  },
+  {
+    "id": "skinedhlp-resizable",
+    "section": "Original Skin Editor help",
+    "title": "How to create a resizable window",
+    "file": "pages/skinedhlp-resizable.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/resizable.html"
+  },
+  {
+    "id": "skinedhlp-sbgwizard",
+    "section": "Original Skin Editor help",
+    "title": "How to use the SliderBackground Generator",
+    "file": "pages/skinedhlp-sbgwizard.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/sbgwizard.html"
   },
   {
     "id": "skinedhlp-i-image",
@@ -63,11 +329,25 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-image.html"
   },
   {
+    "id": "skinedhlp-layout",
+    "section": "Original Skin Editor help",
+    "title": "Layout",
+    "file": "pages/skinedhlp-layout.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/layout.html"
+  },
+  {
     "id": "skinedhlp-i-panel",
     "section": "Original Skin Editor help",
     "title": "Panel",
     "file": "pages/skinedhlp-i-panel.md",
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-panel.html"
+  },
+  {
+    "id": "skinedhlp-percent",
+    "section": "Original Skin Editor help",
+    "title": "Percentage variables",
+    "file": "pages/skinedhlp-percent.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/percent.html"
   },
   {
     "id": "skinedhlp-i-playtree",
@@ -91,62 +371,6 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-sliderbg.html"
   },
   {
-    "id": "skinedhlp-i-text",
-    "section": "Original Skin Editor help",
-    "title": "Text",
-    "file": "pages/skinedhlp-i-text.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-text.html"
-  },
-  {
-    "id": "skinedhlp-i-video",
-    "section": "Original Skin Editor help",
-    "title": "Video",
-    "file": "pages/skinedhlp-i-video.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-video.html"
-  },
-  {
-    "id": "skinedhlp-index",
-    "section": "Original Skin Editor help",
-    "title": "VLC Skin Editor - Online Help",
-    "file": "pages/skinedhlp-index.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/index.html"
-  },
-  {
-    "id": "skinedhlp-layout",
-    "section": "Original Skin Editor help",
-    "title": "Layout",
-    "file": "pages/skinedhlp-layout.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/layout.html"
-  },
-  {
-    "id": "skinedhlp-notes",
-    "section": "Original Skin Editor help",
-    "title": "Notes",
-    "file": "pages/skinedhlp-notes.md",
-    "sourceUrl": ""
-  },
-  {
-    "id": "skinedhlp-percent",
-    "section": "Original Skin Editor help",
-    "title": "Percentage variables",
-    "file": "pages/skinedhlp-percent.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/percent.html"
-  },
-  {
-    "id": "skinedhlp-res-bitmap",
-    "section": "Original Skin Editor help",
-    "title": "Bitmap",
-    "file": "pages/skinedhlp-res-bitmap.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-bitmap.html"
-  },
-  {
-    "id": "skinedhlp-res-font",
-    "section": "Original Skin Editor help",
-    "title": "Font",
-    "file": "pages/skinedhlp-res-font.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-font.html"
-  },
-  {
     "id": "skinedhlp-res-subbitmap",
     "section": "Original Skin Editor help",
     "title": "SubBitmap",
@@ -154,18 +378,11 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/res-subbitmap.html"
   },
   {
-    "id": "skinedhlp-resizable",
+    "id": "skinedhlp-i-text",
     "section": "Original Skin Editor help",
-    "title": "How to create a resizable window",
-    "file": "pages/skinedhlp-resizable.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/resizable.html"
-  },
-  {
-    "id": "skinedhlp-sbgwizard",
-    "section": "Original Skin Editor help",
-    "title": "How to use the SliderBackground Generator",
-    "file": "pages/skinedhlp-sbgwizard.md",
-    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/sbgwizard.html"
+    "title": "Text",
+    "file": "pages/skinedhlp-i-text.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-text.html"
   },
   {
     "id": "skinedhlp-textvars",
@@ -175,11 +392,25 @@
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/textvars.html"
   },
   {
+    "id": "skinedhlp-basics",
+    "section": "Original Skin Editor help",
+    "title": "The basics of creating a skin",
+    "file": "pages/skinedhlp-basics.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/basics.html"
+  },
+  {
     "id": "skinedhlp-theme",
     "section": "Original Skin Editor help",
     "title": "Theme settings",
     "file": "pages/skinedhlp-theme.md",
     "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/theme.html"
+  },
+  {
+    "id": "skinedhlp-i-video",
+    "section": "Original Skin Editor help",
+    "title": "Video",
+    "file": "pages/skinedhlp-i-video.md",
+    "sourceUrl": "https://images.videolan.org/vlc/skinedhlp/i-video.html"
   },
   {
     "id": "skinedhlp-window",
@@ -196,25 +427,11 @@
     "sourceUrl": ""
   },
   {
-    "id": "skins2-create-notes",
-    "section": "Creating skins2 themes",
-    "title": "Notes",
-    "file": "pages/skins2-create-notes.md",
-    "sourceUrl": ""
-  },
-  {
     "id": "skins2-create-skins2-create",
     "section": "Creating skins2 themes",
     "title": "HowTo create your own skin",
     "file": "pages/skins2-create-skins2-create.md",
     "sourceUrl": "https://images.videolan.org/vlc/skins2-create.html"
-  },
-  {
-    "id": "readthedocs-addons-extensions",
-    "section": "VLC user documentation",
-    "title": "Extensions",
-    "file": "pages/readthedocs-addons-extensions.md",
-    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/extensions.html"
   },
   {
     "id": "readthedocs-addons-index",
@@ -224,24 +441,10 @@
     "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/index.html"
   },
   {
-    "id": "readthedocs-addons-skins",
-    "section": "VLC user documentation",
-    "title": "Skins",
-    "file": "pages/readthedocs-addons-skins.md",
-    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/skins.html"
-  },
-  {
     "id": "readthedocs-index",
     "section": "VLC user documentation",
     "title": "Index",
     "file": "pages/readthedocs-index.md",
-    "sourceUrl": ""
-  },
-  {
-    "id": "readthedocs-notes",
-    "section": "VLC user documentation",
-    "title": "Notes",
-    "file": "pages/readthedocs-notes.md",
     "sourceUrl": ""
   },
   {
@@ -250,5 +453,19 @@
     "title": "Support",
     "file": "pages/readthedocs-support-index.md",
     "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/support/index.html"
+  },
+  {
+    "id": "readthedocs-addons-extensions",
+    "section": "VLC user documentation",
+    "title": "Extensions",
+    "file": "pages/readthedocs-addons-extensions.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/extensions.html"
+  },
+  {
+    "id": "readthedocs-addons-skins",
+    "section": "VLC user documentation",
+    "title": "Skins",
+    "file": "pages/readthedocs-addons-skins.md",
+    "sourceUrl": "https://vlc-user-documentation.readthedocs.io/en/latest/addons/skins.html"
   }
 ]

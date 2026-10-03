@@ -131,7 +131,16 @@ public final class VlcSkinStudio {
                 new dev.zoroaster1x.vlcskin.app.dialog.ThemeBrowserDialog(studio, frame).setVisible(true);
             }
             if (System.getProperty("vlcskin.docs") != null) {
-                new dev.zoroaster1x.vlcskin.app.dialog.DocumentationDialog(frame).setVisible(true);
+                var documentation = new dev.zoroaster1x.vlcskin.app.dialog.DocumentationDialog(frame);
+                String topic = System.getProperty("vlcskin.docs.topic");
+                String docsSearch = System.getProperty("vlcskin.docs.search");
+                if (topic != null && !topic.isBlank()) {
+                    documentation.panel().selectTopic(topic);
+                }
+                if (docsSearch != null && !docsSearch.isBlank()) {
+                    documentation.panel().searchAll(docsSearch);
+                }
+                documentation.setVisible(true);
             }
             if (System.getProperty("vlcskin.debug") != null) {
                 javax.swing.Timer dumpTimer = new javax.swing.Timer(3000, event -> {

@@ -88,6 +88,12 @@ after looking at a fresh screenshot or GIF.
 * The desktop window has a working default panel layout (resources left,
   canvas centre, inspector right) and a responsive welcome card;
   View > Reset panel layout restores it.
+* Documentation viewer under Help > Documentation (F1): a rewritten,
+  app-first handbook with generated diagrams, a format reference generated
+  from VLC's skin.dtd, and the original help, creation guide and VLC user
+  documentation bundled as archives. Search ranks pages, headings and text
+  and highlights the term in the page. The AI assistant panel was removed,
+  MCP is the automation path.
 * `docs/feature-parity.md` records the full comparison with the original
   editor, including the differences that stay (self-updater replaced by a
   release check, popup menu entries preserved without an editor, and so on).

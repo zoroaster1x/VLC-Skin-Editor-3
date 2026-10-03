@@ -255,6 +255,25 @@ The binary is about 68 MB. `picocli-codegen` runs at compile time for the CLI
 metadata, and the AWT reflection and JNI entries collected with GraalVM's
 tracing agent live under `src/main/resources/META-INF/native-image/`.
 
+## Documentation
+
+Help > Documentation (F1) opens the built in guide. It ships inside the jar
+and works offline:
+
+* A rewritten handbook: the window tour, every panel and tool, and a step by
+  step skin build from artwork to VLT export, with generated diagrams.
+* A complete format reference generated from VLC's own `skin.dtd`, every
+  element and attribute with defaults and meanings.
+* The original Skin Editor help pages, the skins2 creation guide and the VLC
+  user documentation, bundled as reference archives with their images.
+
+The search covers page titles, every heading and the body text, ranks title
+matches first and shows the section path, line and hit count of each result.
+Selecting a result highlights the term in the rendered page. The bundle is
+regenerated with `tools/bundle-docs.py`; the diagrams come from
+`tools/docs-graphics.py` and the format reference from
+`tools/dtd-to-markdown.py`.
+
 ## Automation and MCP
 
 Scripts, editors and AI clients drive the same `EditorService` over the MCP
