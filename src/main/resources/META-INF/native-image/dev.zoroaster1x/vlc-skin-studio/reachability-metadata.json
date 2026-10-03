@@ -78,10 +78,59 @@
       ]
     },
     {
-      "type": "dev.zoroaster1x.vlcskin.cli.NewCommand"
+      "type": "dev.zoroaster1x.vlcskin.cli.NewCommand",
+      "fields": [
+        {
+          "name": "exampleId"
+        },
+        {
+          "name": "height"
+        },
+        {
+          "name": "target"
+        },
+        {
+          "name": "width"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
-      "type": "dev.zoroaster1x.vlcskin.cli.RenderCommand"
+      "type": "dev.zoroaster1x.vlcskin.cli.RenderCommand",
+      "fields": [
+        {
+          "name": "json"
+        },
+        {
+          "name": "layout"
+        },
+        {
+          "name": "out"
+        },
+        {
+          "name": "quiet"
+        },
+        {
+          "name": "skin"
+        },
+        {
+          "name": "window"
+        },
+        {
+          "name": "zoom"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "dev.zoroaster1x.vlcskin.cli.SkinStudioCli"
@@ -99,7 +148,18 @@
       "type": "dev.zoroaster1x.vlcskin.cli.TuiCommand"
     },
     {
-      "type": "dev.zoroaster1x.vlcskin.cli.ValidateCommand"
+      "type": "dev.zoroaster1x.vlcskin.cli.ValidateCommand",
+      "fields": [
+        {
+          "name": "skin"
+        }
+      ],
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
     },
     {
       "type": "dev.zoroaster1x.vlcskin.cli.VltCommand"
@@ -558,6 +618,10 @@
         {
           "name": "isHeadless",
           "parameterTypes": []
+        },
+        {
+          "name": "getLocalGraphicsEnvironment",
+          "parameterTypes": []
         }
       ]
     },
@@ -958,7 +1022,16 @@
       "type": "java.nio.file.Path"
     },
     {
-      "type": "java.nio.file.Paths"
+      "type": "java.nio.file.Paths",
+      "methods": [
+        {
+          "name": "get",
+          "parameterTypes": [
+            "java.lang.String",
+            "java.lang.String[]"
+          ]
+        }
+      ]
     },
     {
       "type": "java.sql.Connection"
@@ -1975,6 +2048,1221 @@
     },
     {
       "type": "sun.util.resources.cldr.CalendarData"
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatCapsLockIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatCheckBoxIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatCheckBoxMenuItemIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatHelpButtonIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatMenuArrowIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatMenuItemArrowIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatRevealIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTabbedPaneCloseIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTreeClosedIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTreeCollapsedIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTreeExpandedIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTreeLeafIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.icons.FlatTreeOpenIcon",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.resources.Bundle"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatArrowButton"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatButtonBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatButtonUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatCheckBoxMenuItemUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatCheckBoxUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatFormattedTextFieldUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatLabelUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatListCellBorder$Default",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatListUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMarginBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMenuBarBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMenuBarUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMenuItemBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMenuItemUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatMenuUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatPanelUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatPasswordFieldUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatPopupMenuBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatPopupMenuSeparatorUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatPopupMenuUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatRootPaneUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatRoundBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatScrollBarUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatScrollBarUI$FlatScrollBarButton"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatScrollPaneBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatScrollPaneUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSliderUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSpinnerUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSpinnerUI$1"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSplitPaneUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSplitPaneUI$1"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatSplitPaneUI$FlatSplitPaneDivider"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTabbedPaneUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTabbedPaneUI$FlatMoreTabsButton"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTabbedPaneUI$FlatScrollableTabButton"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTabbedPaneUI$FlatTabAreaButton"
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTextAreaUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTextBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTextFieldUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatToggleButtonUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatToolBarBorder",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatToolBarSeparatorUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatToolBarUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatTreeUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.formdev.flatlaf.ui.FlatViewportUI",
+      "methods": [
+        {
+          "name": "createUI",
+          "parameterTypes": [
+            "javax.swing.JComponent"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "com.github.weisj.jsvg.SVGDocument"
+    },
+    {
+      "type": "com.sun.swing.internal.plaf.basic.resources.basic"
+    },
+    {
+      "type": "com.sun.xml.internal.stream.XMLInputFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "com.sun.xml.internal.stream.XMLOutputFactoryImpl",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.StudioFrame"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.chrome.StatusBar"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.AbstractTreePanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.AbstractTreePanel$RefRenderer"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.AiPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.CanvasPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.CanvasPanel$Surface"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.InspectorPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.ItemsPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.ProblemsPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.ProblemsPanel$1"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.ResourcesPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.StructurePanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.VariablesPanel"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.WelcomeCard"
+    },
+    {
+      "type": "dev.zoroaster1x.vlcskin.app.panel.XmlPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.api.RootDockingPanelAPI"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.app.RootDockingPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.ext.ui.FlatLafHeaderUI"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.CustomTabbedPane"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DisplayPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DockableToolbar"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DockedSimplePanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DockedSplitPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DockedTabbedPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.DockingPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.InternalRootDockingPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.floating.DockingHandle"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.floating.FloatUtilsFrame"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.internal.floating.FloatUtilsFrame$1"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.ui.DefaultDockingPanel"
+    },
+    {
+      "type": "io.github.andrewauclair.moderndocking.ui.DefaultHeaderUI"
+    },
+    {
+      "type": "java.awt.Component",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "appContext"
+        },
+        {
+          "name": "background"
+        },
+        {
+          "name": "foreground"
+        },
+        {
+          "name": "graphicsConfig"
+        },
+        {
+          "name": "height"
+        },
+        {
+          "name": "isPacked"
+        },
+        {
+          "name": "name"
+        },
+        {
+          "name": "peer"
+        },
+        {
+          "name": "width"
+        },
+        {
+          "name": "x"
+        },
+        {
+          "name": "y"
+        }
+      ],
+      "methods": [
+        {
+          "name": "getLocationOnScreen_NoTreeLock",
+          "parameterTypes": []
+        },
+        {
+          "name": "getParent_NoClientCode",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "java.awt.Image"
+    },
+    {
+      "type": "java.awt.Rectangle",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "int",
+            "int",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.awt.SequencedEvent"
+    },
+    {
+      "type": "java.awt.event.KeyEvent",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "VK_0"
+        },
+        {
+          "name": "VK_A"
+        },
+        {
+          "name": "VK_ADD"
+        },
+        {
+          "name": "VK_BACK_SLASH"
+        },
+        {
+          "name": "VK_BACK_SPACE"
+        },
+        {
+          "name": "VK_C"
+        },
+        {
+          "name": "VK_CONTEXT_MENU"
+        },
+        {
+          "name": "VK_COPY"
+        },
+        {
+          "name": "VK_CUT"
+        },
+        {
+          "name": "VK_D"
+        },
+        {
+          "name": "VK_DELETE"
+        },
+        {
+          "name": "VK_DOWN"
+        },
+        {
+          "name": "VK_END"
+        },
+        {
+          "name": "VK_ENTER"
+        },
+        {
+          "name": "VK_EQUALS"
+        },
+        {
+          "name": "VK_ESCAPE"
+        },
+        {
+          "name": "VK_F10"
+        },
+        {
+          "name": "VK_F2"
+        },
+        {
+          "name": "VK_F6"
+        },
+        {
+          "name": "VK_F8"
+        },
+        {
+          "name": "VK_H"
+        },
+        {
+          "name": "VK_HOME"
+        },
+        {
+          "name": "VK_INSERT"
+        },
+        {
+          "name": "VK_KP_DOWN"
+        },
+        {
+          "name": "VK_KP_LEFT"
+        },
+        {
+          "name": "VK_KP_RIGHT"
+        },
+        {
+          "name": "VK_KP_UP"
+        },
+        {
+          "name": "VK_LEFT"
+        },
+        {
+          "name": "VK_MINUS"
+        },
+        {
+          "name": "VK_O"
+        },
+        {
+          "name": "VK_PAGE_DOWN"
+        },
+        {
+          "name": "VK_PAGE_UP"
+        },
+        {
+          "name": "VK_PASTE"
+        },
+        {
+          "name": "VK_RIGHT"
+        },
+        {
+          "name": "VK_SLASH"
+        },
+        {
+          "name": "VK_SPACE"
+        },
+        {
+          "name": "VK_SUBTRACT"
+        },
+        {
+          "name": "VK_T"
+        },
+        {
+          "name": "VK_TAB"
+        },
+        {
+          "name": "VK_UP"
+        },
+        {
+          "name": "VK_V"
+        },
+        {
+          "name": "VK_X"
+        },
+        {
+          "name": "isProxyActive"
+        }
+      ]
+    },
+    {
+      "type": "java.awt.event.MouseListener[]"
+    },
+    {
+      "type": "java.awt.event.MouseMotionListener[]"
+    },
+    {
+      "type": "java.awt.image.DirectColorModel",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "int",
+            "int",
+            "int",
+            "int",
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "java.beans.Beans"
+    },
+    {
+      "type": "java.beans.PropertyVetoException"
+    },
+    {
+      "type": "java.io.InputStream"
+    },
+    {
+      "type": "java.lang.ObjectCustomizer"
+    },
+    {
+      "type": "java.lang.String"
+    },
+    {
+      "type": "javax.swing.plaf.basic.BasicMenuBarUI",
+      "methods": [
+        {
+          "name": "loadActionMap",
+          "parameterTypes": [
+            "javax.swing.plaf.basic.LazyActionMap"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "javax.swing.plaf.basic.BasicTabbedPaneUI",
+      "methods": [
+        {
+          "name": "loadActionMap",
+          "parameterTypes": [
+            "javax.swing.plaf.basic.LazyActionMap"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "net.miginfocom.layout.BoundSize"
+    },
+    {
+      "type": "net.miginfocom.layout.BoundSizeCustomizer"
+    },
+    {
+      "type": "net.miginfocom.layout.UnitValue"
+    },
+    {
+      "type": "net.miginfocom.layout.UnitValueCustomizer"
+    },
+    {
+      "type": "net.miginfocom.swing.MigLayout"
+    },
+    {
+      "type": "org.fife.ui.rsyntaxtextarea.DefaultTokenMakerFactory",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.fife.ui.rsyntaxtextarea.FoldingAwareIconRowHeader"
+    },
+    {
+      "type": "org.fife.ui.rsyntaxtextarea.RSyntaxTextArea"
+    },
+    {
+      "type": "org.fife.ui.rsyntaxtextarea.modes.PlainTextTokenMaker",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.fife.ui.rsyntaxtextarea.modes.XMLTokenMaker",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "org.fife.ui.rtextarea.AbstractGutterComponent"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.FoldIndicator"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.Gutter"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.IconRowHeader"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.LineNumberList"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.RTextArea"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.RTextAreaBase"
+    },
+    {
+      "type": "org.fife.ui.rtextarea.RTextScrollPane"
+    },
+    {
+      "type": "sun.awt.SunToolkit",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "awtLock",
+          "parameterTypes": []
+        },
+        {
+          "name": "awtLockNotify",
+          "parameterTypes": []
+        },
+        {
+          "name": "awtLockNotifyAll",
+          "parameterTypes": []
+        },
+        {
+          "name": "awtLockWait",
+          "parameterTypes": [
+            "long"
+          ]
+        },
+        {
+          "name": "awtUnlock",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11.XBaseWindow",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "window"
+        }
+      ],
+      "methods": [
+        {
+          "name": "getWindow",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11.XContentWindow"
+    },
+    {
+      "type": "sun.awt.X11.XErrorHandlerUtil",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "init",
+          "parameterTypes": [
+            "long"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11.XFramePeer"
+    },
+    {
+      "type": "sun.awt.X11.XToolkit",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "modLockIsShiftLock"
+        },
+        {
+          "name": "numLockMask"
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11.XWindow",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "drawState"
+        },
+        {
+          "name": "graphicsConfig"
+        },
+        {
+          "name": "target"
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11GraphicsConfig",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "aData"
+        },
+        {
+          "name": "bitsPerPixel"
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11GraphicsDevice",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "addDoubleBufferVisual",
+          "parameterTypes": [
+            "int"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.X11InputMethodBase",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "pData"
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.image.GifImageDecoder",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "outCode"
+        },
+        {
+          "name": "prefix"
+        },
+        {
+          "name": "suffix"
+        }
+      ],
+      "methods": [
+        {
+          "name": "readBytes",
+          "parameterTypes": [
+            "byte[]",
+            "int",
+            "int"
+          ]
+        },
+        {
+          "name": "sendPixels",
+          "parameterTypes": [
+            "int",
+            "int",
+            "int",
+            "int",
+            "byte[]",
+            "java.awt.image.ColorModel"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.awt.image.ImageRepresentation",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "numSrcLUT"
+        },
+        {
+          "name": "srcLUTtransIndex"
+        }
+      ]
+    },
+    {
+      "type": "sun.java2d.SunGraphicsEnvironment",
+      "jniAccessible": true,
+      "methods": [
+        {
+          "name": "isDisplayLocal",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
+      "type": "sun.java2d.xr.XRBackendNative",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "FMTPTR_A8"
+        },
+        {
+          "name": "FMTPTR_ARGB32"
+        },
+        {
+          "name": "MASK_XIMG"
+        }
+      ]
+    },
+    {
+      "type": "sun.java2d.xr.XRSurfaceData",
+      "jniAccessible": true,
+      "fields": [
+        {
+          "name": "picture"
+        },
+        {
+          "name": "xid"
+        }
+      ]
+    },
+    {
+      "type": "sun.reflect.misc.Trampoline",
+      "methods": [
+        {
+          "name": "invoke",
+          "parameterTypes": [
+            "java.lang.reflect.Method",
+            "java.lang.Object",
+            "java.lang.Object[]"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "sun.util.resources.cldr.CurrencyNames"
+    },
+    {
+      "type": "sun.util.resources.cldr.CurrencyNames_en"
+    },
+    {
+      "type": "sun.util.resources.cldr.CurrencyNames_en_US"
     }
   ],
   "resources": [
@@ -2063,6 +3351,128 @@
     },
     {
       "bundle": "sun.awt.resources.awt"
+    },
+    {
+      "glob": "META-INF/services/com.formdev.flatlaf.FlatDefaultsAddon"
+    },
+    {
+      "glob": "META-INF/services/com.github.weisj.jsvg.logging.LogManager"
+    },
+    {
+      "glob": "META-INF/services/java.awt.im.spi.InputMethodDescriptor"
+    },
+    {
+      "glob": "META-INF/services/java.util.spi.ResourceBundleControlProvider"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.stream.XMLInputFactory"
+    },
+    {
+      "glob": "META-INF/services/javax.xml.stream.XMLOutputFactory"
+    },
+    {
+      "glob": "api_icons/close.png"
+    },
+    {
+      "glob": "api_icons/settings.png"
+    },
+    {
+      "glob": "com/formdev/flatlaf/FlatDarkLaf.properties"
+    },
+    {
+      "glob": "com/formdev/flatlaf/FlatLaf.properties"
+    },
+    {
+      "glob": "com/formdev/flatlaf/resources/Bundle.properties"
+    },
+    {
+      "glob": "com/formdev/flatlaf/resources/Bundle_en.properties"
+    },
+    {
+      "glob": "com/formdev/flatlaf/resources/Bundle_en_US.properties"
+    },
+    {
+      "glob": "dev/zoroaster1x/vlcskin/app/messages/messages_en.properties"
+    },
+    {
+      "glob": "org/fife/ui/rsyntaxtextarea/RSyntaxTextArea.properties"
+    },
+    {
+      "glob": "org/fife/ui/rsyntaxtextarea/RSyntaxTextArea_en.properties"
+    },
+    {
+      "glob": "org/fife/ui/rsyntaxtextarea/RSyntaxTextArea_en_US.properties"
+    },
+    {
+      "glob": "org/fife/ui/rtextarea/RTextArea.properties"
+    },
+    {
+      "glob": "org/fife/ui/rtextarea/RTextArea_en.properties"
+    },
+    {
+      "glob": "org/fife/ui/rtextarea/RTextArea_en_US.properties"
+    },
+    {
+      "glob": "ui_ext_icons/close.svg"
+    },
+    {
+      "glob": "ui_ext_icons/settings.svg"
+    },
+    {
+      "module": "java.base",
+      "glob": "java/util/currency.data"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "com/formdev/flatlaf/resources/Bundle.properties"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "com/sun/swing/internal/plaf/basic/resources/basic_en.properties"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "com/sun/swing/internal/plaf/basic/resources/basic_en_US.properties"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "javax/swing/text/html/default.css"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "javax/swing/text/html/parser/html32.bdtd"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "sun/awt/resources/cursors/CopyDrop32x32.gif"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "sun/awt/resources/cursors/LinkDrop32x32.gif"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "sun/awt/resources/cursors/MoveDrop32x32.gif"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "sun/awt/resources/cursors/cursors.properties"
+    },
+    {
+      "module": "java.desktop",
+      "glob": "sun/awt/resources/cursors/invalid32x32.gif"
+    },
+    {
+      "bundle": "com.formdev.flatlaf.resources.Bundle"
+    },
+    {
+      "bundle": "com.sun.swing.internal.plaf.basic.resources.basic"
+    },
+    {
+      "bundle": "org.fife.ui.rsyntaxtextarea.RSyntaxTextArea"
+    },
+    {
+      "bundle": "org.fife.ui.rtextarea.RTextArea"
     }
   ]
 }

@@ -21,8 +21,27 @@ public final class VlcSkinStudio {
     }
 
     public static void main(String[] args) {
+        // Inside a native image java.home is not set, and AWT's font configuration
+        // looks for it before it falls back to the platform fonts.
+        if (System.getProperty("java.home") == null) {
+            System.setProperty("java.home", executableFolder());
+        }
+        // The image does not carry the JVM's fontconfig data; use the file the
+        // native build writes next to the executable when it is there.
+        if (isNativeImage()) {
+            java.nio.file.Path fontConfig = Path.of(executableFolder(), "fontconfig.properties");
+            if (java.nio.file.Files.exists(fontConfig)) {
+                System.setProperty("sun.awt.fontconfig", fontConfig.toString());
+            }
+        }
         if (isMac()) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
+        }
+        if (isNativeImage() && (args.length == 0 || "gui".equals(args[0]))) {
+            System.err.println("This native build serves the CLI, the TUI, the MCP server and PNG rendering.");
+            System.err.println("The desktop window runs on the JVM build:");
+            System.err.println("  java -jar vlc-skin-studio.jar");
+            System.exit(2);
         }
         if (args.length > 0 && isCliInvocation(args[0])) {
             // CLI, TUI and MCP never need a display; keep AWT headless.
@@ -31,10 +50,24 @@ public final class VlcSkinStudio {
             StudioSettings settings = store.load();
             dev.zoroaster1x.vlcskin.cli.McpCommand.HOST.set(
                     () -> new dev.zoroaster1x.vlcskin.app.snapshot.SettingsHost(store, settings));
-            int code = new CommandLine(new SkinStudioCli()).execute(args);
+            int code;
+            try {
+                code = new CommandLine(new SkinStudioCli()).execute(args);
+            } catch (RuntimeException | Error ex) {
+                String message = ex.getMessage() == null ? ex.toString() : ex.getMessage();
+                System.err.println(message);
+                code = 3;
+            }
             System.exit(code);
         }
         startGui(args);
+    }
+
+    /**
+     * True when this class runs inside a GraalVM native image rather than a JVM.
+     */
+    private static boolean isNativeImage() {
+        return System.getProperty("org.graalvm.nativeimage.imagecode") != null;
     }
 
     private static boolean isCliInvocation(String first) {
@@ -43,6 +76,17 @@ public final class VlcSkinStudio {
         }
         return Arrays.stream(new CommandLine(new SkinStudioCli()).getSubcommands().keySet().toArray(String[]::new))
                 .anyMatch(name -> name.equals(first));
+    }
+
+    /**
+     * The folder the running executable lives in; a stand-in for java.home
+     * inside a native image, where the property is not set.
+     */
+    private static String executableFolder() {
+        return ProcessHandle.current().info().command()
+                .map(command -> Path.of(command).toAbsolutePath().getParent())
+                .orElseGet(() -> Path.of(System.getProperty("user.dir")))
+                .toString();
     }
 
     private static void startGui(String[] args) {

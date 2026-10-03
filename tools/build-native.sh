@@ -22,12 +22,16 @@ JNI_CONFIG="$PWD/src/main/resources/META-INF/native-image/dev.zoroaster1x/vlc-sk
 
 "$GRAALVM_HOME/bin/native-image" \
   --no-fallback \
+  -Djava.awt.headless=false \
+  --initialize-at-run-time=sun.font.FontUtilities \
   -H:+ReportExceptionStackTraces \
   -H:ReflectionConfigurationFiles="$REFLECT_CONFIG" \
   -H:JNIConfigurationFiles="$JNI_CONFIG" \
   -cp build/libs/vlc-skin-studio.jar \
   -o build/native/vlc-skin-studio \
   dev.zoroaster1x.vlcskin.app.VlcSkinStudio
+
+python3 tools/generate-fontconfig.py build/native/fontconfig.properties || true
 
 echo
 echo "Built build/native/vlc-skin-studio"

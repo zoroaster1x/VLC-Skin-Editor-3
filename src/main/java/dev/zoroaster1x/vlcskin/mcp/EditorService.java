@@ -230,8 +230,12 @@ public final class EditorService {
                     options, session.variables());
             String text = "Rendered layout " + layout.getId() + " at " + (zoom == null ? 1 : zoom) + "x";
             return ToolOutcome.image(result.png(), text, result.description());
-        } catch (IOException ex) {
-            return ToolOutcome.error(ex.getMessage());
+        } catch (IOException | RuntimeException ex) {
+            if (System.getProperty("vlcskin.debug") != null) {
+                ex.printStackTrace();
+            }
+            String message = ex.getMessage() == null ? ex.toString() : ex.getMessage();
+            return ToolOutcome.error("Could not render: " + message);
         }
     }
 
