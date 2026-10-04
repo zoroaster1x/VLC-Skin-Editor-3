@@ -27,6 +27,9 @@ tasks.withType(JavaCompile).configureEach {
 
 tasks.withType(Test).configureEach {
     useJUnitPlatform()
+    // The UI suite paints offscreen through HeadlessStudio; forcing headless
+    // makes a local run match CI, where there is no display at all.
+    systemProperty 'java.awt.headless', 'true'
     testLogging {
         events 'failed', 'skipped'
         exceptionFormat 'full'

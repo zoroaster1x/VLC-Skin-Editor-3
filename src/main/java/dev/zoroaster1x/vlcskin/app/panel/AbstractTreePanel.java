@@ -39,8 +39,12 @@ abstract class AbstractTreePanel extends JPanel {
         tree.setRowHeight(22);
         tree.setCellRenderer(new RefRenderer());
         tree.getSelectionModel().setSelectionMode(javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION);
-        tree.setDragEnabled(true);
-        tree.setDropMode(javax.swing.DropMode.ON_OR_INSERT);
+        // JTree.setDragEnabled throws HeadlessException without a display; the
+        // UI suite paints the same tree offscreen in a headless JVM.
+        if (!java.awt.GraphicsEnvironment.isHeadless()) {
+            tree.setDragEnabled(true);
+            tree.setDropMode(javax.swing.DropMode.ON_OR_INSERT);
+        }
         tree.setTransferHandler(new ItemTransferHandler(this));
         tree.addTreeSelectionListener(e -> {
             if (!refreshGuard.getAsBoolean()) {

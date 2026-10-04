@@ -66,14 +66,14 @@ public final class MenuBarFactory {
                 e -> actions.browseThemes()));
         JMenuItem exportVlt = item(Messages.get("MENU_FILE_VLT", "Export as VLT..."), null, 0, e -> actions.exportVlt());
         exportVlt.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.SHIFT_DOWN_MASK));
+                menuShortcutMask() | KeyEvent.SHIFT_DOWN_MASK));
         file.add(exportVlt);
         file.add(item(Messages.get("MENU_FILE_PNG", "Save current preview as image..."), "image", 0,
                 e -> actions.renderPreview()));
         file.addSeparator();
         JMenuItem testVlc = item(Messages.get("MENU_FILE_TEST", "Test skin in VLC"), "play", 0, e -> actions.testInVlc());
         testVlc.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
-                Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx() | KeyEvent.SHIFT_DOWN_MASK));
+                menuShortcutMask() | KeyEvent.SHIFT_DOWN_MASK));
         file.add(testVlc);
         file.addSeparator();
         file.add(item(Messages.get("MENU_FILE_EXIT", "Exit"), null, 0, e -> actions.exit()));
@@ -93,7 +93,7 @@ public final class MenuBarFactory {
         edit.add(item("Duplicate item", "duplicate", KeyEvent.VK_D, e -> actions.duplicate()));
         JMenuItem delete = item("Delete item", "delete", 0, e -> actions.deleteSelected());
         delete.setAccelerator(isMac()
-                ? KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx())
+                ? KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, menuShortcutMask())
                 : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
         edit.add(delete);
         edit.addSeparator();
@@ -209,7 +209,7 @@ public final class MenuBarFactory {
         }
         if (acceleratorKey != 0) {
             menuItem.setAccelerator(KeyStroke.getKeyStroke(acceleratorKey,
-                    Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()));
+                    menuShortcutMask()));
         }
         menuItem.addActionListener(listener);
         return menuItem;
@@ -225,6 +225,17 @@ public final class MenuBarFactory {
 
     private static boolean isMac() {
         return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac");
+    }
+
+    /**
+     * The platform menu shortcut. A headless toolkit throws instead of
+     * answering, and the tests build the same menu bar offscreen.
+     */
+    private static int menuShortcutMask() {
+        if (java.awt.GraphicsEnvironment.isHeadless()) {
+            return isMac() ? KeyEvent.META_DOWN_MASK : KeyEvent.CTRL_DOWN_MASK;
+        }
+        return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
     }
 
     /**

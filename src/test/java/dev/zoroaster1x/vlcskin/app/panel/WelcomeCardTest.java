@@ -45,7 +45,9 @@ class WelcomeCardTest {
     void aBlankLastFolderFallsBackToTheConfigDirectory() {
         StudioSettings settings = new StudioSettings();
         settings.setLastDirectory("  ");
+        // Compare paths directly: AssertJ resolves existing files only, and the
+        // examples folder does not exist on a fresh machine.
         assertThat(WelcomeCard.exampleFolder(settings, "neon"))
-                .startsWith(AppPaths.configDir());
+                .isEqualTo(AppPaths.examplesDir().resolve("vlc-skin-neon"));
     }
 }
