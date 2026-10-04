@@ -57,8 +57,8 @@ Every menu entry, in plain language, followed by the keyboard shortcuts.
 |---|---|
 | Documentation | Opens the bundled documentation viewer on F1. See [Documentation viewer](documentation-viewer.md). |
 | Online help | Opens the original VLC Skin Editor help pages on videolan.org in your browser. |
-| Check for updates | Opens the GitHub releases page in your browser. |
-| Check for updates on startup | When checked, the editor asks GitHub for the latest release each time it starts and shows a dialog when a newer one exists. There is no self updater; downloads happen from the releases page. |
+| Check for updates | Asks GitHub for the releases now and opens the upgrade dialog when a newer one exists. |
+| Check for updates on startup | On by default. Each start checks GitHub in the background and, when a newer release exists, shows the upgrader dialog with the notes of every release you missed, oldest first. |
 | About | Version, license and project links. |
 
 ## Keyboard shortcuts

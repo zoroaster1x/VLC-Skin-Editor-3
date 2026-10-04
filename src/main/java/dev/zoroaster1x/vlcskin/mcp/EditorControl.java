@@ -1,6 +1,5 @@
 package dev.zoroaster1x.vlcskin.mcp;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import dev.zoroaster1x.vlcskin.Version;
 import dev.zoroaster1x.vlcskin.edit.DeepCopy;
 import dev.zoroaster1x.vlcskin.edit.EditorSession;
@@ -23,14 +22,9 @@ import dev.zoroaster1x.vlcskin.snapshot.UiInspector;
 import dev.zoroaster1x.vlcskin.util.Json;
 import dev.zoroaster1x.vlcskin.util.VlcFinder;
 import java.awt.image.BufferedImage;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -504,6 +498,50 @@ public final class EditorControl {
                 : ToolOutcome.text("The attached host has no settings dialog");
     }
 
+    public ToolOutcome fitCanvas() {
+        UiInspector ui = service.ui();
+        if (ui == null) {
+            return ToolOutcome.text("No desktop UI is attached; Fit applies to the running canvas");
+        }
+        return ui.fitCanvas() ? ToolOutcome.text("Canvas fitted to the window")
+                : ToolOutcome.text("The attached host has no canvas to fit");
+    }
+
+    public ToolOutcome resetPanelLayout() {
+        UiInspector ui = service.ui();
+        if (ui == null) {
+            return ToolOutcome.text("No desktop UI is attached; panels exist only with the window");
+        }
+        return ui.resetPanelLayout() ? ToolOutcome.text("Panel layout reset to the default arrangement")
+                : ToolOutcome.text("The attached host has no panel layout to reset");
+    }
+
+    /**
+     * Closes the desktop window, saving first when the document is dirty. A
+     * dirty document without a path cannot be saved silently, so the call is
+     * refused and the model is expected to save it explicitly.
+     */
+    public ToolOutcome quitApp(boolean save) {
+        UiInspector ui = service.ui();
+        if (ui == null || !ui.available()) {
+            return ToolOutcome.text("No desktop window is attached; there is nothing to quit");
+        }
+        if (session().isDirty()) {
+            if (!save) {
+                return ToolOutcome.error("The skin has unsaved changes; save it first or pass save=true");
+            }
+            if (session().file() == null) {
+                return ToolOutcome.error("The skin has no path yet; save it with save_skin and a target path first");
+            }
+            ToolOutcome saved = service.save(null);
+            if (saved.error()) {
+                return saved;
+            }
+        }
+        return ui.quit() ? ToolOutcome.text("The desktop window is closing")
+                : ToolOutcome.text("The attached host cannot close its window");
+    }
+
     // -------------------------------------------------------------- extras
 
     public ToolOutcome getResource(String id) {
@@ -554,34 +592,81 @@ public final class EditorControl {
         return ToolOutcome.text(Json.write(state), state);
     }
 
+    /**
+     * Which release is newest and what changed in every release the user
+     * missed, so a model can summarize the upgrade before it happens.
+     */
     public ToolOutcome checkForUpdates() {
         try {
-            HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.github.com/repos/zoroaster1x/vlc-skin-editor/releases/latest"))
-                    .timeout(Duration.ofSeconds(15))
-                    .header("Accept", "application/vnd.github+json")
-                    .GET()
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            if (response.statusCode() >= 400) {
-                return ToolOutcome.text("The release check returned HTTP " + response.statusCode()
-                        + "; the current version is " + Version.VERSION);
+            var info = new dev.zoroaster1x.vlcskin.update.UpdateService().check();
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("current", info.current());
+            result.put("updateAvailable", info.updateAvailable());
+            if (info.latest() != null) {
+                result.put("latest", info.latest().version());
+                result.put("latestTag", info.latest().tag());
+                result.put("url", info.latest().pageUrl());
+                result.put("jarUrl", info.latest().jarUrl());
+                List<Map<String, Object>> missed = new ArrayList<>();
+                for (var release : info.missed()) {
+                    Map<String, Object> entry = new LinkedHashMap<>();
+                    entry.put("tag", release.tag());
+                    entry.put("version", release.version());
+                    entry.put("name", release.name());
+                    entry.put("publishedAt", release.publishedAt());
+                    entry.put("notes", release.notes());
+                    missed.add(entry);
+                }
+                result.put("missed", missed);
             }
-            JsonNode node = Json.mapper().readTree(response.body());
-            String latest = node.path("tag_name").asText("");
-            String url = node.path("html_url").asText("");
-            boolean newer = !latest.isBlank() && !latest.equals(Version.VERSION);
-            Map<String, Object> info = new LinkedHashMap<>();
-            info.put("current", Version.VERSION);
-            info.put("latest", latest);
-            info.put("updateAvailable", newer);
-            info.put("url", url);
-            return ToolOutcome.text(newer ? "A newer release is available: " + latest
-                    : "Up to date (" + Version.VERSION + ")", info);
+            return ToolOutcome.text(info.updateAvailable()
+                    ? "Update " + info.latest().version() + " is available; "
+                            + info.missed().size() + " release(s) missed"
+                    : "Up to date (" + info.current() + ")", result);
         } catch (Exception ex) {
             return ToolOutcome.text("The release check failed: " + ex.getMessage()
                     + "; the current version is " + Version.VERSION);
+        }
+    }
+
+    /**
+     * Downloads the newest release, checks its SHA-256 and installs it over the
+     * running jar. Unix replaces the file in place; Windows starts a helper
+     * that swaps it and restarts once this process exits.
+     */
+    public ToolOutcome installUpdate() {
+        try {
+            var updates = new dev.zoroaster1x.vlcskin.update.UpdateService();
+            var info = updates.check();
+            if (!info.updateAvailable()) {
+                return ToolOutcome.text("Already on the latest version " + info.current());
+            }
+            var latest = info.latest();
+            Path folder = dev.zoroaster1x.vlcskin.app.config.AppPaths.configDir().resolve("updates");
+            Files.createDirectories(folder);
+            Path jar = updates.downloadJar(latest,
+                    folder.resolve("vlc-skin-studio-" + latest.version() + ".jar"), null);
+            Path sums = updates.downloadChecksums(latest,
+                    folder.resolve("SHA256SUMS-" + latest.version()));
+            String expected = dev.zoroaster1x.vlcskin.update.UpdateService.expectedChecksum(sums);
+            if (!dev.zoroaster1x.vlcskin.update.UpdateService.verify(jar, expected)) {
+                return ToolOutcome.error("The downloaded jar failed its SHA-256 check; nothing was installed");
+            }
+            Path running = dev.zoroaster1x.vlcskin.update.UpdateService.runningJar();
+            if (running == null) {
+                return ToolOutcome.text("Downloaded and verified " + jar
+                        + "; this process does not run from a jar, so nothing was replaced");
+            }
+            var result = dev.zoroaster1x.vlcskin.update.UpdateService.install(jar, running);
+            return ToolOutcome.text(result.restartHandled()
+                    ? "Installed " + latest.version() + " over " + result.target()
+                            + "; a helper replaces the file after this process exits and restarts the app"
+                    : "Installed " + latest.version() + " over " + result.target()
+                            + "; restart to use the new version",
+                    Map.of("target", result.target().toString(), "version", latest.version(),
+                            "restartHandled", result.restartHandled()));
+        } catch (Exception ex) {
+            return ToolOutcome.error("Could not install the update: " + ex.getMessage());
         }
     }
 
@@ -591,12 +676,13 @@ public final class EditorControl {
     }
 
     /**
-     * Lists the official VideoLAN theme gallery, optionally filtered.
+     * Lists the official VideoLAN theme gallery, optionally filtered. The list
+     * is cached for a day; refresh asks the site again.
      */
-    public ToolOutcome listGalleryThemes(String query) {
+    public ToolOutcome listGalleryThemes(String query, Boolean refresh) {
         try {
             List<dev.zoroaster1x.vlcskin.gallery.GalleryTheme> themes =
-                    new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient().fetch();
+                    new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient().fetch(Boolean.TRUE.equals(refresh));
             String needle = query == null ? "" : query.toLowerCase(Locale.ROOT).trim();
             List<Map<String, Object>> entries = new ArrayList<>();
             for (var theme : themes) {
@@ -613,6 +699,7 @@ public final class EditorControl {
                 entry.put("size", theme.size());
                 entry.put("downloads", theme.downloads());
                 entry.put("date", theme.date());
+                entry.put("previewUrl", theme.previewUrl());
                 entries.add(entry);
             }
             return ToolOutcome.text(entries.size() + " gallery themes", Map.of("themes", entries));
@@ -631,10 +718,7 @@ public final class EditorControl {
         try {
             dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient client =
                     new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient();
-            var match = client.fetch().stream()
-                    .filter(theme -> theme.name().equalsIgnoreCase(name) || theme.file().equalsIgnoreCase(name))
-                    .findFirst()
-                    .orElse(null);
+            var match = findGalleryTheme(client, name);
             if (match == null) {
                 return ToolOutcome.error("No gallery theme named \"" + name + "\"");
             }
@@ -650,6 +734,46 @@ public final class EditorControl {
         } catch (Exception ex) {
             return ToolOutcome.error("Could not import the theme: " + ex.getMessage());
         }
+    }
+
+    /**
+     * The preview image of one gallery theme, returned as a PNG so a model can
+     * look at the theme before deciding to import it.
+     */
+    public ToolOutcome galleryThemePreview(String name) {
+        if (name == null || name.isBlank()) {
+            return ToolOutcome.error("A theme name or archive file is required");
+        }
+        try {
+            var client = new dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient();
+            var match = findGalleryTheme(client, name);
+            if (match == null) {
+                return ToolOutcome.error("No gallery theme named \"" + name + "\"");
+            }
+            byte[] preview = client.image(match.previewUrl());
+            if (preview == null || preview.length == 0) {
+                return ToolOutcome.error("The preview image could not be loaded for \"" + match.name() + "\"");
+            }
+            Map<String, Object> info = new LinkedHashMap<>();
+            info.put("name", match.name());
+            info.put("author", match.author());
+            info.put("date", match.date());
+            info.put("downloads", match.downloads());
+            info.put("size", match.size());
+            info.put("file", match.file());
+            info.put("previewUrl", match.previewUrl());
+            return ToolOutcome.image(preview, "Preview of " + match.name() + " by " + match.author(), info);
+        } catch (Exception ex) {
+            return ToolOutcome.error("Could not load the preview: " + ex.getMessage());
+        }
+    }
+
+    private dev.zoroaster1x.vlcskin.gallery.GalleryTheme findGalleryTheme(
+            dev.zoroaster1x.vlcskin.gallery.ThemeGalleryClient client, String name) throws Exception {
+        return client.fetch().stream()
+                .filter(theme -> theme.name().equalsIgnoreCase(name) || theme.file().equalsIgnoreCase(name))
+                .findFirst()
+                .orElse(null);
     }
 
     public ToolOutcome duplicateResource(String id, String pattern) {

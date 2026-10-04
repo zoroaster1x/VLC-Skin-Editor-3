@@ -20,7 +20,7 @@ import javax.swing.JPanel;
  */
 public final class AboutDialog extends JDialog {
 
-    private static final String WEBSITE = "https://github.com/zoroaster1x/vlc-skin-editor";
+    private static final String WEBSITE = "https://github.com/zoroaster1x/VLC-Skin-Editor-3";
 
     public AboutDialog() {
         super((java.awt.Frame) null,
@@ -40,9 +40,12 @@ public final class AboutDialog extends JDialog {
                 Desktop UI with dockable panels, a terminal UI, a CLI and an MCP server.<br>\
                 Built with Java 25, FlatLaf, ModernDocking and the official MCP Java SDK.<br>\
                 Skin format: VLC skins2 V2.0.<br><br>\
-                Website: <a href="%s">github.com/zoroaster1x/vlc-skin-editor</a>\
+                Website: <a href="%s">github.com/zoroaster1x/VLC-Skin-Editor-3</a><br>\
+                Releases: <a href="%s/releases">updates and patch notes</a> &middot; \
+                Issues: <a href="%s/issues">report a bug</a><br>\
+                Documentation: the Help menu, or F1\
                 </body></html>\
-                """.formatted(WEBSITE));
+                """.formatted(WEBSITE, WEBSITE, WEBSITE));
         body.setEditable(false);
         body.setOpaque(false);
         body.setBorder(null);

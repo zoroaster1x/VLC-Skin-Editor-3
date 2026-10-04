@@ -55,6 +55,27 @@ public interface UiInspector {
     }
 
     /**
+     * Fits the whole layout into the canvas viewport when a UI is attached.
+     */
+    default boolean fitCanvas() {
+        return false;
+    }
+
+    /**
+     * Restores the default dock arrangement when a UI is attached.
+     */
+    default boolean resetPanelLayout() {
+        return false;
+    }
+
+    /**
+     * Closes the desktop window when a UI is attached.
+     */
+    default boolean quit() {
+        return false;
+    }
+
+    /**
      * The host preferences as string key/value pairs, empty when no host.
      */
     default java.util.Map<String, String> preferences() {

@@ -109,11 +109,12 @@ With the OpenCode CLI you can add it directly instead: `opencode mcp add vlc-ski
 | `save_preview` | Write a layout render to a PNG file. |
 | `test_in_vlc` | Save, install the `.vlt` into VLC's skins folder and start VLC. |
 | `generate_slider_background` | Build a background strip and register it on a slider. |
-| `get_preferences`, `set_preferences` | Host preferences such as theme, language, canvas background, checkerboard and canvas state. |
-| `set_canvas` | Zoom, tool and checkerboard of the running canvas. |
-| `show_panel`, `open_settings` | Bring a panel forward or open Skin settings. |
-| `check_for_updates` | Compare with the latest GitHub release. |
-| `list_gallery_themes`, `import_gallery_theme` | Search the official VideoLAN gallery and import one theme. |
+| `get_preferences`, `set_preferences` | Host preferences such as theme, language, canvas background, checkerboard, auto update and canvas state, plus the recent files list. |
+| `set_canvas`, `fit_canvas` | Zoom, tool, checkerboard and Fit window of the running canvas. |
+| `show_panel`, `open_settings`, `reset_panel_layout`, `quit_app` | Bring a panel forward, open Skin settings, restore the default dock arrangement or close the window. |
+| `check_for_updates`, `install_update` | See the newest release and every missed patch note, then download, verify and install the jar. |
+| `app_info`, `list_documentation`, `search_documentation`, `read_documentation` | The About box and Help links, plus the whole bundled documentation: topic list, ranked search and full markdown, including the skin format reference and this MCP guide. |
+| `list_gallery_themes`, `gallery_theme_preview`, `import_gallery_theme` | Search the official VideoLAN gallery, look at a theme's preview PNG before deciding, then import it. |
 
 ## Geometry or pixels
 

@@ -125,7 +125,7 @@ public final class VlcSkinStudio {
                 }
             }
             if (settings.isAutoUpdate()) {
-                studio.checkForUpdates(frame);
+                studio.checkForUpdates(frame, frame::exit, false);
             }
             if (System.getProperty("vlcskin.browser") != null) {
                 new dev.zoroaster1x.vlcskin.app.dialog.ThemeBrowserDialog(studio, frame).setVisible(true);

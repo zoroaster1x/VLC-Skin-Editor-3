@@ -17,12 +17,32 @@ java {
     }
 }
 
+// The jar entry point is a separate source set compiled for Java 8, so an old
+// JVM can load it and show install instructions instead of failing to start.
+sourceSets {
+    launcher {
+        java.srcDir 'src/launcher/java'
+    }
+}
+
 tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
-    options.release = 25
+    options.release = name == 'compileLauncherJava' ? 8 : 25
     // JDK 23 and newer no longer run annotation processors unless asked to.
     // Lombok generates every model accessor, so this is required.
     options.compilerArgs.add('-proc:full')
+}
+
+// gradle.properties is the single source of the version: Version.java reads the
+// expanded resource, and the release workflow compares the commit marker with
+// the same property. The value is captured here so the configuration cache can
+// serialize the task without reaching back into the project.
+def appVersion = project.version.toString()
+tasks.named('processResources') {
+    inputs.property('appVersion', appVersion)
+    filesMatching('dev/zoroaster1x/vlcskin/version.properties') {
+        expand(version: appVersion)
+    }
 }
 
 tasks.withType(Test).configureEach {
@@ -65,17 +85,25 @@ dependencies {
     testImplementation libs.junit.jupiter
     testImplementation libs.assertj
     testRuntimeOnly libs.junit.platform.launcher
+
+    // The Java 8 entry point is plain JDK code; tests exercise its parsing.
+    testImplementation sourceSets.launcher.output
 }
 
 application {
-    mainClass = 'dev.zoroaster1x.vlcskin.app.VlcSkinStudio'
+    mainClass = 'dev.zoroaster1x.vlcskin.launch.Launcher'
     applicationName = 'vlc-skin-studio'
+}
+
+tasks.named('jar') {
+    from sourceSets.launcher.output
 }
 
 tasks.named('shadowJar') {
     archiveBaseName = 'vlc-skin-studio'
     archiveClassifier = ''
     archiveVersion = ''
+    from sourceSets.launcher.output
     manifest {
         attributes 'Main-Class': application.mainClass.get(),
                    'Enable-Native-Access': 'ALL-UNNAMED'

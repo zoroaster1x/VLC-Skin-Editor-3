@@ -162,8 +162,7 @@ public final class MenuBarFactory {
         help.add(documentation);
         help.add(item(Messages.get("MENU_HELP_DOC", "Online help"), "help", 0,
                 e -> browse("https://www.videolan.org/vlc/skinedhlp/")));
-        help.add(item("Check for updates", null, 0,
-                e -> browse("https://github.com/zoroaster1x/vlc-skin-editor/releases")));
+        help.add(item("Check for updates", null, 0, e -> openUpdateCheck(actions)));
         JCheckBoxMenuItem autoUpdate = new JCheckBoxMenuItem("Check for updates on startup",
                 actions.studio().settings().isAutoUpdate());
         autoUpdate.addActionListener(e -> {
@@ -236,6 +235,18 @@ public final class MenuBarFactory {
             return isMac() ? KeyEvent.META_DOWN_MASK : KeyEvent.CTRL_DOWN_MASK;
         }
         return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
+    }
+
+    /**
+     * The update check needs the window for the dialog and its exit hook; the
+     * headless host only gets the background request.
+     */
+    private static void openUpdateCheck(ChromeActions actions) {
+        if (actions instanceof dev.zoroaster1x.vlcskin.app.StudioFrame frame) {
+            frame.openUpdateCheck();
+        } else {
+            actions.studio().checkForUpdates(null, null, true);
+        }
     }
 
     /**

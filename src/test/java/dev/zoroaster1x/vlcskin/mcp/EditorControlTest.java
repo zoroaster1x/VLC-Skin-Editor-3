@@ -29,6 +29,9 @@ class EditorControlTest {
         String tool;
         Boolean checkerboard;
         boolean settingsOpened;
+        boolean fitted;
+        boolean layoutReset;
+        boolean quit;
 
         StubHost() {
             preferences.put("theme", "dark");
@@ -79,6 +82,24 @@ class EditorControlTest {
         @Override
         public boolean openSettings() {
             settingsOpened = true;
+            return true;
+        }
+
+        @Override
+        public boolean fitCanvas() {
+            fitted = true;
+            return true;
+        }
+
+        @Override
+        public boolean resetPanelLayout() {
+            layoutReset = true;
+            return true;
+        }
+
+        @Override
+        public boolean quit() {
+            quit = true;
             return true;
         }
 
@@ -227,6 +248,26 @@ class EditorControlTest {
         assertThat(control.showPanel("Nope").text()).contains("No panel");
         assertThat(control.openSettings().error()).isFalse();
         assertThat(host.settingsOpened).isTrue();
+        assertThat(control.setPreferences(Map.of("autoUpdate", "true")).error()).isFalse();
+        assertThat(host.preferences.get("autoUpdate")).isEqualTo("true");
+        assertThat(control.fitCanvas().error()).isFalse();
+        assertThat(host.fitted).isTrue();
+        assertThat(control.resetPanelLayout().error()).isFalse();
+        assertThat(host.layoutReset).isTrue();
+        assertThat(control.quitApp(true).error()).isFalse();
+        assertThat(host.quit).isTrue();
+    }
+
+    @Test
+    void quittingADirtySkinNeedsAnExplicitSave(@TempDir Path folder) throws Exception {
+        EditorService service = service(folder);
+        StubHost host = new StubHost();
+        service.setUi(host);
+        EditorControl control = new EditorControl(service);
+        service.moveItem("play_btn", 1, 1);
+
+        assertThat(control.quitApp(false).error()).isTrue();
+        assertThat(host.quit).isFalse();
     }
 
     @Test
@@ -244,7 +285,9 @@ class EditorControlTest {
         List<String> names = tools.stream().map(ToolSpec::name).toList();
         assertThat(names).contains("undo", "redo", "select_element", "reparent_item", "apply_xml",
                 "save_preview", "test_in_vlc", "generate_slider_background", "set_preferences",
-                "set_canvas", "show_panel", "check_for_updates");
+                "set_canvas", "show_panel", "check_for_updates", "install_update", "fit_canvas", "reset_panel_layout",
+                "quit_app", "app_info", "list_documentation", "search_documentation",
+                "read_documentation", "gallery_theme_preview");
         assertThat(names).doesNotHaveDuplicates();
     }
 }

@@ -10,7 +10,7 @@ Release assets are built and attested by GitHub Actions. Verify the downloaded
 `vlc-skin-studio.jar` with:
 
 ```bash
-gh attestation verify vlc-skin-studio.jar --repo zoroaster1x/vlc-skin-editor
+gh attestation verify vlc-skin-studio.jar --repo zoroaster1x/VLC-Skin-Editor-3
 ```
 
 ## Changes since {{PREVIOUS}}
@@ -20,6 +20,8 @@ gh attestation verify vlc-skin-studio.jar --repo zoroaster1x/vlc-skin-editor
 ## Commits
 
 {{COMMITS}}
+
+**Full changelog:** {{COMPARE}}
 
 ## Install
 
@@ -33,7 +35,7 @@ Java 25 is required. VLC is only needed for the "Test skin in VLC" menu item.
 ## Documentation
 
 The controls, the CLI and MCP reference and the honest known limits live in the
-[README](https://github.com/zoroaster1x/vlc-skin-editor#readme).
+[README](https://github.com/zoroaster1x/VLC-Skin-Editor-3#readme).
 
 ## Funding
 

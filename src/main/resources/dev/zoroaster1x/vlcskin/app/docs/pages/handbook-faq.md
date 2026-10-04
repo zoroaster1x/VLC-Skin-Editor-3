@@ -22,7 +22,7 @@ The XML `value` attribute names the percentage variable VLC binds to the slider;
 
 ## What does Check for updates do?
 
-Help > Check for updates opens the GitHub releases page in your browser. The Check for updates on startup checkbox makes the editor ask GitHub for the latest release tag each time it starts and show a dialog when the tag is newer than the running version. There is no self updater: releases are built and attested by CI, and the editor never replaces its own files. Download the new version from the releases page to upgrade.
+Help > Check for updates asks GitHub for the releases and, when a newer one exists, opens a dialog with the notes of every release you missed, oldest first, and an Install update button. The check on startup is on by default and can be turned off in the same menu. Installing downloads the release jar, verifies its SHA-256 against the SHA256SUMS asset the release workflow publishes, and replaces the running jar: on Linux and macOS in place, on Windows through a small helper script that waits for the editor to close, swaps the file and starts it again. If the editor does not run from a jar, it keeps the verified download and says so.
 
 ## Where do downloads go?
 

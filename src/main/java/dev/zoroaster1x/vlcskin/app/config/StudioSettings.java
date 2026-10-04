@@ -27,7 +27,7 @@ public final class StudioSettings {
     private int toolbarOrientation;
     private int toolbarX = -1;
     private int toolbarY = -1;
-    private boolean autoUpdate;
+    private boolean autoUpdate = true;
     private String language = "en";
     private int canvasZoom = 2;
     private String canvasBackground = "theme";

@@ -371,76 +371,28 @@ public final class Studio {
     }
 
     /**
-     * Asks GitHub for the newest release tag in the background. A newer version
-     * is announced with a dialog; failures only reach the status bar.
+     * Asks GitHub for the releases in the background. A newer version opens the
+     * update dialog with the notes of every release the user missed; failures
+     * only reach the status bar when the user asked for the check.
      */
-    public void checkForUpdates(java.awt.Component parent) {
+    public void checkForUpdates(java.awt.Component parent, Runnable quit, boolean interactive) {
         Thread.ofVirtual().name("vlc-skin-studio-update-check").start(() -> {
-            String tag;
+            dev.zoroaster1x.vlcskin.update.UpdateService.UpdateInfo info;
             try {
-                tag = latestReleaseTag();
+                info = new dev.zoroaster1x.vlcskin.update.UpdateService().check();
             } catch (Exception ex) {
-                status("Update check failed: " + ex.getMessage());
+                if (interactive) {
+                    status("Update check failed: " + ex.getMessage());
+                }
                 return;
             }
-            if (tag == null) {
-                status("Update check failed: the release reply had no tag");
-                return;
-            }
-            if (isNewer(tag, Version.VERSION)) {
-                SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(parent,
-                        "A newer version is available: " + tag
-                                + "\nhttps://github.com/zoroaster1x/vlc-skin-editor/releases",
-                        "Check for updates", JOptionPane.INFORMATION_MESSAGE));
-            } else {
+            if (info.updateAvailable()) {
+                SwingUtilities.invokeLater(() -> new dev.zoroaster1x.vlcskin.app.dialog.UpdateDialog(
+                        this, parent, info, quit).setVisible(true));
+            } else if (interactive) {
                 status(Version.NAME + " " + Version.VERSION + " is up to date");
             }
         });
-    }
-
-    @SuppressWarnings("unchecked")
-    private static String latestReleaseTag() throws IOException, InterruptedException {
-        var client = java.net.http.HttpClient.newHttpClient();
-        var request = java.net.http.HttpRequest.newBuilder(java.net.URI.create(
-                        "https://api.github.com/repos/zoroaster1x/vlc-skin-editor/releases/latest"))
-                .header("Accept", "application/vnd.github+json")
-                .timeout(java.time.Duration.ofSeconds(10))
-                .GET()
-                .build();
-        var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofString());
-        if (response.statusCode() != 200) {
-            throw new IOException("HTTP " + response.statusCode());
-        }
-        Map<String, Object> release = Json.read(response.body(), Map.class);
-        Object tag = release.get("tag_name");
-        return tag == null ? null : tag.toString();
-    }
-
-    private static boolean isNewer(String candidate, String current) {
-        int[] newer = versionParts(candidate);
-        int[] older = versionParts(current);
-        for (int i = 0; i < Math.max(newer.length, older.length); i++) {
-            int left = i < newer.length ? newer[i] : 0;
-            int right = i < older.length ? older[i] : 0;
-            if (left != right) {
-                return left > right;
-            }
-        }
-        return false;
-    }
-
-    private static int[] versionParts(String version) {
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("(\\d+)(?:\\.(\\d+))?(?:\\.(\\d+))?").matcher(version);
-        if (!matcher.find()) {
-            return new int[0];
-        }
-        int[] parts = new int[3];
-        for (int i = 0; i < parts.length; i++) {
-            String group = matcher.group(i + 1);
-            parts[i] = group == null ? 0 : Integer.parseInt(group);
-        }
-        return parts;
     }
 
     public void error(String message) {

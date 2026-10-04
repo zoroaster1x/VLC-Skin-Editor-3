@@ -63,6 +63,8 @@ public final class SettingsHost implements UiInspector {
         values.put("showToolbar", Boolean.toString(settings.isShowToolbar()));
         values.put("canvasZoom", Integer.toString(settings.getCanvasZoom()));
         values.put("canvasBackground", settings.getCanvasBackground());
+        values.put("autoUpdate", Boolean.toString(settings.isAutoUpdate()));
+        values.put("recentFiles", String.join("\n", settings.getRecentFiles()));
         return values;
     }
 
@@ -79,6 +81,7 @@ public final class SettingsHost implements UiInspector {
             case "canvaszoom" -> settings.setCanvasZoom(Math.max(1, Math.min(16, Integer.parseInt(value))));
             case "canvasbackground" -> settings.setCanvasBackground(
                     dev.zoroaster1x.vlcskin.app.theme.ThemeManager.normalizeCanvasBackground(value));
+            case "autoupdate" -> settings.setAutoUpdate(Boolean.parseBoolean(value));
             default -> {
                 return false;
             }

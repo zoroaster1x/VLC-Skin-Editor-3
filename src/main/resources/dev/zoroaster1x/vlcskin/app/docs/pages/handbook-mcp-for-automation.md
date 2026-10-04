@@ -54,7 +54,7 @@ Use the absolute path to the fat jar, `build/libs/vlc-skin-studio.jar` after `./
 | Resources | Add bitmaps, fonts, bitmap fonts, popup menus and ini files, import images from disk, cut sub bitmaps, edit them, delete and duplicate them, and reload images from disk. |
 | Windows, layouts and theme | Add, delete, duplicate and reorder windows and layouts, and edit theme metadata and attributes. |
 | History, selection and state | Undo and redo, read the history, use the same selection the trees use, simulate the player variables, and validate the theme. |
-| Output and host | Apply edited XML, write a preview PNG, test in VLC, generate a slider background, read and write preferences, set the canvas, show a panel, open Skin settings, browse or import gallery themes, and check for updates. |
+| Output and host | Apply edited XML, write a preview PNG, test in VLC, generate a slider background, read and write preferences, set or fit the canvas, show a panel, open Skin settings, reset the panel layout, quit the window, browse the gallery with preview images before importing, check for and install a SHA-256 verified update, and read the whole bundled documentation including the skin format reference. |
 
 `layout_tree` is the workhorse: every item with its id, type, parent, z order, absolute bounds, visibility, text and the attributes that matter for the type. A client that cannot see images can still reason about the whole layout from that. `render_layout` adds the PNG and can highlight one item id.
 

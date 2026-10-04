@@ -27,7 +27,7 @@ final class ThemeWriter {
         theme.foreignAttributes().forEach(writer::attr);
 
         writeThemeInfo(theme.getThemeInfo(), writer);
-        writer.line("<!-- Created with VLC Skin Studio (https://github.com/zoroaster1x/vlc-skin-editor) -->");
+        writer.line("<!-- Created with VLC Skin Studio (https://github.com/zoroaster1x/VLC-Skin-Editor-3) -->");
 
         for (IncludeFile include : theme.getIncludes()) {
             writer.start("Include").attr("file", include.getFile());

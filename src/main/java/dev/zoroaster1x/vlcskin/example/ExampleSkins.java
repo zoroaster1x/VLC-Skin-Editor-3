@@ -76,7 +76,7 @@ public final class ExampleSkins {
         info.setName("Neon player");
         info.setAuthor("VLC Skin Studio example");
         info.setEmail("none");
-        info.setWebpage("https://github.com/zoroaster1x/vlc-skin-editor");
+        info.setWebpage("https://github.com/zoroaster1x/VLC-Skin-Editor-3");
         theme.setThemeInfo(info);
 
         theme.getResources().add(bitmap("background", "background.png"));
@@ -128,7 +128,7 @@ public final class ExampleSkins {
         ThemeInfo info = new ThemeInfo();
         info.setName("Flat panel");
         info.setAuthor("VLC Skin Studio example");
-        info.setWebpage("https://github.com/zoroaster1x/vlc-skin-editor");
+        info.setWebpage("https://github.com/zoroaster1x/VLC-Skin-Editor-3");
         theme.setThemeInfo(info);
 
         theme.getResources().add(bitmap("panel", "panel.png"));

@@ -12,6 +12,7 @@ public final class McpToolset {
 
     private final EditorService service;
     private final EditorControl control;
+    private final HelpTools help = new HelpTools();
 
     public McpToolset(EditorService service) {
         this.service = service;
@@ -339,9 +340,21 @@ public final class McpToolset {
                         args.get("checkerboard") == null ? null : Boolean.parseBoolean(args.get("checkerboard").toString()))));
         tools.add(new ToolSpec("show_panel", "Show panel",
                 "Bring a dock panel to the front: Resources, Windows and layouts, Items, Canvas, Inspector, "
-                        + "Variables, Problems, Skin XML or AI assistant.",
+                        + "Variables, Problems or Skin XML.",
                 Schema.object().string("name", "Panel name").required("name").build(),
                 args -> control.showPanel(str(args, "name"))));
+        tools.add(new ToolSpec("fit_canvas", "Fit canvas",
+                "Zoom the running preview so the whole layout fits the window, the same as View > Fit window.",
+                Schema.object().build(), args -> control.fitCanvas()));
+        tools.add(new ToolSpec("reset_panel_layout", "Reset panel layout",
+                "Restore the default dock arrangement of the panels, the same as View > Reset panel layout.",
+                Schema.object().build(), args -> control.resetPanelLayout()));
+        tools.add(new ToolSpec("quit_app", "Quit the app",
+                "Close the desktop window; unsaved changes are saved first unless save is false, in which "
+                        + "case a dirty skin is refused.",
+                Schema.object().bool("save", "Save unsaved changes before quitting, default true").build(),
+                args -> control.quitApp(args.get("save") == null
+                        || Boolean.parseBoolean(args.get("save").toString()))));
         tools.add(new ToolSpec("open_settings", "Open skin settings",
                 "Open the Skin settings dialog in the running window.",
                 Schema.object().build(), args -> control.openSettings()));
@@ -353,12 +366,45 @@ public final class McpToolset {
                 "The simulated player state the preview renders against.",
                 Schema.object().build(), args -> control.getVariables()));
         tools.add(new ToolSpec("check_for_updates", "Check for updates",
-                "Compare the running version with the latest GitHub release.",
+                "Compare the running version with the GitHub releases and return the notes of every "
+                        + "release the user missed, oldest first.",
                 Schema.object().build(), args -> control.checkForUpdates()));
+        tools.add(new ToolSpec("install_update", "Install update",
+                "Download the newest release jar, verify its SHA-256 against the release checksums and "
+                        + "install it over the running jar. Unix replaces the file in place; Windows "
+                        + "leaves a helper that swaps it and restarts after this process exits.",
+                Schema.object().build(), args -> control.installUpdate()));
+        tools.add(new ToolSpec("app_info", "App info",
+                "The About box and the Help links in one call: name, version, project, releases and the "
+                        + "documentation topic ids for the MCP guide and the skin format reference.",
+                Schema.object().build(), args -> help.appInfo()));
+        tools.add(new ToolSpec("list_documentation", "List documentation",
+                "Every bundled documentation topic grouped by section: the handbook, the skin format "
+                        + "reference and the archived original help.",
+                Schema.object().build(), args -> help.list()));
+        tools.add(new ToolSpec("search_documentation", "Search documentation",
+                "Ranked search across the bundled documentation; each hit names its topic, heading path "
+                        + "and line.",
+                Schema.object().string("query", "Search terms").integer("limit", "Maximum hits, default 20")
+                        .required("query").build(),
+                args -> help.search(str(args, "query"), integer(args, "limit"))));
+        tools.add(new ToolSpec("read_documentation", "Read documentation",
+                "The full markdown of one topic by id from list_documentation, for example the skin format "
+                        + "reference or the MCP guide.",
+                Schema.object().string("topic", "Topic id").integer("maxChars", "Optional character cap")
+                        .required("topic").build(),
+                args -> help.read(str(args, "topic"), integer(args, "maxChars"))));
         tools.add(new ToolSpec("list_gallery_themes", "List gallery themes",
-                "The official VideoLAN skins gallery; filter by name or author.",
-                Schema.object().string("query", "Optional filter").build(),
-                args -> control.listGalleryThemes(str(args, "query"))));
+                "The official VideoLAN skins gallery; filter by name or author. The list is cached for a "
+                        + "day; refresh asks the site again.",
+                Schema.object().string("query", "Optional filter")
+                        .bool("refresh", "Ignore the cached list").build(),
+                args -> control.listGalleryThemes(str(args, "query"), bool(args, "refresh"))));
+        tools.add(new ToolSpec("gallery_theme_preview", "Gallery theme preview",
+                "The PNG preview image of one gallery theme, so you can look at it before importing.",
+                Schema.object().string("name", "Theme name or archive file from list_gallery_themes")
+                        .required("name").build(),
+                args -> control.galleryThemePreview(str(args, "name"))));
         tools.add(new ToolSpec("import_gallery_theme", "Import a gallery theme",
                 "Download one theme from the official gallery, unpack it and open it.",
                 Schema.object().string("name", "Theme name or archive file")
@@ -382,6 +428,11 @@ public final class McpToolset {
     public static String str(Map<String, Object> args, String name) {
         Object value = args.get(name);
         return value == null ? null : value.toString();
+    }
+
+    public static Boolean bool(Map<String, Object> args, String name) {
+        Object value = args.get(name);
+        return value == null ? null : Boolean.parseBoolean(value.toString());
     }
 
     public static Integer integer(Map<String, Object> args, String name) {

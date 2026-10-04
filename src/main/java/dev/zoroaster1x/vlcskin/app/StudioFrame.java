@@ -116,7 +116,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
 
         studio.addStatusListener(statusBar::setMessage);
         studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window",
-                () -> panels.canvas, this::showPanelByName));
+                () -> panels.canvas, this::showPanelByName, this::resetLayout, this::exit));
         studio.session().addListener(this::onSessionChanged);
 
         addWindowListener(new WindowAdapter() {
@@ -297,6 +297,14 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         });
     }
 
+
+    /**
+     * Help > Check for updates: the dialog with the missed release notes and
+     * the installer, quitting through the normal exit path.
+     */
+    public void openUpdateCheck() {
+        studio.checkForUpdates(this, this::exit, true);
+    }
 
     @Override
     public void newSkin() {

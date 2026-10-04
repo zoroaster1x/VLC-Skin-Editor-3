@@ -33,19 +33,30 @@ public final class SwingUiInspector implements UiInspector {
     private final String label;
     private final Supplier<dev.zoroaster1x.vlcskin.app.panel.CanvasPanel> canvasSupplier;
     private final java.util.function.Consumer<String> panelShower;
+    private final Runnable resetLayout;
+    private final Runnable quit;
 
     public SwingUiInspector(Supplier<Component> rootSupplier, Studio studio, String label) {
-        this(rootSupplier, studio, label, null, null);
+        this(rootSupplier, studio, label, null, null, null, null);
     }
 
     public SwingUiInspector(Supplier<Component> rootSupplier, Studio studio, String label,
                             Supplier<dev.zoroaster1x.vlcskin.app.panel.CanvasPanel> canvasSupplier,
                             java.util.function.Consumer<String> panelShower) {
+        this(rootSupplier, studio, label, canvasSupplier, panelShower, null, null);
+    }
+
+    public SwingUiInspector(Supplier<Component> rootSupplier, Studio studio, String label,
+                            Supplier<dev.zoroaster1x.vlcskin.app.panel.CanvasPanel> canvasSupplier,
+                            java.util.function.Consumer<String> panelShower,
+                            Runnable resetLayout, Runnable quit) {
         this.rootSupplier = rootSupplier;
         this.studio = studio;
         this.label = label;
         this.canvasSupplier = canvasSupplier;
         this.panelShower = panelShower;
+        this.resetLayout = resetLayout;
+        this.quit = quit;
     }
 
     @Override
@@ -115,6 +126,34 @@ public final class SwingUiInspector implements UiInspector {
     }
 
     @Override
+    public boolean fitCanvas() {
+        var canvas = canvasSupplier == null ? null : canvasSupplier.get();
+        if (canvas == null) {
+            return false;
+        }
+        canvas.fitToWindow();
+        return true;
+    }
+
+    @Override
+    public boolean resetPanelLayout() {
+        if (resetLayout == null) {
+            return false;
+        }
+        resetLayout.run();
+        return true;
+    }
+
+    @Override
+    public boolean quit() {
+        if (quit == null) {
+            return false;
+        }
+        quit.run();
+        return true;
+    }
+
+    @Override
     public java.util.Map<String, String> preferences() {
         var settings = studio.settings();
         java.util.Map<String, String> values = new java.util.LinkedHashMap<>();
@@ -124,6 +163,8 @@ public final class SwingUiInspector implements UiInspector {
         values.put("showToolbar", Boolean.toString(settings.isShowToolbar()));
         values.put("canvasZoom", Integer.toString(settings.getCanvasZoom()));
         values.put("canvasBackground", settings.getCanvasBackground());
+        values.put("autoUpdate", Boolean.toString(settings.isAutoUpdate()));
+        values.put("recentFiles", String.join("\n", settings.getRecentFiles()));
         return values;
     }
 
@@ -154,6 +195,7 @@ public final class SwingUiInspector implements UiInspector {
                     }
                 }
             }
+            case "autoupdate" -> settings.setAutoUpdate(Boolean.parseBoolean(value));
             default -> {
                 return false;
             }

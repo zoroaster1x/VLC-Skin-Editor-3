@@ -27,6 +27,7 @@ JNI_CONFIG="$PWD/src/main/resources/META-INF/native-image/dev.zoroaster1x/vlc-sk
   -H:+ReportExceptionStackTraces \
   -H:ReflectionConfigurationFiles="$REFLECT_CONFIG" \
   -H:JNIConfigurationFiles="$JNI_CONFIG" \
+  -H:IncludeResources='dev/zoroaster1x/vlcskin/(app/docs/.*|version.properties)' \
   -cp build/libs/vlc-skin-studio.jar \
   -o build/native/vlc-skin-studio \
   dev.zoroaster1x.vlcskin.app.VlcSkinStudio
