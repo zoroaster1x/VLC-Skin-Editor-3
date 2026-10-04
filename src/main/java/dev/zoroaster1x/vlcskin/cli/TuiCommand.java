@@ -31,6 +31,8 @@ public final class TuiCommand implements Callable<Integer> {
                 return 1;
             }
         }
+        dev.zoroaster1x.vlcskin.util.AppLog.start("TUI", dev.zoroaster1x.vlcskin.Version.VERSION);
+        dev.zoroaster1x.vlcskin.util.Banner.startup();
         TuiLoop.run(service, !noColor);
         return 0;
     }

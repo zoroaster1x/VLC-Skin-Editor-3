@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  All logging goes to stderr. The MCP server speaks JSON-RPC on stdout, so a
+  single debug line there would corrupt the protocol stream. Reactor and the
+  MCP SDK keep their own levels so a normal run stays quiet.
+-->
+<configuration>
+    <appender name="STDERR" class="ch.qos.logback.core.ConsoleAppender">
+        <target>System.err</target>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="reactor" level="WARN"/>
+    <logger name="io.modelcontextprotocol" level="INFO"/>
+
+    <root level="INFO">
+        <appender-ref ref="STDERR"/>
+    </root>
+</configuration>

@@ -25,7 +25,15 @@ public final class TuiLoop {
     }
 
     public static void run(EditorService service, boolean color) throws IOException {
-        Terminal terminal = TerminalBuilder.builder().system(true).dumb(false).build();
+        Terminal terminal;
+        try {
+            terminal = TerminalBuilder.builder().system(true).dumb(false).build();
+        } catch (IOException | IllegalStateException ex) {
+            // No terminal (a pipe or a CI run): read plain lines instead of
+            // failing with a stack trace.
+            runPiped(service, color);
+            return;
+        }
         TuiShell shell = new TuiShell(service, color);
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(terminal)
@@ -53,8 +61,29 @@ public final class TuiLoop {
         }
     }
 
-    private static Path historyFile() {
-        Path folder = AppPaths.configDir();
+    /**
+     * The non-interactive path: one command per line from stdin, responses on
+     * stdout. This is what makes the TUI testable with a pipe.
+     */
+    private static void runPiped(EditorService service, boolean color) throws IOException {
+        TuiShell shell = new TuiShell(service, color);
+        System.out.print(shell.banner());
+        System.out.flush();
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(
+                new java.io.InputStreamReader(System.in, java.nio.charset.StandardCharsets.UTF_8))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                System.out.print(shell.execute(line));
+                System.out.flush();
+                String trimmed = line.strip().toLowerCase(java.util.Locale.ROOT);
+                if ("quit".equals(trimmed) || "exit".equals(trimmed)) {
+                    return;
+                }
+            }
+        }
+    }
+
+    private static Path historyFile() {        Path folder = AppPaths.configDir();
         try {
             Files.createDirectories(folder);
         } catch (IOException ex) {

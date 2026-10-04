@@ -18,6 +18,7 @@ class AppPathsTest {
         assertThat(AppPaths.examplesDir()).isEqualTo(AppPaths.configDir().resolve("examples"));
         assertThat(AppPaths.exportsDir()).isEqualTo(AppPaths.configDir().resolve("exports"));
         assertThat(AppPaths.updatesDir()).isEqualTo(AppPaths.cacheDir().resolve("updates"));
+        assertThat(AppPaths.logsDir()).isEqualTo(AppPaths.configDir().resolve("logs"));
     }
 
     @Test

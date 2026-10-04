@@ -64,8 +64,16 @@ undoable `ValueCommand`.
 `AGENTS.md` is the repository reference: hard rules, data flow, threading, the
 native build and the format knowledge that cost real time to find.
 
-## Native image (optional)
+## Logs
 
+Every run appends timestamped lines to `logs/YYYY-MM-DD.log` under the config
+directory, so all sessions of a user share one file. A start also opens
+`logs/YYYY-MM-DD-HHMMSS+ZZZZ.zip`, which holds every log this user has and is
+refreshed while the session runs; the archive name carries the date, the start
+time and the timezone offset. On Windows and macOS the same folder hangs off
+`%APPDATA%` and `~/Library/Application Support`.
+
+## Native image (optional)
 GraalVM 25 can build a self-contained binary for the CLI, TUI and MCP entry
 points, PNG rendering included. The desktop Swing window stays on the JVM: the
 binary prints that pointer when started without a subcommand.

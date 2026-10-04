@@ -103,6 +103,8 @@ public final class McpServerRunner {
      */
     public static void serveStdio(EditorService service, String version) {
         JacksonMcpJsonMapper mapper = new JacksonMcpJsonMapper(Json.mapper());
+        dev.zoroaster1x.vlcskin.util.AppLog.start("MCP", version);
+        dev.zoroaster1x.vlcskin.util.Banner.startup(System.err);
         McpLog.started(version, service.session().file() == null
                 ? null : service.session().file().toString());
         CountDownLatch latch = new CountDownLatch(1);

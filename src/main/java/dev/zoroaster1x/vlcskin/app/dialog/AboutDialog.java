@@ -35,12 +35,17 @@ public final class AboutDialog extends JDialog {
         body.setText("""
                 <html><body style='font-family:sans-serif;font-size:12px;margin:0'>\
                 A modern editor for VLC skins2 themes.<br><br>\
-                Copyright 2007-2026 The VideoLAN Team and contributors.<br>\
+                Original VLC Skin Editor: Copyright 2007-2011 Daniel Dreibrodt.<br>\
+                This project: Copyright (C) 2026 Zoroaster1x and contributors.<br>\
                 GPL-3.0-or-later, derivative of the original VLC Skin Editor 0.8.6 \
-                by Daniel Dreibrodt (GPL-2.0-or-later).<br><br>\
+                (GPL-2.0-or-later). Attribution terms under GPLv3 section 7(b), see \
+                NOTICE.md in the project root.<br><br>\
                 Desktop UI with dockable panels, a terminal UI, a CLI and an MCP server.<br>\
                 Built with Java 25, FlatLaf, ModernDocking and the official MCP Java SDK.<br>\
                 Skin format: VLC skins2 V2.0.<br><br>\
+                <b>Developers</b><br>\
+                Zoroaster1x, maintainer and project owner.<br>\
+                Made with love by a Kurdish developer.<br><br>\
                 Website: <a href="%s">github.com/zoroaster1x/VLC-Skin-Editor-3</a><br>\
                 Releases: <a href="%s/releases">updates and patch notes</a> &middot; \
                 Issues: <a href="%s/issues">report a bug</a><br>\

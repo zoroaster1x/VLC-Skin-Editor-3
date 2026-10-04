@@ -152,7 +152,8 @@ src/main/java/dev/zoroaster1x/vlcskin/
   cli/              picocli commands: new, render, inspect, validate, vlt,
                     examples, mcp, tui
   tui/              TuiShell, TuiLoop, AsciiRenderer
-  util/             Json, XmlWriter, XmlEscape, VlcFinder, Platform, Log
+  util/             Json, XmlWriter, XmlEscape, VlcFinder, Platform, Log,
+                    AppLog (daily logs and session zip)
   example/          ExampleSkins with generated assets plus the bundled
                     VeLoCity Dark theme
 src/main/java/dev/zoroaster1x/vlcskin/app/
@@ -511,6 +512,9 @@ avoid.
   disk (platform config, cache and data roots); `Platform` is the only place
   that decides the operating system. Do not add another `.config`, `.cache` or
   `os.name` check anywhere else.
+* All logs append to the daily file and the live session zip under the config
+  `logs/` folder (`AppLog`); `logback.xml` sends SDK logging to stderr, never
+  to stdout, because MCP stdout is the protocol channel.
 
 ## 11. Native image notes
 

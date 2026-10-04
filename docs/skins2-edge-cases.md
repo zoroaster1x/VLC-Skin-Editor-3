@@ -5,7 +5,8 @@
 > [modules/gui/skins2](https://github.com/videolan/vlc/tree/e77e49b5dff7484dbf70cd1540a6a568e1890280/modules/gui/skins2)
 > and [share/skins2](https://github.com/videolan/vlc/tree/e77e49b5dff7484dbf70cd1540a6a568e1890280/share/skins2).
 > Every `path:line` citation is relative to that revision. VLC is
-> GPL-2.0-or-later, the same license as this project.
+> GPL-2.0-or-later; this project is GPL-3.0-or-later, a compatible
+> derivative.
 >
 > **Where the VLC sources map to this repository:**
 >

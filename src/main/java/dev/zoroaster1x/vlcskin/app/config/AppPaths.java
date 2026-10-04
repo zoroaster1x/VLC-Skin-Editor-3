@@ -24,13 +24,35 @@ import java.util.Locale;
  */
 public final class AppPaths {
 
+    private static volatile Path configOverride;
+    private static volatile Path cacheOverride;
+    private static volatile Path dataOverride;
+
     private AppPaths() {
+    }
+
+    /**
+     * Redirects the three roots, for tests. Reset with {@link #resetRoots()}.
+     */
+    public static void useRoots(Path config, Path cache, Path data) {
+        configOverride = config;
+        cacheOverride = cache;
+        dataOverride = data;
+    }
+
+    public static void resetRoots() {
+        configOverride = null;
+        cacheOverride = null;
+        dataOverride = null;
     }
 
     /**
      * The persistent settings, layout, keymap and language root.
      */
     public static Path configDir() {
+        if (configOverride != null) {
+            return configOverride;
+        }
         Path home = Path.of(System.getProperty("user.home", "."));
         String os = osName();
         if (os.contains("win")) {
@@ -55,6 +77,9 @@ public final class AppPaths {
      * downloads. Losing it never loses user work.
      */
     public static Path cacheDir() {
+        if (cacheOverride != null) {
+            return cacheOverride;
+        }
         Path home = Path.of(System.getProperty("user.home", "."));
         String os = osName();
         if (os.contains("win")) {
@@ -78,6 +103,9 @@ public final class AppPaths {
      * Bulk data the user would expect to keep: downloaded gallery themes.
      */
     public static Path dataDir() {
+        if (dataOverride != null) {
+            return dataOverride;
+        }
         Path home = Path.of(System.getProperty("user.home", "."));
         String os = osName();
         if (os.contains("win")) {
@@ -112,6 +140,13 @@ public final class AppPaths {
      */
     public static Path updatesDir() {
         return cacheDir().resolve("updates");
+    }
+
+    /**
+     * The daily text logs and the session archives, next to the settings.
+     */
+    public static Path logsDir() {
+        return configDir().resolve("logs");
     }
 
     private static String osName() {

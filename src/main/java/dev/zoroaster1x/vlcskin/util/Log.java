@@ -53,5 +53,6 @@ public final class Log {
                 : String.format(message, arguments);
         System.err.println(TIME.format(Instant.now()) + " [" + level + "] ["
                 + Thread.currentThread().getName() + "] " + text);
+        AppLog.line(level, text);
     }
 }

@@ -100,6 +100,7 @@ public final class McpLog {
      * Appends one timestamped line to the log.
      */
     public static void line(String message) {
+        dev.zoroaster1x.vlcskin.util.AppLog.line("MCP", message);
         try {
             Path file = logFile();
             Files.createDirectories(file.getParent());

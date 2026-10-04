@@ -1,3 +1,14 @@
+/*
+ * VLC Skin Studio, a modern editor for VLC skins2 themes.
+ * Copyright (C) 2026 Zoroaster1x and contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. It is a derivative of the original VLC Skin Editor 0.8.6
+ * by Daniel Dreibrodt.
+ */
+
 package dev.zoroaster1x.vlcskin.app;
 
 import dev.zoroaster1x.vlcskin.app.config.SettingsStore;
@@ -117,6 +128,8 @@ public final class VlcSkinStudio {
                 setTaskbarIcon(icon);
             }
             frame.setVisible(true);
+            dev.zoroaster1x.vlcskin.util.AppLog.start("GUI", dev.zoroaster1x.vlcskin.Version.VERSION);
+            dev.zoroaster1x.vlcskin.util.Banner.startup();
             if (args.length > 0 && !"gui".equals(args[0])) {
                 Path file = Path.of(args[0]);
                 if (java.nio.file.Files.exists(file)) {

@@ -137,7 +137,8 @@ works offline, and its search covers titles, headings and body text.
 
 GPL-3.0-or-later. This is a derivative of the original VLC Skin Editor by
 Daniel Dreibrodt (GPL-2.0-or-later) and reads the VLC skins2 format, whose
-implementation in VLC is GPL-2.0-or-later. See `LICENSE`.
+implementation in VLC is GPL-2.0-or-later. See `LICENSE` for the full text and
+`NOTICE.md` for the author attribution terms added under GPLv3 section 7(b).
 
 ## Credits
 

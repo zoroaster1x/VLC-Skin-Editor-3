@@ -283,10 +283,14 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     private void installShortcuts() {
         JComponent root = getRootPane();
         var inputMap = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
-        for (KeyStroke existing : inputMap.allKeys()) {
-            Object name = inputMap.get(existing);
-            if (name != null && name.toString().startsWith("shortcut:")) {
-                inputMap.remove(existing);
+        // allKeys() is null until the map has at least one binding.
+        KeyStroke[] existing = inputMap.allKeys();
+        if (existing != null) {
+            for (KeyStroke stroke : existing) {
+                Object name = inputMap.get(stroke);
+                if (name != null && name.toString().startsWith("shortcut:")) {
+                    inputMap.remove(stroke);
+                }
             }
         }
         java.util.Map<String, String> keys = studio.settings().getKeys();
@@ -773,6 +777,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             // A persistence problem must never keep the window from closing.
         }
         dispose();
+        dev.zoroaster1x.vlcskin.util.Banner.goodbye();
         System.exit(0);
     }
 

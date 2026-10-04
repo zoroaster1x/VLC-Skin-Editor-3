@@ -1,3 +1,13 @@
+/*
+ * VLC Skin Studio, a modern editor for VLC skins2 themes.
+ * Copyright (C) 2026 Zoroaster1x and contributors.
+ *
+ * This program is free software: you can redistribute it and/or modify it
+ * under the terms of the GNU General Public License as published by the Free
+ * Software Foundation, either version 3 of the License, or (at your option)
+ * any later version. This small shim stays Java 8 so an old JVM can read it.
+ */
+
 package dev.zoroaster1x.vlcskin.launch;
 
 import java.lang.reflect.Method;

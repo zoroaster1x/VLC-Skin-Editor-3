@@ -2,7 +2,7 @@
   Bundled copy of VLC share/skins2/winamp2.xml, used to import Winamp2 skin
   archives that carry no theme.xml, the way VLC does. Source:
   https://code.videolan.org/videolan/vlc/-/blob/master/share/skins2/winamp2.xml
-  VLC is GPL-2.0-or-later, same as this project.
+  VLC is GPL-2.0-or-later; this project is GPL-3.0-or-later.
 -->
 <!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skins.dtd">
 
