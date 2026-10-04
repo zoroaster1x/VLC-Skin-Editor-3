@@ -326,7 +326,8 @@ public final class McpToolset {
                 "The desktop host preferences: theme, language, checkerboard, toolbar and canvas state.",
                 Schema.object().build(), args -> control.getPreferences()));
         tools.add(new ToolSpec("set_preferences", "Set preferences",
-                "Change host preferences: theme, language, checkerboard, showToolbar, canvasZoom or tool.",
+                "Change host preferences: theme, language, checkerboard, showToolbar, canvasZoom, tool "
+                        + "or canvasBackground (theme, light or dark).",
                 Schema.object().object("values", "Preference key to value", Map.of())
                         .required("values").build(),
                 args -> control.setPreferences(stringMap(args, "values"))));

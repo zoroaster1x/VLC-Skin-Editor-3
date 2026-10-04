@@ -24,7 +24,7 @@ The eight panels are Resources, Windows and layouts, Items, Canvas, Inspector, V
 
 ## Themes, language and the toolbar
 
-The theme list offers Light, Dark, IntelliJ, Darcula, Arc, Arc dark and One dark, with the VLC orange accent in every one. The Dark theme checkbox in the View menu toggles between Light and Dark. Edit > Preferences holds the look and feel, the language, the checkerboard and the toolbar visibility.
+The theme list offers Light, Dark, IntelliJ, Darcula, Arc, Arc dark and One dark, with the VLC orange accent in every one. The Dark theme checkbox in the View menu toggles between Light and Dark. Edit > Preferences holds the look and feel, the language, the canvas background, the checkerboard and the toolbar visibility.
 
 The 21 language files converted from the original VLC Skin Editor cover menus, toolbar tooltips, panel titles and common dialogs. Newer surfaces stay in English until a translation exists, and the note in the Preferences dialog says so. The status bar names the current file, the selection, the canvas zoom and whether the document has unsaved changes.
 

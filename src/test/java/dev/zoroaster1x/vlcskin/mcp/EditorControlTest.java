@@ -216,6 +216,8 @@ class EditorControlTest {
         assertThat(control.setPreferences(Map.of("theme", "light", "language", "de")).error()).isFalse();
         assertThat(host.theme).isEqualTo("light");
         assertThat(host.preferences.get("language")).isEqualTo("de");
+        assertThat(control.setPreferences(Map.of("canvasBackground", "light")).error()).isFalse();
+        assertThat(host.preferences.get("canvasBackground")).isEqualTo("light");
         assertThat(control.setCanvas(3, "path", true).error()).isFalse();
         assertThat(host.zoom).isEqualTo(3);
         assertThat(host.tool).isEqualTo("path");

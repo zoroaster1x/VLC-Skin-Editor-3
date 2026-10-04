@@ -30,6 +30,7 @@ public final class StudioSettings {
     private boolean autoUpdate;
     private String language = "en";
     private int canvasZoom = 2;
+    private String canvasBackground = "theme";
     private boolean showToolCalls;
     private String lastExample = "neon";
 

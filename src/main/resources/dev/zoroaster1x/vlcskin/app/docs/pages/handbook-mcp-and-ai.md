@@ -109,7 +109,7 @@ With the OpenCode CLI you can add it directly instead: `opencode mcp add vlc-ski
 | `save_preview` | Write a layout render to a PNG file. |
 | `test_in_vlc` | Save, install the `.vlt` into VLC's skins folder and start VLC. |
 | `generate_slider_background` | Build a background strip and register it on a slider. |
-| `get_preferences`, `set_preferences` | Host preferences such as theme, language, checkerboard and canvas state. |
+| `get_preferences`, `set_preferences` | Host preferences such as theme, language, canvas background, checkerboard and canvas state. |
 | `set_canvas` | Zoom, tool and checkerboard of the running canvas. |
 | `show_panel`, `open_settings` | Bring a panel forward or open Skin settings. |
 | `check_for_updates` | Compare with the latest GitHub release. |

@@ -3,11 +3,13 @@ package dev.zoroaster1x.vlcskin.app;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import dev.zoroaster1x.vlcskin.app.panel.CanvasPanel;
+import dev.zoroaster1x.vlcskin.app.theme.ThemeManager;
 import dev.zoroaster1x.vlcskin.edit.EditorSession;
 import dev.zoroaster1x.vlcskin.example.ExampleSkins;
 import dev.zoroaster1x.vlcskin.model.ItemType;
 import dev.zoroaster1x.vlcskin.model.item.Item;
 import dev.zoroaster1x.vlcskin.render.Bounds;
+import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -75,6 +77,23 @@ class StudioUiTest {
         BufferedImage image = headless.render(1440, 900);
         ImageIO.write(image, "png", outputDir.resolve("studio-light.png").toFile());
         assertThat(Files.size(outputDir.resolve("studio-light.png"))).isGreaterThan(20_000);
+    }
+
+    @Test
+    void theCanvasBackdropFollowsTheTheme(@TempDir Path folder) throws Exception {
+        HeadlessStudio light = studio(folder, "light");
+        Color lightBackdrop = light.canvas().canvasComponent().getBackground();
+        assertThat(lightBackdrop).isEqualTo(ThemeManager.canvasBackground());
+
+        HeadlessStudio dark = studio(folder.resolve("dark"), "dark");
+        Color darkBackdrop = dark.canvas().canvasComponent().getBackground();
+        assertThat(darkBackdrop).isEqualTo(ThemeManager.canvasBackground());
+        assertThat(lightBackdrop).isNotEqualTo(darkBackdrop);
+
+        // A dark window can still pin a light stage, and the change is live.
+        dark.studio().settings().setCanvasBackground("light");
+        dark.canvas().refreshBackdrop();
+        assertThat(dark.canvas().canvasComponent().getBackground()).isEqualTo(lightBackdrop);
     }
 
     @Test

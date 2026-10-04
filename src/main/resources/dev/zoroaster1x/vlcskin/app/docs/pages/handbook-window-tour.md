@@ -87,6 +87,7 @@ On the canvas itself:
 - Ctrl and the mouse wheel zoom in and out.
 - The right click menu on an item offers Duplicate, Delete, Bring to front and Fit window. Duplicate asks for a rename pattern first.
 - Transparency is drawn over a checkerboard pattern. View > Checkerboard toggles it.
+- The backdrop behind the preview follows the window theme. Preferences can pin it to Light or Dark instead, so a white stage under a dark window is one choice away.
 - Animated bitmaps play in place. The preview runs at the fastest bitmap `fps` in the theme and stops when no animated bitmap remains.
 
 ## The three trees and their icons

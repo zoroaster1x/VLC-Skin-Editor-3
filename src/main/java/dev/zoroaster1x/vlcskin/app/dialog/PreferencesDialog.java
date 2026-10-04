@@ -48,6 +48,16 @@ public final class PreferencesDialog extends JDialog {
             }
         }
 
+        JComboBox<String> backgroundBox = new JComboBox<>(new String[] {
+                Messages.get("APP_PREFS_CANVAS_THEME", "Follow the theme"),
+                Messages.get("APP_PREFS_CANVAS_LIGHT", "Light"),
+                Messages.get("APP_PREFS_CANVAS_DARK", "Dark")});
+        backgroundBox.setSelectedIndex(switch (studio.settings().getCanvasBackground()) {
+            case "light" -> 1;
+            case "dark" -> 2;
+            default -> 0;
+        });
+
         JCheckBox checkerboard = new JCheckBox(Messages.get("APP_PREFS_CHECKERBOARD", "Checkerboard behind the preview"),
                 studio.settings().isCheckerboard());
         JCheckBox showToolbar = new JCheckBox(Messages.get("WIN_PREFS_TBAR_L", "Show the toolbar"),
@@ -55,6 +65,7 @@ public final class PreferencesDialog extends JDialog {
 
         content.add(row(Messages.get("WIN_PREFS_LAF_L", "Look and feel"), themeBox));
         content.add(row(Messages.get("WIN_PREFS_LANG_L", "Language"), languageBox));
+        content.add(row(Messages.get("APP_PREFS_CANVAS_BG", "Canvas background"), backgroundBox));
         content.add(Box.createVerticalStrut(8));
         content.add(checkerboard);
         content.add(showToolbar);
@@ -84,6 +95,11 @@ public final class PreferencesDialog extends JDialog {
                 Messages.setLanguage(language.code());
                 studio.settings().setLanguage(language.code());
             }
+            studio.settings().setCanvasBackground(switch (backgroundBox.getSelectedIndex()) {
+                case 1 -> "light";
+                case 2 -> "dark";
+                default -> "theme";
+            });
             studio.settings().setCheckerboard(checkerboard.isSelected());
             studio.settings().setShowToolbar(showToolbar.isSelected());
             if (toolbarToggle != null) {
@@ -99,7 +115,7 @@ public final class PreferencesDialog extends JDialog {
         content.add(footer);
 
         setContentPane(content);
-        setPreferredSize(new Dimension(460, 320));
+        setPreferredSize(new Dimension(460, 360));
         pack();
         setLocationRelativeTo(null);
     }

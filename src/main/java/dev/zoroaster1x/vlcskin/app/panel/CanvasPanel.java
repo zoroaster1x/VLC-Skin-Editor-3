@@ -2,6 +2,7 @@ package dev.zoroaster1x.vlcskin.app.panel;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.theme.ThemeManager;
 import dev.zoroaster1x.vlcskin.edit.ValueCommand;
 import dev.zoroaster1x.vlcskin.model.SkinLayout;
 import dev.zoroaster1x.vlcskin.model.item.Item;
@@ -42,6 +43,7 @@ public final class CanvasPanel extends JPanel {
     private final Studio studio;
     private final CardLayout cards = new CardLayout();
     private final JPanel cardHost = new JPanel(cards);
+    private final javax.swing.JScrollPane scroll;
     private final Surface surface;
     private final WelcomeCard welcome;
     private final JPanel controls = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 4));
@@ -83,11 +85,11 @@ public final class CanvasPanel extends JPanel {
         setLayout(new java.awt.BorderLayout());
         // The original put the preview in a scroll pane with zoom buttons; the
         // scrollbars and the wheel are how you move around a bigger theme.
-        javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(surface,
+        scroll = new javax.swing.JScrollPane(surface,
                 javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 javax.swing.ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scroll.setBorder(null);
-        scroll.getViewport().setBackground(new Color(0x16, 0x18, 0x1D));
+        scroll.getViewport().setBackground(backdrop());
         scroll.setWheelScrollingEnabled(true);
         scroll.getVerticalScrollBar().setUnitIncrement(24);
         scroll.getHorizontalScrollBar().setUnitIncrement(24);
@@ -103,6 +105,39 @@ public final class CanvasPanel extends JPanel {
         });
         animator.setCoalesce(true);
         installMouse();
+    }
+
+    /**
+     * A theme switch runs through the LAF update; the canvas backdrop follows
+     * it instead of staying dark on a light theme.
+     */
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        if (scroll != null) {
+            refreshBackdrop();
+        }
+    }
+
+    /**
+     * The configured backdrop: the window theme decides by default, or the
+     * user pinned a light or dark stage in preferences.
+     */
+    private Color backdrop() {
+        return ThemeManager.canvasBackground(studio.settings().getCanvasBackground());
+    }
+
+    /**
+     * Reapplies the configured backdrop after a preference change, so a white
+     * stage on a dark theme (or the other way around) shows at once.
+     */
+    public void refreshBackdrop() {
+        Color backdrop = backdrop();
+        scroll.getViewport().setBackground(backdrop);
+        surface.setBackground(backdrop);
+        welcome.setBackground(backdrop);
+        surface.repaint();
+        welcome.repaint();
     }
 
     private JPanel buildControls() {
@@ -622,8 +657,14 @@ public final class CanvasPanel extends JPanel {
 
         Surface() {
             setOpaque(true);
-            setBackground(new Color(0x16, 0x18, 0x1D));
+            setBackground(backdrop());
             setFocusable(true);
+        }
+
+        @Override
+        public void updateUI() {
+            super.updateUI();
+            setBackground(backdrop());
         }
 
         @Override
@@ -667,7 +708,9 @@ public final class CanvasPanel extends JPanel {
             bounds.setBounds(x, y, size.width, size.height);
             BufferedImage image = image(layout, options);
             g.drawImage(image, bounds.x, bounds.y, null);
-            g.setColor(new Color(255, 255, 255, 24));
+            g.setColor(ThemeManager.currentIsDark()
+                    ? new Color(255, 255, 255, 24)
+                    : new Color(0, 0, 0, 32));
             g.drawRect(bounds.x - 1, bounds.y - 1, bounds.width + 1, bounds.height + 1);
             if (layout.getItems().isEmpty()) {
                 java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
@@ -681,13 +724,14 @@ public final class CanvasPanel extends JPanel {
                 int centerX = bounds.x + bounds.width / 2;
                 int boxWidth = Math.max(metrics.stringWidth(line1), metrics.stringWidth(line2)) + 28;
                 int boxY = bounds.y + bounds.height / 2 - 30;
-                g2.setColor(new Color(0x1E, 0x1F, 0x22, 200));
+                boolean dark = ThemeManager.currentIsDark();
+                g2.setColor(dark ? new Color(0x1E, 0x1F, 0x22, 200) : new Color(0xFF, 0xFF, 0xFF, 225));
                 g2.fillRoundRect(centerX - boxWidth / 2, boxY, boxWidth, 62, 12, 12);
-                g2.setColor(new Color(0xE6, 0xE7, 0xE9));
+                g2.setColor(dark ? new Color(0xE6, 0xE7, 0xE9) : new Color(0x2B, 0x2D, 0x30));
                 g2.drawString(line1, centerX - metrics.stringWidth(line1) / 2, boxY + 26);
                 g2.setFont(g2.getFont().deriveFont(java.awt.Font.PLAIN, 12f));
                 java.awt.FontMetrics metrics2 = g2.getFontMetrics();
-                g2.setColor(new Color(0xB9, 0xBC, 0xC2));
+                g2.setColor(dark ? new Color(0xB9, 0xBC, 0xC2) : new Color(0x6E, 0x71, 0x78));
                 g2.drawString(line2, centerX - metrics2.stringWidth(line2) / 2, boxY + 47);
                 g2.dispose();
             }

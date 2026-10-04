@@ -5,6 +5,7 @@ import dev.zoroaster1x.vlcskin.app.component.Icons;
 import dev.zoroaster1x.vlcskin.app.config.AppPaths;
 import dev.zoroaster1x.vlcskin.app.config.StudioSettings;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.theme.ThemeManager;
 import dev.zoroaster1x.vlcskin.example.ExampleSkins;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -39,7 +40,7 @@ final class WelcomeCard extends JPanel {
     WelcomeCard(Studio studio) {
         this.studio = studio;
         setOpaque(true);
-        setBackground(new Color(0x16, 0x18, 0x1D));
+        setBackground(backdrop());
         setLayout(new java.awt.GridBagLayout());
 
         JPanel card = new TrackWidthPanel();
@@ -98,6 +99,23 @@ final class WelcomeCard extends JPanel {
         constraints.weighty = 1;
         constraints.insets = new java.awt.Insets(18, 18, 18, 18);
         add(scroll, constraints);
+    }
+
+    /**
+     * The empty state sits on the same backdrop as the canvas, so a light theme
+     * does not turn the welcome page into a dark page.
+     */
+    @Override
+    public void updateUI() {
+        super.updateUI();
+        // Called from the JPanel constructor too, before studio is assigned.
+        if (studio != null) {
+            setBackground(backdrop());
+        }
+    }
+
+    private Color backdrop() {
+        return ThemeManager.canvasBackground(studio.settings().getCanvasBackground());
     }
 
     /**

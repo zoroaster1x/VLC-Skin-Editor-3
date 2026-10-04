@@ -55,6 +55,43 @@ public final class ThemeManager {
         return FlatLaf.isLafDark();
     }
 
+    private static final Color CANVAS_DARK = new Color(0x16, 0x18, 0x1D);
+    private static final Color CANVAS_LIGHT = new Color(0xEC, 0xEE, 0xF1);
+
+    /**
+     * The backdrop behind the preview. Dark looks keep the near black stage;
+     * light looks get a light neutral so the canvas is not a dark hole in an
+     * otherwise white window.
+     */
+    public static Color canvasBackground() {
+        return currentIsDark() ? CANVAS_DARK : CANVAS_LIGHT;
+    }
+
+    /**
+     * The backdrop for the stored preference: {@code light} and {@code dark}
+     * pin the stage regardless of the window theme, anything else follows it.
+     */
+    public static Color canvasBackground(String preference) {
+        if ("light".equalsIgnoreCase(preference)) {
+            return CANVAS_LIGHT;
+        }
+        if ("dark".equalsIgnoreCase(preference)) {
+            return CANVAS_DARK;
+        }
+        return canvasBackground();
+    }
+
+    /**
+     * The storable form of a canvas backdrop preference; unknown values fall
+     * back to following the theme.
+     */
+    public static String normalizeCanvasBackground(String value) {
+        if ("light".equalsIgnoreCase(value) || "dark".equalsIgnoreCase(value)) {
+            return value.toLowerCase(java.util.Locale.ROOT);
+        }
+        return "theme";
+    }
+
     /**
      * Applies a theme and the studio UI defaults.
      */

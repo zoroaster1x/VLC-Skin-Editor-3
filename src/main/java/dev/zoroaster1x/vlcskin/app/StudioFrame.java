@@ -129,6 +129,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
     }
 
     private void onSessionChanged() {
+        panels.canvas.refreshBackdrop();
         statusBar.update(studio);
         MenuBarFactory.refreshUndoLabels(getJMenuBar(), studio, "Undo", "Redo");
         applyToolbarVisibility();
