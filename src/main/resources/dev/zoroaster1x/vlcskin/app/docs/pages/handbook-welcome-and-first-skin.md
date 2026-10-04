@@ -24,7 +24,7 @@ The Recent list shows the files you opened last, newest first. Click a path to o
 
 The Examples list shows each example with a one line description and a Create button. Create writes the example into a new folder and opens it in the editor straight away:
 
-- It uses the last folder you worked in when there is one, otherwise your home folder.
+- It uses the last folder you worked in when there is one, otherwise the `examples` folder under the editor's config directory, `~/.config/vlc-skin-studio/examples`.
 - The folder is named `vlc-skin-neon` or `vlc-skin-panel`.
 - The theme file inside is `theme.xml`, and the PNG assets are generated next to it.
 
@@ -35,7 +35,7 @@ The two examples are:
 | Neon player | A 320x140 player bar with transport buttons, a seek slider and a volume slider. |
 | Flat panel | A 420x220 plain control panel with a video area and a seek slider, a good starting point for a bigger window. |
 
-The Examples button at the top of the card opens the same two themes as a popup menu and creates the chosen one in your home folder.
+The Examples button at the top of the card opens the same two themes as a popup menu and creates the chosen one in the same place.
 
 ## Create a new skin
 

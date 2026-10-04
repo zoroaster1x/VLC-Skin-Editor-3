@@ -29,11 +29,7 @@ public final class SettingsStore {
     }
 
     public static Path defaultPath() {
-        String configHome = System.getenv("XDG_CONFIG_HOME");
-        Path base = configHome != null && !configHome.isBlank()
-                ? Path.of(configHome)
-                : Path.of(System.getProperty("user.home"), ".config");
-        return base.resolve("vlc-skin-studio").resolve("settings.json");
+        return AppPaths.configDir().resolve("settings.json");
     }
 
     public Path file() {

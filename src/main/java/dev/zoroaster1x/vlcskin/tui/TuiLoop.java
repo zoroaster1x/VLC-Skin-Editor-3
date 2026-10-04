@@ -1,5 +1,6 @@
 package dev.zoroaster1x.vlcskin.tui;
 
+import dev.zoroaster1x.vlcskin.app.config.AppPaths;
 import dev.zoroaster1x.vlcskin.mcp.EditorService;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -53,10 +54,7 @@ public final class TuiLoop {
     }
 
     private static Path historyFile() {
-        String configHome = System.getenv("XDG_CONFIG_HOME");
-        Path base = configHome != null && !configHome.isBlank()
-                ? Path.of(configHome) : Path.of(System.getProperty("user.home"), ".config");
-        Path folder = base.resolve("vlc-skin-studio");
+        Path folder = AppPaths.configDir();
         try {
             Files.createDirectories(folder);
         } catch (IOException ex) {

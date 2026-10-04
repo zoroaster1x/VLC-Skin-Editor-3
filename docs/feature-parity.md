@@ -118,7 +118,7 @@ Verdict: the rewrite ports the complete editing surface of the original. All ori
 |---|---|---|---|---|
 | Generator | `SliderBGGen.java` two-step wizard plus `SliderBGBuilder.java` | `app/dialog/SliderBackgroundGeneratorDialog.java` plus `render/SliderBackgroundGenerator.java` | ported | |
 | Inputs | direction, width, height, four margins, background, start edge, middle (required), end edge, overlay, tile or stretch for background and middle (`SliderBGGen.java`, `SliderBGBuilder.java`) | same inputs, tile via two checkboxes, stretch is the unchecked state | different | Single form instead of Next/Previous cards. |
-| Output | writes `<id>_bg.png` next to the skin, adds a Bitmap, sets frame counts and zero padding (`SliderBGGen.java` lines 406-435) | writes `<background id>_bg.png`, registers a Bitmap, sets frame counts and zero padding (`SliderBackgroundGeneratorDialog.java` lines 148-226) | ported | Rewrite only registers the bitmap when the skin has a file; otherwise it writes to the home folder. |
+| Output | writes `<id>_bg.png` next to the skin, adds a Bitmap, sets frame counts and zero padding (`SliderBGGen.java` lines 406-435) | writes `<background id>_bg.png`, registers a Bitmap, sets frame counts and zero padding (`SliderBackgroundGeneratorDialog.java` lines 148-226) | ported | Rewrite only registers the bitmap when the skin has a file; otherwise it writes to `~/.config/vlc-skin-studio/exports`. |
 | Missing middle image error | `ERROR_SBGGEN_MIDDLE_MSG` | `SliderBackgroundGeneratorDialog.java` lines 149-155 | ported | |
 
 ### Theme settings, preferences and look and feel

@@ -34,8 +34,7 @@ public final class Messages {
      * per language, without rebuilding.
      */
     private static java.nio.file.Path userLanguageFolder() {
-        return dev.zoroaster1x.vlcskin.app.config.SettingsStore.defaultPath()
-                .resolveSibling("lang");
+        return dev.zoroaster1x.vlcskin.app.config.AppPaths.configDir().resolve("lang");
     }
 
     public static void setLanguage(String code) {

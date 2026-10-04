@@ -1,6 +1,7 @@
 package dev.zoroaster1x.vlcskin.app;
 
 import dev.zoroaster1x.vlcskin.Version;
+import dev.zoroaster1x.vlcskin.app.config.AppPaths;
 import dev.zoroaster1x.vlcskin.app.config.SettingsStore;
 import dev.zoroaster1x.vlcskin.app.config.StudioSettings;
 import dev.zoroaster1x.vlcskin.app.dialog.ProgressDialog;
@@ -351,22 +352,22 @@ public final class Studio {
     }
 
     /**
-     * The VLC skins folder, used when the user has no last directory yet.
-     * Only an existing directory is returned; nothing is created.
+     * The folder the file choosers start in when there is no last directory:
+     * VLC's skins folder when it exists, otherwise the examples folder under
+     * the config directory, created on demand. Never the home folder.
      */
     private Path defaultDirectory() {
-        Path candidate = null;
         Path skins = dev.zoroaster1x.vlcskin.util.VlcFinder.skinsFolder();
         if (Files.isDirectory(skins)) {
-            candidate = skins;
+            return skins;
         }
-        if (candidate == null || !Files.isDirectory(candidate)) {
-            candidate = Path.of(System.getProperty("user.home"), "vlc-skins");
-            if (!Files.isDirectory(candidate)) {
-                candidate = Path.of(System.getProperty("user.home"));
-            }
+        Path examples = AppPaths.examplesDir();
+        try {
+            Files.createDirectories(examples);
+            return examples;
+        } catch (IOException ex) {
+            return null;
         }
-        return Files.isDirectory(candidate) ? candidate : null;
     }
 
     /**

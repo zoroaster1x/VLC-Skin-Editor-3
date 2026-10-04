@@ -612,7 +612,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
 
 
     private Path layoutFile() {
-        return dev.zoroaster1x.vlcskin.app.config.SettingsStore.defaultPath().resolveSibling("layout.xml");
+        return dev.zoroaster1x.vlcskin.app.config.AppPaths.configDir().resolve("layout.xml");
     }
 
     private void restoreLayout() {

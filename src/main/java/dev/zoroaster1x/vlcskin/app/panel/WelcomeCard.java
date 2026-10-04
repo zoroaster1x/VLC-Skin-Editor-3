@@ -2,6 +2,8 @@ package dev.zoroaster1x.vlcskin.app.panel;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.component.Icons;
+import dev.zoroaster1x.vlcskin.app.config.AppPaths;
+import dev.zoroaster1x.vlcskin.app.config.StudioSettings;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
 import dev.zoroaster1x.vlcskin.example.ExampleSkins;
 import java.awt.BorderLayout;
@@ -14,6 +16,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -197,7 +200,7 @@ final class WelcomeCard extends JPanel {
         row.add(texts, BorderLayout.CENTER);
         JButton create = new JButton(Messages.get("APP_WELCOME_CREATE", "Create"));
         create.addActionListener(e -> {
-            Path folder = exampleFolder(example);
+            Path folder = exampleFolder(studio.settings(), example.id());
             var outcome = studio.service().createExample(example.id(), folder.toString());
             if (outcome.error()) {
                 studio.error(outcome.text());
@@ -212,27 +215,25 @@ final class WelcomeCard extends JPanel {
     }
 
     /**
-     * Where an example is written: the last folder the user used when it is
-     * writable, otherwise the home folder. Flatpak export directories are never
-     * used, writing there fails with a confusing error.
+     * Where an example is written: the last folder the user worked in when it
+     * is writable, otherwise the examples folder under the config directory.
+     * Flatpak export paths are skipped, writing there fails with a confusing
+     * error.
      */
-    private Path exampleFolder(ExampleSkins.Example example) {
-        Path home = Path.of(System.getProperty("user.home"));
-        Path base = home;
-        String last = studio.settings().getLastDirectory();
+    static Path exampleFolder(StudioSettings settings, String exampleId) {
+        Path base = null;
+        String last = settings.getLastDirectory();
         if (last != null && !last.isBlank()) {
             Path candidate = Path.of(last);
-            if (java.nio.file.Files.isDirectory(candidate)
-                    && java.nio.file.Files.isWritable(candidate)
+            if (Files.isDirectory(candidate) && Files.isWritable(candidate)
                     && !candidate.toString().contains("flatpak")) {
                 base = candidate;
             }
         }
-        Path folder = base.resolve("vlc-skin-" + example.id());
-        if (!java.nio.file.Files.isWritable(folder.getParent())) {
-            folder = home.resolve("vlc-skin-" + example.id());
+        if (base == null) {
+            base = AppPaths.examplesDir();
         }
-        return folder;
+        return base.resolve("vlc-skin-" + exampleId);
     }
 
     private void showExamples() {
@@ -240,7 +241,7 @@ final class WelcomeCard extends JPanel {
         for (ExampleSkins.Example example : ExampleSkins.catalog()) {
             javax.swing.JMenuItem item = new javax.swing.JMenuItem(example.name());
             item.addActionListener(e -> {
-                Path folder = exampleFolder(example);
+                Path folder = exampleFolder(studio.settings(), example.id());
                 var outcome = studio.service().createExample(example.id(), folder.toString());
                 if (outcome.error()) {
                     studio.error(outcome.text());

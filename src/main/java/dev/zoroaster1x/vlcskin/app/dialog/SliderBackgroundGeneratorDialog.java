@@ -1,6 +1,7 @@
 package dev.zoroaster1x.vlcskin.app.dialog;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
+import dev.zoroaster1x.vlcskin.app.config.AppPaths;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
 import dev.zoroaster1x.vlcskin.edit.ValueCommand;
 import dev.zoroaster1x.vlcskin.model.resource.BitmapResource;
@@ -164,8 +165,9 @@ public final class SliderBackgroundGeneratorDialog extends JDialog {
                     readOrNull(overlayFile));
             BufferedImage strip = SliderBackgroundGenerator.generate(spec);
             Path folder = studio.session().file() == null
-                    ? Path.of(System.getProperty("user.home"))
+                    ? AppPaths.exportsDir()
                     : studio.session().file().getParent();
+            Files.createDirectories(folder);
             Path target = folder.resolve(background.getId() + "_bg.png");
             ImageIO.write(strip, "png", target.toFile());
             if (studio.session().file() != null) {
