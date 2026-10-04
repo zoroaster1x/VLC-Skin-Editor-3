@@ -36,8 +36,28 @@ permissions:
   contents: read
 
 jobs:
+  marker:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.check.outputs.release }}
+    steps:
+      - name: Look for the marker in the commit subject
+        id: check
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          SUBJECT=$(printf '%s' "$MESSAGE" | head -n1)
+          if [ "$EVENT" = "push" ] && printf '%s' "$SUBJECT" | grep -Eq '\[release\][[:space:]]*[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "The head commit is a release; the Release workflow builds and tests it."
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
-    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[release]') }}
+    needs: marker
+    if: needs.marker.outputs.release == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

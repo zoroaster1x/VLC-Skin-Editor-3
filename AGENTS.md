@@ -488,21 +488,22 @@ avoid.
 
 * **A release is cut by CI, never by hand.** Bump `version` in
   `gradle.properties`, then make the head commit with the marker in its
-  message: `VLC Skin Studio 1.0.1 [release] 1.0.1`. The marker version must
-  equal `gradle.properties`.
+  subject: `VLC Skin Studio 1.0.1 [release] 1.0.1`. The marker version must
+  equal `gradle.properties`. Only the subject counts; a body that mentions the
+  marker does not release.
 * The Release workflow builds, runs the suites, generates the notes from every
   commit since the previous release tag with a link per commit plus a full
   changelog compare link, followed by `.github/release-template.md` (which
   carries the funding block), attests the provenance of
   `build/libs/vlc-skin-studio.jar`, and publishes the release with that jar plus
   a SHA-256 checksum file.
-* A push without the marker is built and tested by the Tests workflow only:
-  the Release job skips itself on the missing marker and the Tests job skips
-  itself on a present one, so one commit never runs the same suite twice and
-  no job pretends to release. `workflow_dispatch` cuts a release for the
-  current version.
+* Each workflow starts with a cheap marker job that checks the commit subject;
+  without the marker the Release workflow skips its heavy job and the Tests
+  workflow runs, with the marker it is the other way around, so one commit
+  never runs the same suite twice and no job pretends to release.
+  `workflow_dispatch` cuts a release for the current version.
 * Manual fallback, only when CI cannot run:
-  `gh release create 1.0.1 --target master build/libs/vlc-skin-studio.jar`
+  `gh release create 1.0.1 --target main build/libs/vlc-skin-studio.jar`
   (attestation is then missing, so say so in the report).
 
 ## 16. Known traps

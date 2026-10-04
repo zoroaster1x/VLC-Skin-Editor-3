@@ -23,8 +23,28 @@ permissions:
   attestations: write
 
 jobs:
+  marker:
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.check.outputs.release }}
+    steps:
+      - name: Look for the marker in the commit subject
+        id: check
+        env:
+          MESSAGE: ${{ github.event.head_commit.message }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          SUBJECT=$(printf '%s' "$MESSAGE" | head -n1)
+          if [ "$EVENT" = "workflow_dispatch" ] || printf '%s' "$SUBJECT" | grep -Eq '\[release\][[:space:]]*[0-9]+\.[0-9]+\.[0-9]+'; then
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "No [release] x.y.z marker in the head commit subject; the Tests workflow covers this push."
+          fi
+
   release:
-    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]') }}
+    needs: marker
+    if: needs.marker.outputs.release == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -56,7 +76,7 @@ jobs:
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             VERSION="$PROPERTY_VERSION"
           else
-            VERSION=$(git log -1 --pretty=%B | python3 -c "import sys,re;m=re.search(r'\[release\]\s*(\d+\.\d+\.\d+)', sys.stdin.read(), re.I);print(m.group(1) if m else '')")
+            VERSION=$(git log -1 --pretty=%s | python3 -c "import sys,re;m=re.search(r'\[release\]\s*(\d+\.\d+\.\d+)', sys.stdin.read(), re.I);print(m.group(1) if m else '')")
           fi
           if [ -z "$VERSION" ]; then
             echo "No [release] x.y.z marker in the head commit; this is a normal build."
