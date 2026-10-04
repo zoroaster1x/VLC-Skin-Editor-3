@@ -20,7 +20,8 @@ class LauncherTest {
     void theInstallMessageNamesTheRightSources() {
         String message = Launcher.installMessage("1.8.0_402");
         assertThat(message).contains("Java 25");
-        assertThat(message).contains("https://www.azul.com/downloads/#downloads-table-zulu");
+        assertThat(message).contains("https://www.azul.com/downloads/?version=java-25-lts&package=jre#zulu");
+        assertThat(message).contains(".msi");
         assertThat(message).contains("sdkman.io");
         assertThat(message).contains("PATH");
         assertThat(message).contains("1.8.0_402");

@@ -25,7 +25,7 @@ public final class Launcher {
 
     public static final int REQUIRED_JAVA = 25;
     private static final String APP_MAIN = "dev.zoroaster1x.vlcskin.app.VlcSkinStudio";
-    private static final String AZUL = "https://www.azul.com/downloads/#downloads-table-zulu";
+    private static final String AZUL = "https://www.azul.com/downloads/?version=java-25-lts&package=jre#zulu";
     private static final String SDKMAN = "https://sdkman.io/";
 
     private Launcher() {
@@ -90,7 +90,7 @@ public final class Launcher {
     public static String installMessage(String runningVersion) {
         return "VLC Skin Studio needs Java " + REQUIRED_JAVA + " or newer.\n"
                 + "You are running Java " + runningVersion + ".\n\n"
-                + "Windows: download the Zulu build of Java " + REQUIRED_JAVA + " from\n"
+                + "Windows: download the Zulu JRE " + REQUIRED_JAVA + " .msi from\n"
                 + AZUL + "\n"
                 + "After installing you may need to edit your PATH so the new java.exe is found\n"
                 + "first. Open a new command prompt and check with: java -version\n\n"

@@ -72,6 +72,7 @@ Java 25 is required. Gradle comes from the wrapper, Java from SDKMAN (see
 ```bash
 ./gradlew build                       # compile, run every suite, build the jar
 ./gradlew shadowJar                   # single file jar with all dependencies
+./gradlew releaseZip                  # release zip with jar, launchers, README.txt
 ./gradlew test                        # tests only
 ./gradlew uiScreenshots               # regenerate screenshots/ (stills and GIFs)
 ./gradlew run                         # open the desktop window
@@ -92,6 +93,12 @@ so an old JVM can load it and show install instructions; it reflects into
 `dev.zoroaster1x.vlcskin.app.VlcSkinStudio` on Java 25. The native image keeps
 `VlcSkinStudio` as its entry point. Any known subcommand runs the CLI; anything
 else opens the window with an optional file argument.
+
+`releaseZip` writes `build/distributions/vlc-skin-studio-<version>.zip` with the
+fat jar, `run.bat`, `run.sh` and `README.txt` from `packaging/`. The launchers
+check for Java 25, print `JAVA NOT INSTALLED. Please download from ...` with the
+Azul Zulu JRE link for the detected OS and CPU when it is missing, and pass
+their arguments through. The zip and the bare jar are both release assets.
 
 Tooling under `tools/`:
 
@@ -183,6 +190,7 @@ src/main/resources/dev/zoroaster1x/vlcskin/
   example/velocity/   the bundled VeLoCity Dark theme and its MIT license
 src/test/java/...   one suite per area, see section 6
 src/test/resources/edge-cases/  53 VLC edge case themes from docs/skins2-edge-cases.md
+packaging/          run.bat, run.sh, README.txt that releaseZip ships to users
 tools/              build, gallery, docs, screenshot and parity harnesses
 docs/               skin-gallery-report.md/.json, feature-parity.md,
                     skins2-parser.md, skins2-rendering.md, skins2-edge-cases.md
@@ -593,16 +601,23 @@ avoid.
 * The Release workflow builds, runs the suites, generates the notes from every
   commit since the previous release tag with a link per commit plus a full
   changelog compare link, followed by `.github/release-template.md` (which
-  carries the funding block), attests the provenance of
-  `build/libs/vlc-skin-studio.jar`, and publishes the release with that jar plus
-  a SHA-256 checksum file.
+  carries the funding block), attests the provenance of the jar and the dist
+  zip, and publishes three assets: `vlc-skin-studio-<version>.zip` (jar,
+  `run.bat`, `run.sh`, `README.txt`), the bare `vlc-skin-studio.jar` and
+  `SHA256SUMS`. The jar's checksum line comes first because the in-app updater
+  reads the first SHA-256 in that file.
+* **Never hard wrap a line in `.github/release-template.md` or in the notes
+  the workflow generates.** A GitHub release body turns every source newline
+  into a line break, so an 80 column template renders with a break after every
+  line. Paragraphs are one long line; only list items and code blocks may break.
 * Each workflow starts with a cheap marker job that checks the commit subject;
   without the marker the Release workflow skips its heavy job and the Tests
   workflow runs, with the marker it is the other way around, so one commit
   never runs the same suite twice and no job pretends to release.
   `workflow_dispatch` cuts a release for the current version.
 * Manual fallback, only when CI cannot run:
-  `gh release create 1.0.1 --target main build/libs/vlc-skin-studio.jar`
+  `gh release create 1.0.1 --target main build/libs/vlc-skin-studio.jar
+  build/distributions/vlc-skin-studio-1.0.1.zip`
   (attestation is then missing, so say so in the report).
 
 ## 16. Known traps
@@ -617,6 +632,8 @@ avoid.
   `MarkdownRenderer.stripFrontMatter`.
 * Trusting the legacy help pages. They are archived reference; the handbook is
   the product.
+* Hard wrapping release notes. GitHub release bodies turn each source newline
+  into a visible break; see section 15.
 
 ## 17. Local test configuration
 

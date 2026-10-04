@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'java'
     id 'application'
@@ -95,6 +97,15 @@ application {
     applicationName = 'vlc-skin-studio'
 }
 
+// The application plugin's bin/lib distributions would otherwise claim
+// vlc-skin-studio-<version>.zip, the name releaseZip gives to the release
+// package users download. They keep a separate name; only releaseZip ships.
+distributions {
+    main {
+        distributionBaseName = 'vlc-skin-studio-application'
+    }
+}
+
 tasks.named('jar') {
     from sourceSets.launcher.output
 }
@@ -111,8 +122,33 @@ tasks.named('shadowJar') {
     mergeServiceFiles()
 }
 
+// The release zip users download: the fat jar, the Windows and POSIX launchers
+// and the plain text readme. The launchers are copied byte for byte; README.txt
+// carries @version@, which the filter replaces with the Gradle version.
+tasks.register('releaseZip', Zip) {
+    group = 'distribution'
+    description = 'Packages the fat jar with the launcher scripts and README.txt.'
+    dependsOn tasks.named('shadowJar')
+    archiveBaseName = 'vlc-skin-studio'
+    archiveVersion = appVersion
+    archiveClassifier = ''
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    from(tasks.named('shadowJar').flatMap { it.archiveFile }) {
+        rename { 'vlc-skin-studio.jar' }
+    }
+    from('packaging') {
+        include 'run.sh', 'run.bat'
+        filePermissions { unix('rwxr-xr-x') }
+    }
+    from('packaging') {
+        include 'README.txt'
+        filter(ReplaceTokens, tokens: [version: appVersion])
+    }
+}
+
 tasks.named('build') {
     dependsOn tasks.named('shadowJar')
+    dependsOn tasks.named('releaseZip')
 }
 
 // Writes the runtime classpath to build/runtimecp.txt so scripts and end to end

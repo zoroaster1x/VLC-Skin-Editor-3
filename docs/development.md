@@ -5,6 +5,7 @@
 ```bash
 ./gradlew build                    # compile, test, build the fat jar
 ./gradlew shadowJar                # the fat jar alone
+./gradlew releaseZip               # release zip with the launchers and README.txt
 ./gradlew test                     # tests only, screenshots in build/reports
 ./gradlew uiScreenshots            # regenerate screenshots/ (stills and GIFs)
 java -jar build/libs/vlc-skin-studio.jar          # desktop UI

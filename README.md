@@ -6,14 +6,24 @@ with you. It is a from scratch port of the original VLC Skin Editor (0.8.6)
 to Java 25.
 
 Project: <https://github.com/zoroaster1x/VLC-Skin-Editor-3> ·
-[Releases](https://github.com/zoroaster1x/VLC-Skin-Editor-3/releases) ·
+[Latest release](https://github.com/zoroaster1x/VLC-Skin-Editor-3/releases/latest) ·
 [Issues](https://github.com/zoroaster1x/VLC-Skin-Editor-3/issues)
 
-**[What it does](#what-it-does)** · **[Requirements](#requirements)** · **[Quick start](#quick-start)** · **[Screenshots](#screenshots)** · **[Documentation](#documentation)** · **[License](#license)** · **[Credits](#credits)** · **[Funding](#funding)**
+**[Install](#install)** · **[What it does](#what-it-does)** · **[Requirements](#requirements)** · **[Quick start](#quick-start)** · **[Screenshots](#screenshots)** · **[Documentation](#documentation)** · **[License](#license)** · **[Credits](#credits)** · **[Funding](#funding)**
 
 ![Dark theme](screenshots/studio-dark-overview.png)
 
 ![Light theme](screenshots/studio-light-overview.png)
+
+## Install
+
+Download the [latest release](https://github.com/zoroaster1x/VLC-Skin-Editor-3/releases/latest). It ships `vlc-skin-studio-<version>.zip` with the application jar, `run.bat` for Windows, `run.sh` for Linux and macOS, and a `README.txt` with the same instructions; the bare `vlc-skin-studio.jar` is attached as well.
+
+* **Windows**: install the Azul Zulu JRE 25 `.msi` from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=windows&architecture=x86-64-bit#zulu), unzip the package and double-click `run.bat`. On Windows on ARM take the ARM 64-bit `.zip` and set `JAVA_HOME` to the unpacked folder.
+* **macOS**: install the Azul Zulu JRE 25 from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=macos#zulu), ARM 64-bit on Apple Silicon or x86 64-bit on Intel (`brew install --cask zulu@25` also works), then run `chmod +x run.sh && ./run.sh` in Terminal.
+* **Linux**: install the Azul Zulu JRE 25 from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=linux#zulu), x86 64-bit or ARM 64-bit, as `.tar.gz`, `.deb` or `.rpm`, then run `chmod +x run.sh && ./run.sh`.
+
+`run.bat` and `run.sh` check for Java first and stop with `JAVA NOT INSTALLED. Please download from ...` and the right link when it is missing. They pass every argument through, so `run.sh --help` lists the CLI, the terminal UI and the MCP server, `run.sh render theme.xml -o preview.png` renders a theme, and `run.sh mcp` starts the MCP server. If Java 25 is already installed you can also skip the launchers and double-click `vlc-skin-studio.jar`, or run `java -jar vlc-skin-studio.jar`.
 
 ## What it does
 
@@ -48,15 +58,18 @@ Project: <https://github.com/zoroaster1x/VLC-Skin-Editor-3> ·
 
 ## Requirements
 
-* Java 25. The build asks Gradle for a Java 25 toolchain. The jar entry point
-  is compiled for Java 8 on purpose: on an older runtime it shows a dialog with
-  the download links instead of an UnsupportedClassVersionError.
+* Java 25. The release launchers check for it and point at the Azul Zulu JRE
+  download when it is missing; a JRE is enough. The build asks Gradle for a
+  Java 25 toolchain. The jar entry point is compiled for Java 8 on purpose: on
+  an older runtime it shows a dialog with the download links instead of an
+  UnsupportedClassVersionError.
 * VLC only if you want the "Test skin in VLC" menu item.
 
 ## Quick start
 
 ```bash
 ./gradlew build                    # compile, test, build the fat jar
+./gradlew releaseZip               # package the release zip with the launchers
 java -jar build/libs/vlc-skin-studio.jar          # desktop UI
 java -jar build/libs/vlc-skin-studio.jar --help   # CLI
 ./run.sh                           # the same, builds on first run
