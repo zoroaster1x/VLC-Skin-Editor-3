@@ -1,9 +1,10 @@
 name: Tests
 
-# Runs when the code or the build changes. A commit that only touches the
-# README does not need a full build on every push; the release workflow still
-# builds and tests what it publishes. workflow_dispatch keeps a manual run
-# possible.
+# Runs when the code or the build changes, and the commit is not a release:
+# a push carrying the [release] marker is built and tested by the Release
+# workflow instead, so the same suite never runs twice for one commit. A commit
+# that only touches the README does not need a build at all. workflow_dispatch
+# keeps a manual run possible.
 
 on:
   push:
@@ -36,6 +37,7 @@ permissions:
 
 jobs:
   test:
+    if: ${{ github.event_name != 'push' || !contains(github.event.head_commit.message, '[release]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:

@@ -1,11 +1,12 @@
-# Builds and tests every push to main. Cuts a release only when the head
-# commit message carries a version marker, for example:
+# Cuts a release when the head commit message carries a version marker:
 #
 #   VLC Skin Studio 1.0.1 [release] 1.0.1
 #
-# The marker version must equal the version in gradle.properties. The release
-# notes list every commit since the previous release tag, then the text from
-# .github/release-template.md, which carries the funding block. The jar is
+# A push without the marker skips this workflow entirely; the Tests workflow
+# builds and tests that push instead, so the same work never runs twice. The
+# marker version must equal the version in gradle.properties. The release notes
+# list every commit since the previous release tag with links, then the text
+# from .github/release-template.md, which carries the funding block. The jar is
 # attested so a reader can verify where it was built, then published with a
 # SHA-256 checksum file.
 
@@ -23,6 +24,7 @@ permissions:
 
 jobs:
   release:
+    if: ${{ github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[release]') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
