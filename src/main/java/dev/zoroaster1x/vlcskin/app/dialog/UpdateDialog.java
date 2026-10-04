@@ -21,9 +21,10 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
 /**
- * The upgrade notification: the newest version, the notes of every release the
- * user missed, and a button that downloads the jar, checks its SHA-256 and
- * installs it over the running one.
+ * The upgrade prompt: the newest version, the scrollable notes of every
+ * release the user missed, an update button and a close button. Nothing is
+ * downloaded or replaced unless the user presses update now; closing keeps
+ * the old version.
  */
 public final class UpdateDialog extends JDialog {
 
@@ -35,8 +36,12 @@ public final class UpdateDialog extends JDialog {
         this.info = info;
         UpdateService.Release latest = info.latest();
 
+        String published = latest.publishedAt();
+        String date = published != null && published.length() >= 10 ? published.substring(0, 10) : "an unknown date";
         JTextArea headline = new JTextArea(Messages.format("APP_UPDATE_HEADLINE",
-                "VLC Skin Studio %s is available. You have %s.", latest.version(), info.current()));
+                "VLC Skin Studio %s (released %s) is available. You have %s. Update now, or close "
+                        + "this window to keep using the old version.",
+                latest.version(), date, info.current()));
         headline.setEditable(false);
         headline.setOpaque(false);
         headline.setLineWrap(true);
@@ -44,6 +49,22 @@ public final class UpdateDialog extends JDialog {
         headline.setFocusable(false);
         headline.setFont(getFont().deriveFont(Font.BOLD, getFont().getSize2D() + 2f));
         headline.setBorder(BorderFactory.createEmptyBorder(0, 2, 8, 2));
+
+        JTextArea age = new JTextArea(ageFor(info));
+        age.setEditable(false);
+        age.setOpaque(false);
+        age.setLineWrap(true);
+        age.setWrapStyleWord(true);
+        age.setFocusable(false);
+        age.setBorder(BorderFactory.createEmptyBorder(0, 2, 8, 2));
+
+        JPanel header = new JPanel();
+        header.setOpaque(false);
+        header.setLayout(new javax.swing.BoxLayout(header, javax.swing.BoxLayout.Y_AXIS));
+        headline.setAlignmentX(Component.LEFT_ALIGNMENT);
+        age.setAlignmentX(Component.LEFT_ALIGNMENT);
+        header.add(headline);
+        header.add(age);
 
         JTextArea notes = new JTextArea(notesFor(info));
         notes.setEditable(false);
@@ -56,9 +77,9 @@ public final class UpdateDialog extends JDialog {
         scroll.setBorder(BorderFactory.createLineBorder(
                 javax.swing.UIManager.getColor("Component.borderColor")));
 
-        JButton later = new JButton(Messages.get("APP_UPDATE_LATER", "Later"));
+        JButton later = new JButton(Messages.get("APP_UPDATE_LATER", "Close"));
         later.addActionListener(event -> dispose());
-        JButton install = new JButton(Messages.get("APP_UPDATE_INSTALL", "Install update"));
+        JButton install = new JButton(Messages.get("APP_UPDATE_INSTALL", "Update now"));
         install.addActionListener(event -> install(studio, install, quit));
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
@@ -67,7 +88,7 @@ public final class UpdateDialog extends JDialog {
 
         JPanel content = new JPanel(new BorderLayout(0, 10));
         content.setBorder(BorderFactory.createEmptyBorder(14, 16, 14, 16));
-        content.add(headline, BorderLayout.NORTH);
+        content.add(header, BorderLayout.NORTH);
         content.add(scroll, BorderLayout.CENTER);
         content.add(footer, BorderLayout.SOUTH);
         setContentPane(content);
@@ -76,20 +97,66 @@ public final class UpdateDialog extends JDialog {
     }
 
     /**
-     * The notes of every missed release, oldest first; the 1.0.1 release of a
-     * fresh repository can carry the whole history, so the text area scrolls.
+     * The age line: how many releases the running copy missed and, when both
+     * release dates are known, approximately how many days old it is.
+     */
+    static String ageFor(UpdateService.UpdateInfo info) {
+        int updates = info.updatesBehind();
+        String count = updates == 1 ? "1 update" : updates + " updates";
+        long days = info.daysBehind();
+        if (days >= 0) {
+            return Messages.format("APP_UPDATE_AGE",
+                    "Your copy is %s old (approximately %s days old!).", count, Long.toString(days));
+        }
+        return Messages.format("APP_UPDATE_AGE_UNKNOWN", "Your copy is %s old.", count);
+    }
+
+    /**
+     * The notes of every missed release, oldest first. Each release keeps only
+     * its change list and commits; install and funding come from the newest one
+     * so a long history does not repeat the intro, attestation, documentation
+     * and license of every release, and the full pages stay on GitHub.
      */
     static String notesFor(UpdateService.UpdateInfo info) {
         StringBuilder text = new StringBuilder();
-        for (UpdateService.Release release : info.missed()) {
+        var missed = info.missed();
+        for (int i = 0; i < missed.size(); i++) {
+            UpdateService.Release release = missed.get(i);
+            boolean newest = i == missed.size() - 1;
             text.append("# ").append(release.tag());
             String published = release.publishedAt();
             if (published != null && published.length() >= 10) {
                 text.append("  (").append(published, 0, 10).append(')');
             }
-            text.append("\n\n").append(release.notes() == null ? "" : release.notes().strip()).append("\n\n");
+            text.append("\n\n").append(releaseSummary(release.notes(), newest)).append("\n\n");
         }
         return text.toString().strip();
+    }
+
+    /**
+     * The sections worth showing in the prompt: changes and commits for every
+     * release, plus install and funding for the newest one. Intro, attestation,
+     * documentation and license are dropped. A body without headings is kept
+     * whole, so old or handwritten notes still show.
+     */
+    static String releaseSummary(String body, boolean newest) {
+        if (body == null || body.isBlank()) {
+            return "";
+        }
+        StringBuilder out = new StringBuilder();
+        boolean keep = false;
+        for (String line : body.split("\n")) {
+            if (line.startsWith("## ")) {
+                String section = line.substring(3).strip().toLowerCase(java.util.Locale.ROOT);
+                keep = section.startsWith("changes") || section.startsWith("commits")
+                        || (newest && (section.startsWith("install") || section.startsWith("funding")));
+            }
+            if (keep) {
+                out.append(line).append('\n');
+            }
+        }
+        String summary = out.toString().strip();
+        return summary.isEmpty() ? body.strip() : summary;
     }
 
     private void install(Studio studio, JButton button, Runnable quit) {
@@ -142,12 +209,7 @@ public final class UpdateDialog extends JDialog {
     private UpdateService.InstallResult installNow(UpdateService.Release latest, Path jar, Path sums, Path running)
             throws Exception {
         UpdateService service = new UpdateService();
-        service.downloadJar(latest, jar, null);
-        service.downloadChecksums(latest, sums);
-        String expected = UpdateService.expectedChecksum(sums);
-        if (!UpdateService.verify(jar, expected)) {
-            throw new java.io.IOException("The downloaded jar failed its SHA-256 check");
-        }
+        service.downloadVerifiedJar(latest, jar, sums, null);
         if (running == null) {
             return null;
         }

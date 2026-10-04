@@ -185,7 +185,7 @@ public final class MenuBarFactory {
         help.add(item(Messages.get("MENU_HELP_DOC", "Online help"), "help", 0,
                 e -> browse("https://www.videolan.org/vlc/skinedhlp/")));
         help.add(item("Check for updates", null, 0, e -> openUpdateCheck(actions)));
-        JCheckBoxMenuItem autoUpdate = new JCheckBoxMenuItem("Check for updates on startup",
+        JCheckBoxMenuItem autoUpdate = new JCheckBoxMenuItem("Check for updates automatically (every 30 minutes)",
                 actions.studio().settings().isAutoUpdate());
         autoUpdate.addActionListener(e -> {
             actions.studio().settings().setAutoUpdate(autoUpdate.isSelected());

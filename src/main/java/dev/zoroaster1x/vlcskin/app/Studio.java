@@ -36,6 +36,7 @@ public final class Studio {
     private volatile StudioSettings settings;
     private final List<Consumer<String>> statusListeners = new ArrayList<>();
     private boolean darkTheme = true;
+    private volatile String lastOfferedVersion;
 
     public Studio(EditorService service, SettingsStore settingsStore, StudioSettings settings) {
         this.service = service;
@@ -382,8 +383,10 @@ public final class Studio {
 
     /**
      * Asks GitHub for the releases in the background. A newer version opens the
-     * update dialog with the notes of every release the user missed; failures
-     * only reach the status bar when the user asked for the check.
+     * update prompt with the notes of every release the user missed; failures
+     * only reach the status bar when the user asked for the check. A periodic
+     * check never offers the same version twice; only the update button
+     * installs anything.
      */
     public void checkForUpdates(java.awt.Component parent, Runnable quit, boolean interactive) {
         Thread.ofVirtual().name("vlc-skin-studio-update-check").start(() -> {
@@ -397,12 +400,34 @@ public final class Studio {
                 return;
             }
             if (info.updateAvailable()) {
+                String offered = info.latest().version();
+                if (!interactive && offered.equals(lastOfferedVersion)) {
+                    return;
+                }
+                lastOfferedVersion = offered;
                 SwingUtilities.invokeLater(() -> new dev.zoroaster1x.vlcskin.app.dialog.UpdateDialog(
                         this, parent, info, quit).setVisible(true));
             } else if (interactive) {
                 status(Version.NAME + " " + Version.VERSION + " is up to date");
             }
         });
+    }
+
+    /**
+     * Re-checks the releases every 30 minutes while the window is open, so a
+     * release cut during a long session still reaches the user. Installing
+     * always needs the update button; the timer only checks.
+     */
+    public void startUpdateTimer(java.awt.Component parent, Runnable quit) {
+        int halfHour = 30 * 60 * 1000;
+        javax.swing.Timer timer = new javax.swing.Timer(halfHour, event -> {
+            if (settings.isAutoUpdate()) {
+                checkForUpdates(parent, quit, false);
+            }
+        });
+        timer.setInitialDelay(halfHour);
+        timer.setRepeats(true);
+        timer.start();
     }
 
     public void error(String message) {

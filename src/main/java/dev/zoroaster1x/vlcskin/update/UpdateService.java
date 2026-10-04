@@ -16,19 +16,22 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.function.Consumer;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Talks to the GitHub releases: which version is newest, the notes of every
- * release the user missed, and the download of the jar with its SHA-256 check
- * before it replaces the running file.
+ * release the user missed, and the download of the release zip with its
+ * SHA-256 check before the jar inside replaces the running file.
  *
  * <p>Replacement is platform aware. Unix swaps the jar in place, which is safe
  * while the JVM runs because it keeps the old inode open. Windows locks a
@@ -44,10 +47,12 @@ public final class UpdateService {
     private static final String CHECKSUMS_ASSET = "SHA256SUMS";
 
     /**
-     * One GitHub release with the asset URLs the updater needs.
+     * One GitHub release with the asset URLs the updater needs. The download
+     * URL is the distribution zip when the release has one, the bare jar for
+     * releases from before the zip existed.
      */
     public record Release(String tag, String name, String notes, String pageUrl, String publishedAt,
-                          String jarUrl, String checksumsUrl) {
+                          String downloadUrl, String checksumsUrl) {
 
         /**
          * The numeric part of the tag: {@code v1.0.2} becomes {@code 1.0.2}.
@@ -62,10 +67,34 @@ public final class UpdateService {
      * The outcome of a check: the newest release, and every release newer than
      * the running version, oldest first, so the notes read in upgrade order.
      */
-    public record UpdateInfo(String current, Release latest, List<Release> missed) {
+    public record UpdateInfo(String current, String currentPublishedAt, Release latest, List<Release> missed) {
 
         public boolean updateAvailable() {
             return latest != null && !missed.isEmpty();
+        }
+
+        /**
+         * How many releases newer than the running version exist.
+         */
+        public int updatesBehind() {
+            return missed.size();
+        }
+
+        /**
+         * Days between the release of the running version and the newest one,
+         * or -1 when either release date is unknown.
+         */
+        public long daysBehind() {
+            if (latest == null || currentPublishedAt == null || latest.publishedAt() == null) {
+                return -1;
+            }
+            try {
+                Instant from = Instant.parse(currentPublishedAt);
+                Instant to = Instant.parse(latest.publishedAt());
+                return Math.max(Duration.between(from, to).toDays(), 0);
+            } catch (Exception ex) {
+                return -1;
+            }
         }
     }
 
@@ -99,13 +128,20 @@ public final class UpdateService {
      */
     public UpdateInfo check() throws IOException, InterruptedException {
         List<Release> newer = new ArrayList<>();
+        Release runningRelease = null;
         for (Release release : releases()) {
-            if (compareVersions(release.version(), currentVersion) > 0) {
+            int comparison = compareVersions(release.version(), currentVersion);
+            if (comparison > 0) {
                 newer.add(release);
+            } else if (comparison == 0) {
+                runningRelease = release;
             }
         }
         newer.sort(Comparator.comparing(Release::version, UpdateService::compareVersions));
-        return new UpdateInfo(currentVersion, newer.isEmpty() ? null : newer.getLast(), newer);
+        return new UpdateInfo(currentVersion,
+                runningRelease == null ? null : runningRelease.publishedAt(),
+                newer.isEmpty() ? null : newer.getLast(),
+                newer);
     }
 
     List<Release> releases() throws IOException, InterruptedException {
@@ -138,10 +174,24 @@ public final class UpdateService {
                     node.path("body").asText(""),
                     node.path("html_url").asText(""),
                     node.path("published_at").asText(""),
-                    assetUrl(node, JAR_ASSET),
+                    archiveUrl(node),
                     assetUrl(node, CHECKSUMS_ASSET)));
         }
         return releases;
+    }
+
+    /**
+     * The release archive: {@code vlc-skin-studio-<version>.zip} when present,
+     * the bare jar for releases from before the zip existed.
+     */
+    private static String archiveUrl(JsonNode release) {
+        for (JsonNode asset : release.path("assets")) {
+            String name = asset.path("name").asText("");
+            if (name.startsWith("vlc-skin-studio-") && name.endsWith(".zip")) {
+                return asset.path("browser_download_url").asText("");
+            }
+        }
+        return assetUrl(release, JAR_ASSET);
     }
 
     private static String assetUrl(JsonNode release, String name) {
@@ -154,18 +204,64 @@ public final class UpdateService {
     }
 
     /**
-     * Downloads the release jar to the target path, replacing it atomically.
+     * Downloads the release archive and its checksum file, verifies the
+     * archive SHA-256 and returns the jar: the archive itself for a jar-only
+     * release, the {@code vlc-skin-studio.jar} entry for a distribution zip.
      */
-    public Path downloadJar(Release release, Path target, Consumer<String> progress)
-            throws IOException, InterruptedException {
-        if (release.jarUrl() == null || release.jarUrl().isBlank()) {
-            throw new IOException("Release " + release.tag() + " has no " + JAR_ASSET + " asset");
+    public Path downloadVerifiedJar(Release release, Path jarTarget, Path checksumsTarget,
+            Consumer<String> progress) throws IOException, InterruptedException {
+        String url = release.downloadUrl();
+        if (url == null || url.isBlank()) {
+            throw new IOException("Release " + release.tag() + " has no zip or jar asset");
         }
         if (progress != null) {
             progress.accept("Downloading " + release.version() + "...");
         }
-        writeAtomically(target, get(release.jarUrl(), Duration.ofMinutes(5)));
-        return target;
+        downloadChecksums(release, checksumsTarget);
+        String expected = expectedChecksum(checksumsTarget);
+        if (expected == null) {
+            throw new IOException("Release " + release.tag() + " has no SHA-256 checksum");
+        }
+        if (url.endsWith(".zip")) {
+            Path zip = jarTarget.resolveSibling(jarTarget.getFileName() + ".download.zip");
+            writeAtomically(zip, get(url, Duration.ofMinutes(5)));
+            if (!verify(zip, expected)) {
+                throw new IOException("The downloaded zip failed its SHA-256 check");
+            }
+            extractJar(zip, jarTarget);
+            return jarTarget;
+        }
+        writeAtomically(jarTarget, get(url, Duration.ofMinutes(5)));
+        if (!verify(jarTarget, expected)) {
+            throw new IOException("The downloaded jar failed its SHA-256 check");
+        }
+        return jarTarget;
+    }
+
+    /**
+     * Copies the {@code vlc-skin-studio.jar} entry out of a release zip into
+     * the target path, replacing it atomically.
+     */
+    static Path extractJar(Path zip, Path target) throws IOException {
+        try (ZipFile file = new ZipFile(zip.toFile())) {
+            ZipEntry entry = file.getEntry(JAR_ASSET);
+            if (entry == null) {
+                throw new IOException("The release zip has no " + JAR_ASSET);
+            }
+            Path absolute = target.toAbsolutePath();
+            Files.createDirectories(absolute.getParent());
+            Path temp = Files.createTempFile(absolute.getParent(), absolute.getFileName().toString(), ".part");
+            try (InputStream in = file.getInputStream(entry)) {
+                Files.copy(in, temp, StandardCopyOption.REPLACE_EXISTING);
+            }
+            try {
+                Files.move(temp, absolute, StandardCopyOption.REPLACE_EXISTING,
+                        StandardCopyOption.ATOMIC_MOVE);
+            } catch (AtomicMoveNotSupportedException ex) {
+                Files.move(temp, absolute, StandardCopyOption.REPLACE_EXISTING);
+            }
+            return target;
+        }
     }
 
     /**

@@ -641,7 +641,9 @@ public final class EditorControl {
                 result.put("latest", info.latest().version());
                 result.put("latestTag", info.latest().tag());
                 result.put("url", info.latest().pageUrl());
-                result.put("jarUrl", info.latest().jarUrl());
+                result.put("downloadUrl", info.latest().downloadUrl());
+                result.put("updatesBehind", info.updatesBehind());
+                result.put("daysBehind", info.daysBehind());
                 List<Map<String, Object>> missed = new ArrayList<>();
                 for (var release : info.missed()) {
                     Map<String, Object> entry = new LinkedHashMap<>();
@@ -679,14 +681,9 @@ public final class EditorControl {
             var latest = info.latest();
             Path folder = dev.zoroaster1x.vlcskin.app.config.AppPaths.updatesDir();
             Files.createDirectories(folder);
-            Path jar = updates.downloadJar(latest,
-                    folder.resolve("vlc-skin-studio-" + latest.version() + ".jar"), null);
-            Path sums = updates.downloadChecksums(latest,
-                    folder.resolve("SHA256SUMS-" + latest.version()));
-            String expected = dev.zoroaster1x.vlcskin.update.UpdateService.expectedChecksum(sums);
-            if (!dev.zoroaster1x.vlcskin.update.UpdateService.verify(jar, expected)) {
-                return ToolOutcome.error("The downloaded jar failed its SHA-256 check; nothing was installed");
-            }
+            Path jar = updates.downloadVerifiedJar(latest,
+                    folder.resolve("vlc-skin-studio-" + latest.version() + ".jar"),
+                    folder.resolve("SHA256SUMS-" + latest.version()), null);
             Path running = dev.zoroaster1x.vlcskin.update.UpdateService.runningJar();
             if (running == null) {
                 return ToolOutcome.text("Downloaded and verified " + jar

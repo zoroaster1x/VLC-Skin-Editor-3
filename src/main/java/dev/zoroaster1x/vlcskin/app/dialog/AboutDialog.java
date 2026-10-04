@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 public final class AboutDialog extends JDialog {
 
     private static final String WEBSITE = "https://github.com/zoroaster1x/VLC-Skin-Editor-3";
+    private static final String MONERO =
+            "8BdxmQSniku4dBJXWPXeXvgjztmj5nmvWQqeCrVvCtYciusbAyo4rqrGCefTfQ4gGaVZmLN7VgLiYUYyBdYFEwHn1UWPjWs";
 
     public AboutDialog() {
         super((java.awt.Frame) null,
@@ -46,12 +48,15 @@ public final class AboutDialog extends JDialog {
                 <b>Developers</b><br>\
                 Zoroaster1x, maintainer and project owner.<br>\
                 Made with love by a Kurdish developer.<br><br>\
+                <b>Support</b><br>\
+                Monero (XMR): <a href="%s#funding">donate</a><br>\
+                <span style='font-family:monospace;font-size:11px'>%s</span><br><br>\
                 Website: <a href="%s">github.com/zoroaster1x/VLC-Skin-Editor-3</a><br>\
                 Releases: <a href="%s/releases">updates and patch notes</a> &middot; \
                 Issues: <a href="%s/issues">report a bug</a><br>\
                 Documentation: the Help menu, or F1\
                 </body></html>\
-                """.formatted(WEBSITE, WEBSITE, WEBSITE));
+                """.formatted(WEBSITE, MONERO, WEBSITE, WEBSITE, WEBSITE));
         body.setEditable(false);
         body.setOpaque(false);
         body.setBorder(null);

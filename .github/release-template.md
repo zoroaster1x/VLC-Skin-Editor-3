@@ -26,7 +26,7 @@ macOS: install the Azul Zulu JRE 25 from <https://www.azul.com/downloads/?versio
 
 Linux: install the Azul Zulu JRE 25 from <https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=linux#zulu> (x86 64-bit or ARM 64-bit), then run `./run.sh`.
 
-Without arguments `run.bat` and `run.sh` open the desktop window; anything you add goes to the application, so `run.sh --help` lists the CLI, the terminal UI and the MCP server. If Java 25 is already installed you can also double-click `vlc-skin-studio.jar` or run `java -jar vlc-skin-studio.jar` directly. VLC itself is only needed for the "Test skin in VLC" menu item.
+Without arguments `run.bat` and `run.sh` open the desktop window; anything you add goes to the application, so `run.sh --help` lists the CLI, the terminal UI and the MCP server. If Java 25 is already installed you can also double-click the `vlc-skin-studio.jar` from the unzipped folder, or run `java -jar vlc-skin-studio.jar` there. VLC itself is only needed for the "Test skin in VLC" menu item.
 
 ## Documentation
 

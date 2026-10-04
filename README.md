@@ -17,13 +17,13 @@ Project: <https://github.com/zoroaster1x/VLC-Skin-Editor-3> ·
 
 ## Install
 
-Download the [latest release](https://github.com/zoroaster1x/VLC-Skin-Editor-3/releases/latest). It ships `vlc-skin-studio-<version>.zip` with the application jar, `run.bat` for Windows, `run.sh` for Linux and macOS, and a `README.txt` with the same instructions; the bare `vlc-skin-studio.jar` is attached as well.
+Download the [latest release](https://github.com/zoroaster1x/VLC-Skin-Editor-3/releases/latest). It ships `vlc-skin-studio-<version>.zip` with the application jar, `run.bat` for Windows, `run.sh` for Linux and macOS, and a `README.txt` with the same instructions.
 
 * **Windows**: install the Azul Zulu JRE 25 `.msi` from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=windows&architecture=x86-64-bit#zulu), unzip the package and double-click `run.bat`. On Windows on ARM take the ARM 64-bit `.zip` and set `JAVA_HOME` to the unpacked folder.
 * **macOS**: install the Azul Zulu JRE 25 from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=macos#zulu), ARM 64-bit on Apple Silicon or x86 64-bit on Intel (`brew install --cask zulu@25` also works), then run `chmod +x run.sh && ./run.sh` in Terminal.
 * **Linux**: install the Azul Zulu JRE 25 from [the Azul download page](https://www.azul.com/downloads/?version=java-25-lts&package=jre&os=linux#zulu), x86 64-bit or ARM 64-bit, as `.tar.gz`, `.deb` or `.rpm`, then run `chmod +x run.sh && ./run.sh`.
 
-`run.bat` and `run.sh` check for Java first and stop with `JAVA NOT INSTALLED. Please download from ...` and the right link when it is missing. They pass every argument through, so `run.sh --help` lists the CLI, the terminal UI and the MCP server, `run.sh render theme.xml -o preview.png` renders a theme, and `run.sh mcp` starts the MCP server. If Java 25 is already installed you can also skip the launchers and double-click `vlc-skin-studio.jar`, or run `java -jar vlc-skin-studio.jar`.
+`run.bat` and `run.sh` check for Java first and stop with `JAVA NOT INSTALLED. Please download from ...` and the right link when it is missing. They pass every argument through, so `run.sh --help` lists the CLI, the terminal UI and the MCP server, `run.sh render theme.xml -o preview.png` renders a theme, and `run.sh mcp` starts the MCP server. If Java 25 is already installed you can also skip the launchers and double-click the unzipped `vlc-skin-studio.jar`, or run `java -jar vlc-skin-studio.jar`. The app checks the releases on startup and every 30 minutes while it runs, offering the date and notes of every missed version in a scrollable window with an update button and a close button; it never installs anything unless you press update.
 
 ## What it does
 
@@ -53,8 +53,11 @@ Download the [latest release](https://github.com/zoroaster1x/VLC-Skin-Editor-3/r
   as data for models without vision, `render_layout` returns a PNG and the same
   data for models with vision, and the editing tools change the open document
   with undo.
-* Checks the GitHub releases on startup (can be turned off), shows the notes of
-  every release you missed and installs the jar after checking SHA-256.
+* Checks the GitHub releases on startup and every 30 minutes while it runs
+  (can be turned off), then offers the date, changes and commits of every
+  release you missed plus how many updates and days behind you are, in a
+  scrollable window. Nothing is downloaded or installed until you press
+  update; the zip is SHA-256 checked before its jar replaces the running one.
 
 ## Requirements
 

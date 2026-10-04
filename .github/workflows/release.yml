@@ -7,9 +7,10 @@
 # marker version must equal the version in gradle.properties. The release notes
 # list every commit since the previous release tag with links, then the text
 # from .github/release-template.md, which carries the funding block. The assets
-# are the distribution zip (jar, run.bat, run.sh, README.txt), the bare jar and
-# a SHA-256 checksum file whose first line covers the jar. The jar and the zip
-# are attested so a reader can verify where they were built.
+# are the distribution zip (jar, run.bat, run.sh, README.txt) and a SHA-256
+# checksum file for the zip, which is attested so a reader can verify where it
+# was built. The in-app updater downloads the zip, verifies it and extracts the
+# jar.
 
 name: Release
 
@@ -115,17 +116,13 @@ jobs:
           commits = open("/tmp/commits.txt", encoding="utf-8").read().strip() or "- No commits."
           if os.environ.get("PRIVATE_REPO", "").lower() == "true":
               attestation = ("Artifact attestation is not available for user-owned private "
-                             "repositories. The jar, the zip and the SHA-256 checksum file are "
-                             "still built and published by CI from this commit.")
+                             "repositories. The zip and its SHA-256 checksum file are still "
+                             "built and published by CI from this commit.")
           else:
-              verify = ("gh attestation verify vlc-skin-studio.jar --repo "
-                        + os.environ["REPO_SLUG"] + "\n"
-                        "gh attestation verify vlc-skin-studio-"
-                        + os.environ["VERSION"] + ".zip --repo " + os.environ["REPO_SLUG"])
               attestation = (
-                  "The release jar and zip are built and attested by GitHub Actions. "
-                  "Verify a downloaded asset with:\n\n"
-                  "```bash\n" + verify + "\n```"
+                  "The release zip is built and attested by GitHub Actions. Verify it with:\n\n"
+                  "```bash\ngh attestation verify vlc-skin-studio-"
+                  + os.environ["VERSION"] + ".zip --repo " + os.environ["REPO_SLUG"] + "\n```"
               )
           body = (
               template.replace("{{VERSION}}", os.environ["VERSION"])
@@ -143,19 +140,18 @@ jobs:
         if: steps.version.outputs.version != ''
         run: |
           VERSION="${{ steps.version.outputs.version }}"
-          cd build/libs
-          # The jar comes first: the in-app updater reads the first checksum.
-          sha256sum vlc-skin-studio.jar > SHA256SUMS
-          (cd ../distributions && sha256sum "vlc-skin-studio-$VERSION.zip") >> SHA256SUMS
-          cat SHA256SUMS
+          mkdir -p build/libs
+          # Only the zip is published; the first line is the checksum the
+          # in-app updater reads before it extracts vlc-skin-studio.jar.
+          sha256sum "build/distributions/vlc-skin-studio-$VERSION.zip" \
+            | sed 's|build/distributions/||' > build/libs/SHA256SUMS
+          cat build/libs/SHA256SUMS
 
       - name: Attest build provenance
         if: steps.version.outputs.version != '' && github.event.repository.private != true
         uses: actions/attest-build-provenance@v4
         with:
-          subject-path: |
-            build/libs/vlc-skin-studio.jar
-            build/distributions/vlc-skin-studio-${{ steps.version.outputs.version }}.zip
+          subject-path: build/distributions/vlc-skin-studio-${{ steps.version.outputs.version }}.zip
 
       - name: Publish the release
         if: steps.version.outputs.version != ''
@@ -167,8 +163,8 @@ jobs:
           ZIP="build/distributions/vlc-skin-studio-$VERSION.zip"
           if gh release view "$VERSION" >/dev/null 2>&1; then
             gh release edit "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md
-            gh release upload "$VERSION" build/libs/vlc-skin-studio.jar build/libs/SHA256SUMS "$ZIP" --clobber
+            gh release upload "$VERSION" "$ZIP" build/libs/SHA256SUMS --clobber
           else
-            gh release create "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md --target "${{ github.sha }}" build/libs/vlc-skin-studio.jar build/libs/SHA256SUMS "$ZIP"
+            gh release create "$VERSION" --title "$TITLE" --notes-file /tmp/release-body.md --target "${{ github.sha }}" "$ZIP" build/libs/SHA256SUMS
           fi
           echo "Released $VERSION."

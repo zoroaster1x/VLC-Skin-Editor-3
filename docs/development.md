@@ -19,7 +19,7 @@ dialog with the download links instead of an UnsupportedClassVersionError.
 
 ## Tests
 
-132 tests across 33 suites cover round trips, escaping, unknown content, bezier
+142 tests across 36 suites cover round trips, escaping, unknown content, bezier
 maths, boolean expressions, rendering, hit testing, bitmap animation, slider
 backgrounds, VLT archives (including a zip that bundles further themes), the
 editor service, the MCP control surface and log, the three-way disk merge, the
