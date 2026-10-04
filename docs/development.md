@@ -71,7 +71,9 @@ points, PNG rendering included. The desktop Swing window stays on the JVM: the
 binary prints that pointer when started without a subcommand.
 
 ```bash
-sdk install java 25.4.4.1+1-graalce
+# Install a GraalVM 25 (SDKMAN, a tarball, or your package manager),
+# then point GRAALVM_HOME at it if native-image is not on PATH.
+export GRAALVM_HOME="/path/to/graalvm-25"
 tools/build-native.sh
 build/native/vlc-skin-studio --version
 build/native/vlc-skin-studio render skin.xml -o preview.png

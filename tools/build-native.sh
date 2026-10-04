@@ -3,14 +3,19 @@
 # The Swing window stays on the JVM; it is not verified inside a native image.
 #
 # Usage: tools/build-native.sh
-# Requires GraalVM 25 (SDKMAN: sdk install java 25.4.4.1+1-graalce).
+# Requires GraalVM 25 (for example an SDKMAN install, or set GRAALVM_HOME).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-GRAALVM_HOME="${GRAALVM_HOME:-$HOME/.sdkman/candidates/java/25.4.4.1+1-graalce}"
-if [ ! -x "$GRAALVM_HOME/bin/native-image" ]; then
-  echo "native-image not found under $GRAALVM_HOME" >&2
-  echo "Install GraalVM 25: sdk install java 25.4.4.1+1-graalce" >&2
+GRAALVM_HOME="${GRAALVM_HOME:-}"
+if [ -z "$GRAALVM_HOME" ] && command -v native-image >/dev/null 2>&1; then
+  GRAALVM_HOME="$(cd "$(dirname "$(command -v native-image)")/.." && pwd)"
+fi
+if [ -z "$GRAALVM_HOME" ] || [ ! -x "$GRAALVM_HOME/bin/native-image" ]; then
+  echo "native-image not found." >&2
+  echo "Set GRAALVM_HOME to a GraalVM 25 install, for example:" >&2
+  echo "  export GRAALVM_HOME=\"/path/to/graalvm-25\"" >&2
+  echo "An SDKMAN install works too; make sure its bin/native-image exists." >&2
   exit 1
 fi
 

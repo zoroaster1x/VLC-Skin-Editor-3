@@ -162,7 +162,7 @@ Winamp2 fallback was added.
 Before a release or a large commit, run exactly this and read every line:
 
 ```bash
-export JAVA_HOME="$HOME/.sdkman/candidates/java/25.0.4.fx-zulu"
+export JAVA_HOME=/path/to/your/jdk-25
 ./gradlew build                      # compile, every suite, the fat jar
 VELOCITY_THEME=src/main/resources/dev/zoroaster1x/vlcskin/example/velocity/theme.xml \
     ./gradlew uiScreenshots          # refresh screenshots/ including velocity-*

@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Bundle the crawled VLC documentation into the app resources.
 
-Reads /tmp/opencode/work-on-documentation (written by the crawl agents), prunes
-unused images, optionally downsizes large ones, rewrites image links, and
-writes the viewer bundle to
+Reads a source folder of crawled markdown and images (the default is
+``build/docs-source``), prunes unused images, optionally downsizes large ones,
+rewrites image links, and writes the viewer bundle to
 src/main/resources/dev/zoroaster1x/vlcskin/app/docs/.
 
 Usage:
-    python3 tools/bundle-docs.py [--source /tmp/opencode/work-on-documentation]
+    python3 tools/bundle-docs.py [--source build/docs-source]
 """
 
 import argparse
@@ -63,7 +63,7 @@ def resize(image, destination):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--source", type=Path, default=Path("/tmp/opencode/work-on-documentation"))
+    parser.add_argument("--source", type=Path, default=Path("build/docs-source"))
     args = parser.parse_args()
 
     if not args.source.is_dir():

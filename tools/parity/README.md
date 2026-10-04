@@ -20,7 +20,7 @@ citations, in `docs/skins2-parser.md`, `docs/skins2-rendering.md` and
 ### Build the studio jar
 
 ```bash
-export JAVA_HOME="$HOME/.sdkman/candidates/java/25.0.4.fx-zulu"   # any Java 25
+export JAVA_HOME=/path/to/your/jdk-25      # any Java 25 toolchain
 ./gradlew build
 ```
 
