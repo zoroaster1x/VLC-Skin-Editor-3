@@ -35,6 +35,9 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
     private final JTabbedPane rightTabs = new JTabbedPane();
     private final JTabbedPane bottomTabs = new JTabbedPane();
     private final JPanel canvasHost = new JPanel(new java.awt.BorderLayout());
+    private javax.swing.JSplitPane middleRight;
+    private javax.swing.JSplitPane centerBottom;
+    private javax.swing.JSplitPane leftCenter;
     private final JToolBar toolbar;
     private final StatusBar statusBar = new StatusBar();
     private final MenuBarFactory.ThemeControl themeControl = new MenuBarFactory.ThemeControl() {
@@ -62,6 +65,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         panels.variables.putClientProperty("panelName", "Variables");
         panels.problems.putClientProperty("panelName", "Problems");
         panels.xml.putClientProperty("panelName", "Skin XML");
+        panels.mcp.putClientProperty("panelName", "mcp");
 
         leftTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources(), panels.resources);
         leftTabs.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.windows(), panels.structure);
@@ -73,6 +77,7 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         JTabbedPane bottom = bottomTabs;
         bottom.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
         bottom.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
+        bottom.addTab(dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.mcp(), panels.mcp);
 
         canvasHost.add(panels.canvas, java.awt.BorderLayout.CENTER);
 
@@ -85,16 +90,18 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         JSplitPane leftCenter = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftTabs, centerBottom);
         leftCenter.setDividerLocation(210);
         leftCenter.setResizeWeight(0.2);
+        this.middleRight = middleRight;
+        this.centerBottom = centerBottom;
+        this.leftCenter = leftCenter;
         add(leftCenter, java.awt.BorderLayout.CENTER);
 
         javax.swing.JMenuBar menuBar = MenuBarFactory.build(this, themeControl);
         toolbar = ToolBarFactory.build(this);
-        menuBar.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, menuBar.getPreferredSize().height));
-        toolbar.setMaximumSize(new java.awt.Dimension(Integer.MAX_VALUE, toolbar.getPreferredSize().height));
-        JPanel chrome = new JPanel();
-        chrome.setLayout(new BoxLayout(chrome, BoxLayout.Y_AXIS));
-        chrome.add(menuBar);
-        chrome.add(toolbar);
+        // BorderLayout uses the preferred heights, and unlike a frozen
+        // maximum size it keeps working when the font scale changes.
+        JPanel chrome = new JPanel(new java.awt.BorderLayout());
+        chrome.add(menuBar, java.awt.BorderLayout.NORTH);
+        chrome.add(toolbar, java.awt.BorderLayout.CENTER);
         chrome.setBorder(BorderFactory.createEmptyBorder());
         add(chrome, java.awt.BorderLayout.NORTH);
         add(statusBar, java.awt.BorderLayout.SOUTH);
@@ -102,7 +109,9 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         studio.addStatusListener(statusBar::setMessage);
         studio.session().addListener(() -> {
             statusBar.update(studio);
-            MenuBarFactory.refreshUndoLabels(menuBar, studio, "Undo", "Redo");
+            MenuBarFactory.refreshUndoLabels(menuBar, studio,
+                    dev.zoroaster1x.vlcskin.app.i18n.Messages.get("MENU_EDIT_UNDO", "Undo"),
+                    dev.zoroaster1x.vlcskin.app.i18n.Messages.get("MENU_EDIT_REDO", "Redo"));
             ToolBarFactory.syncToolButtons(toolbar, panels.canvas.tool());
             ToolBarFactory.syncUndoButtons(toolbar, studio.session().history().canUndo(),
                     studio.session().history().canRedo());
@@ -114,6 +123,11 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
 
     public Panels panels() {
         return panels;
+    }
+
+    @Override
+    public java.util.Map<String, String> keybindings() {
+        return studio.settings().getKeys();
     }
 
     @Override
@@ -132,8 +146,10 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
         setSize(width, height);
         doLayout();
         layoutDeep(this);
+        sizeDividers();
         setSize(width, height);
         doLayout();
+        layoutDeep(this);
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = image.createGraphics();
         try {
@@ -142,6 +158,22 @@ public final class HeadlessStudio extends JPanel implements ChromeActions {
             g.dispose();
         }
         return image;
+    }
+
+    /**
+     * Proportions instead of fixed pixels, so the same harness lays out the
+     * panels properly at every window size and the audit can compare them.
+     */
+    private void sizeDividers() {
+        if (leftCenter != null && leftCenter.getWidth() > 0) {
+            leftCenter.setDividerLocation(0.19);
+        }
+        if (centerBottom != null && centerBottom.getHeight() > 0) {
+            centerBottom.setDividerLocation(0.74);
+        }
+        if (middleRight != null && middleRight.getWidth() > 0) {
+            middleRight.setDividerLocation(0.7);
+        }
     }
 
     public byte[] renderPng(int width, int height) throws Exception {

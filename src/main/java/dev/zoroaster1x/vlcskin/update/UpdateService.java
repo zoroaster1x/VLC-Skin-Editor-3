@@ -287,7 +287,7 @@ public final class UpdateService {
     }
 
     public static boolean isWindows() {
-        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("win");
+        return dev.zoroaster1x.vlcskin.util.Platform.isWindows();
     }
 
     /**

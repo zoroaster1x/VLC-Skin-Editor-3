@@ -44,6 +44,11 @@ public final class ProblemsPanel extends JPanel {
                             case INFO -> javax.swing.UIManager.getColor("Label.foreground");
                         });
                     }
+                    // The list has no wrapping; the tooltip carries the whole
+                    // message so a long validation text stays readable.
+                    if (component instanceof javax.swing.JComponent swing) {
+                        swing.setToolTipText(issues.get(index).toString());
+                    }
                 }
                 return component;
             }

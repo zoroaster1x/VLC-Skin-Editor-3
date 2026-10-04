@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Negative points"/>
+  <Bitmap id="atlas" file="shared.png" alphacolor="#FF00FF">
+    <SubBitmap id="cursor" x="0" y="0" width="4" height="4"/>
+  </Bitmap>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Slider id="sl" up="cursor" points="(-10,-10)(-20,-5)"/>
+    </Layout>
+  </Window>
+</Theme>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Image actions"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="80">
+      <Image id="i1" image="b" action="vlc.play()" width="20" height="10"/>
+      <Image id="i2" image="b" action="move" x="30" width="20" height="10"/>
+      <Image id="i3" image="b" action2="vlc.stop()" x="60" width="20" height="10"/>
+    </Layout>
+  </Window>
+</Theme>

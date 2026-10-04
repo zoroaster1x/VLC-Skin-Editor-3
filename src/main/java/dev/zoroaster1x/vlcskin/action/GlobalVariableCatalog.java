@@ -52,7 +52,8 @@ public final class GlobalVariableCatalog {
             new TextVariable("$H", "Help text", "Help text"),
             new TextVariable("$N", "Stream title", "Artist - Title"),
             new TextVariable("$F", "Full stream path", "http://www.example.com/Artist - Title.mp3"),
-            new TextVariable("$S", "Sample rate", "44"));
+            new TextVariable("$S", "Sample rate", "44"),
+            new TextVariable("$R", "Playback speed", "1"));
 
     private GlobalVariableCatalog() {
     }

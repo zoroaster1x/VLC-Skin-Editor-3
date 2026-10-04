@@ -26,8 +26,18 @@ public final class McpCommand implements Callable<Integer> {
     @Option(names = {"-f", "--file"}, paramLabel = "SKIN", description = "Open this skin before serving.")
     Path skin;
 
+    @Option(names = {"--force"}, description = "Serve even when the MCP server is disabled in preferences.")
+    boolean force;
+
     @Override
     public Integer call() throws Exception {
+        var store = new dev.zoroaster1x.vlcskin.app.config.SettingsStore();
+        var settings = store.load();
+        if (!force && !settings.isMcpEnabled()) {
+            System.err.println("The MCP server is disabled in Preferences (AI and MCP, Enable the MCP server).");
+            System.err.println("Run with --force to serve anyway.");
+            return 3;
+        }
         EditorService service = new EditorService();
         var supplier = HOST.get();
         if (supplier != null) {

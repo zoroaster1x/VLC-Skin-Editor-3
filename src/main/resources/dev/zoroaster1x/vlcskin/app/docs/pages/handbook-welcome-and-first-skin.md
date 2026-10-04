@@ -16,7 +16,7 @@ The card carries the title VLC Skin Studio and three buttons:
 |---|---|
 | New skin | Asks where to save a new `.xml` file, then starts an empty theme there. |
 | Open skin | Opens a `.xml` theme or imports a `.vlt` archive. |
-| Examples | Opens a small menu with the two built in example themes. |
+| Examples | Opens a small menu with the three built in example themes. |
 
 Below the buttons are the Recent list and the Examples list.
 
@@ -25,17 +25,18 @@ The Recent list shows the files you opened last, newest first. Click a path to o
 The Examples list shows each example with a one line description and a Create button. Create writes the example into a new folder and opens it in the editor straight away:
 
 - It uses the last folder you worked in when there is one, otherwise the `examples` folder under the editor's config directory, `~/.config/vlc-skin-studio/examples`.
-- The folder is named `vlc-skin-neon` or `vlc-skin-panel`.
-- The theme file inside is `theme.xml`, and the PNG assets are generated next to it.
+- The folder is named `vlc-skin-neon`, `vlc-skin-panel` or `vlc-skin-velocity`.
+- The theme file inside is `theme.xml`. Neon and Flat panel generate their PNG assets; VeLoCity copies its real assets and its MIT license next to the theme.
 
-The two examples are:
+The three examples are:
 
 | Example | What it is |
 |---|---|
 | Neon player | A 320x140 player bar with transport buttons, a seek slider and a volume slider. |
 | Flat panel | A 420x220 plain control panel with a video area and a seek slider, a good starting point for a bigger window. |
+| VeLoCity Dark | dmtiir's full four window player theme (MIT), with its own artwork and fonts. |
 
-The Examples button at the top of the card opens the same two themes as a popup menu and creates the chosen one in the same place.
+The Examples button at the top of the card opens the same three themes as a popup menu and creates the chosen one in the same place.
 
 ## Create a new skin
 

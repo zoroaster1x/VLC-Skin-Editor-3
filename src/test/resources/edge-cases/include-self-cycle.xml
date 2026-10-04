@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Self include"/>
+  <Include file="include-self-cycle.xml"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Image id="i" image="b"/>
+    </Layout>
+  </Window>
+</Theme>

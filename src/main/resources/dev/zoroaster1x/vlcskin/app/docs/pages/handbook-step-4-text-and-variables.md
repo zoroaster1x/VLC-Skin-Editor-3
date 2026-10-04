@@ -15,7 +15,7 @@ Add Text from the Items panel, then fill in the Inspector:
 | Field | Meaning |
 |---|---|
 | Text | The string to draw, `$` variables included. |
-| Font | A font resource id, or `defaultfont` for the built in Sans Serif 12. |
+| Font | A font resource id, or `defaultfont` for the built in FreeSans 12. |
 | Color | `#RRGGBB`. |
 | Width | Fixed width in pixels; `0` lets the text decide its own width. |
 | Alignment | `left`, `center` or `right`. Centering and right alignment only take effect with a fixed width. |
@@ -37,7 +37,7 @@ The Variables panel simulates the player state. Nothing here touches VLC; it onl
 
 - Slider position: one slider from 0 to 100, starting at 50. It moves every slider thumb in the preview.
 - The sixteen booleans: Equalizer enabled, Video output present, Has audio, Fullscreen, Playing, Stopped, Paused, Seekable, Mute, Always on top, Can record, Recording, Random, Loop, Repeat and DVD active. Their defaults are shown checked or unchecked in the panel; the tooltip on each box holds the code name.
-- The twelve text variables: each row is the token, its label and a sample value you can edit.
+- The thirteen text variables: each row is the token, its label and a sample value you can edit.
 
 Use Playing and Paused to test a play or pause button, Mute for a speaker toggle, and the slider position to walk a seek slider along its path.
 
@@ -59,8 +59,9 @@ These are the tokens VLC substitutes in a Text item or a tooltip. The editor pre
 | `$N` | Name of the playing stream. | `Artist - Title` |
 | `$F` | Full name with path. | `http://www.example.com/Artist - Title.mp3` |
 | `$S` | Audio sample rate in kHz. | `44` |
+| `$R` | Playback rate. | `1` |
 
-Substitution is a plain text replacement for each known token, never a regular expression. A `$` that does not start a known token stays as typed. VLC 2.0 also documents `$R` for the playback rate; the preview has no sample for it, so it stays literal there and VLC substitutes it at runtime.
+Substitution is a plain text replacement for each known token, never a regular expression. A `$` that does not start a known token stays as typed.
 
 ## Boolean fields
 

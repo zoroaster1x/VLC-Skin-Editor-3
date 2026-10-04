@@ -10,7 +10,7 @@ VLC Skin Studio opens a dockable desktop window on top of the same format engine
 
 ## What the window contains
 
-A menu bar and a toolbar at the top, the eight dockable panels in the middle, and a status bar at the bottom. The canvas is the center of the work: it renders the selected layout and hosts the Move and Path tools.
+A menu bar and a toolbar at the top, the nine dockable panels in the middle, and a status bar at the bottom. The canvas is the center of the work: it renders the selected layout and hosts the Move and Path tools.
 
 - [Window tour](window-tour.md) covers every panel, the docking rules, the toolbar, the status bar, the canvas controls and the three trees.
 - [Menus and shortcuts](menus-and-shortcuts.md) lists every menu entry and every keyboard shortcut.
@@ -20,11 +20,11 @@ A menu bar and a toolbar at the top, the eight dockable panels in the middle, an
 
 Every panel is dockable: drag it by its title to move, stack or float it. The arrangement is saved to `layout.xml` next to the settings, and View > Reset panel layout restores the default. Settings live in `$XDG_CONFIG_HOME/vlc-skin-studio/settings.json`, or `~/.config/vlc-skin-studio/settings.json` when `XDG_CONFIG_HOME` is unset.
 
-The eight panels are Resources, Windows and layouts, Items, Canvas, Inspector, Variables, Problems and Skin XML. Their jobs are listed in the [window tour](window-tour.md).
+The nine panels are Resources, Windows and layouts, Items, Canvas, Inspector, Variables, Problems, Skin XML and MCP activity. Their jobs are listed in the [window tour](window-tour.md).
 
 ## Themes, language and the toolbar
 
-The theme list offers Light, Dark, IntelliJ, Darcula, Arc, Arc dark and One dark, with the VLC orange accent in every one. The Dark theme checkbox in the View menu toggles between Light and Dark. Edit > Preferences holds the look and feel, the language, the canvas background, the checkerboard and the toolbar visibility.
+The theme list offers Light, Dark, IntelliJ, Darcula, Arc, Arc dark and One dark, with the VLC orange accent in every one. The Dark theme checkbox in the View menu toggles between Light and Dark. Edit > Preferences holds the look and feel, the language, the interface size, the keyboard shortcuts, the canvas background, the checkerboard, the toolbar visibility and the AI and MCP section.
 
 The 21 language files converted from the original VLC Skin Editor cover menus, toolbar tooltips, panel titles and common dialogs. Newer surfaces stay in English until a translation exists, and the note in the Preferences dialog says so. The status bar names the current file, the selection, the canvas zoom and whether the document has unsaved changes.
 

@@ -2,12 +2,79 @@
 
 Sources read:
 
-* Original: `/tmp/opencode/original-skin-designer` (Java Swing, GPL-2.0, Daniel Dreibrodt, version string `0.8.6.dev` in `src/vlcskineditor/Main.java`). Paths below are relative to this root.
+* Original: the upstream VLC Skin Editor 0.8.6 source (Java Swing, GPL-2.0, Daniel Dreibrodt, version string `0.8.6.dev` in `src/vlcskineditor/Main.java`). `tools/parity/README.md` documents how to clone and build it for comparison runs. Paths below are relative to that root.
 * Rewrite: this repository (single Gradle module, Java 25, package `dev.zoroaster1x.vlcskin`). Paths below are relative to this root.
 
 Method: every class under `src/vlcskineditor/` (original) and `src/main/java/dev/zoroaster1x/vlcskin/` (rewrite) was read or grep-checked, plus `README.TXT`, `BUILDING.TXT`, `lang/en.txt` and `share/` for the original, and `README.md` plus the app/core packages for the rewrite. This audit did not touch build outputs.
 
-Verdict: the rewrite ports the complete editing surface of the original. All original dialogs, editors, wizards, trees, menus, shortcuts and format handling have an equivalent. The rewrite adds dockable panels, undoable drag and drop, validation, an XML source panel, a CLI, a TUI, an MCP server and an AI panel. Concrete gaps are the sub bitmap duplicate command, the self-updater (download and install), the exact "add as sibling" placement, and per-feature nuances listed in section 2.
+## 0. Update: verified against VLC 4.0.0-dev (e77e49b5, 2026-10-02)
+
+The rewrite was tested against real VLC skins2 and the original editor on an
+isolated virtual display. The method, commands and lessons are in
+`tools/parity/README.md`; the VLC behaviour with `file:line` citations is in
+`docs/skins2-parser.md`, `docs/skins2-rendering.md` and
+`docs/skins2-edge-cases.md`, and 53 runnable edge-case themes live in
+`src/test/resources/edge-cases/` (opened by `format/EdgeCaseFixturesTest`).
+
+Corpus: all 138 archives of the official gallery (46 MB) imported, validated
+and rendered, one of which bundles two themes, so 139 themes in total; the
+VeLoCity skins and VLC's own `default` and `winamp2.xml` themes are checked in
+the same harness. Result after this update: 139/139 themes import and render,
+including the Winamp2 archive the original editor refused.
+
+Corrections to claims elsewhere in this document, which were true at some
+earlier revision but are not true now:
+
+* The AI assistant panel no longer exists. MCP is the single automation
+  surface, as `AGENTS.md` states; the AI panel was deliberately removed.
+* The MCP catalog is 76 tools, not 63.
+* The rewrite has a working self updater: `update/UpdateService` reads the
+  GitHub releases, collects missed release notes, and installs a downloaded
+  jar only after its SHA-256 matches `SHA256SUMS`, with a Windows helper
+  restart. Section 2 item 4 and the update table are stale.
+* Section 3's threading risks are addressed: session listeners run through the
+  dispatcher (event thread inline, `invokeLater` otherwise), `Studio.status`
+  and `error` marshal to the event thread, `ProgressDialog` is a `FutureTask`
+  disposed in `done()`, `EditorSession.revision` is atomic and `SelectionState`
+  fields are volatile, `Messages` keeps a volatile language and a synchronized
+  bundle cache, and `SettingsStore` serializes saves. The `AiPanel` that
+  section names no longer exists.
+* SubBitmap duplication exists (`EditorService.duplicateResource`,
+  `DeepCopy.resource`), and `Anchor.range` is both parsed and written.
+* Radial sliders are editable, and the Winamp2 and `Playlist` quirks are
+  handled.
+
+Bugs found by the comparison runs and fixed in this update, with the tests
+that pin them down:
+
+| Bug | Fix | Test |
+|---|---|---|
+| Inspector threw `IllegalArgumentException` on real values outside the editor's range (`maxwidth="99999"`, `alpha="0"`) | `InspectorFields.safeModel` widens the spinner range around the value; theme settings and the sub bitmap editor use it | `app/StudioUiTest.aThemeWithExtremeNumbersOpensAndBuildsBothForms` |
+| Duplicate rename patterns lost every letter `s` (`replaceAll("[%s\"]", "")`) | strip only `%` and quotes, fall back to `<id>_copy` when empty | `model/SkinIndexTest` |
+| `visible` expressions were never evaluated when drawing, so hidden controls painted | VLC semantics in `ItemPainters.draw`; unresolved expressions stay visible, like VLC's NULL variable | `render/VlcSemanticsTest` |
+| Text was never clipped to `width`; alignment on overflow was wrong | VLC's CtrlText static-frame rules: clip and show start, middle or end per alignment | `render/VlcSemanticsTest` |
+| Radial slider frame index used `floor(value * frames)` instead of VLC's `(int)(value * (frames - 1))` | exact VLC formula | `render/VlcSemanticsTest` |
+| Boolean expressions did textual substitution, corrupting names that contain a known variable (`notvlc.isPlaying`) | tokenising evaluation with an unknown-aware resolver (`BooleanExpression.resolve`) | `render/BooleanExpressionTest`, `render/VlcSemanticsTest` |
+| A playlist slider wrote its `value` attribute, although VLC always follows the playlist scroll position | `ItemWriter` skips `value` when `inPlaytree` | `format/SkinRoundTripTest.playlistSliderValueIsNotWritten` |
+| VLT export wrote the stale on-disk theme.xml as an extra tar entry, after the current one | assets-only `referencedFiles` | `format/VltCodecTest` |
+| Semicolon resource fallbacks (`id1;id2`) were unresolved, so Winamp2 themes validated as broken | `SkinIndex` tries each segment in order, like VLC's `find_first_object` | `model/SkinIndexTest` |
+| IniFile color constants (`pledit.text.normal`) were unknown | `SkinIndex.constant` registers `<ini>.<section>.<key>` lowercased and `Colors.parse` resolves them | `render/VlcSemanticsTest` |
+| Winamp2 archives (BMPs, no theme.xml) were rejected | bundled `winamp2.xml` template fallback in `VltCodec`, the way VLC's loader works | `format/VltCodecTest.winamp2ArchivesGainTheBundledTemplate` |
+
+Still open and deliberately not ported yet: animation-frame preview for text
+scrolling (`scrolling="auto"` draws the static frame, which is what PNG export
+needs), anchor-driven resize simulation in the preview (a static preview at
+the authored layout size is what VLC shows before any resize), cover art for
+`art="true"` images, and per-slider preview values. Each is listed in
+`docs/known-limits.md`.
+
+Beyond the original, this update adds: Winamp2 archive import through VLC's own
+template, semicolon resource fallback lists, IniFile constants as colors,
+VLC's idle playlist preview, a keymap editor, a live interface scale, platform
+correct config/cache/data directories under one `AppPaths` utility, numeric
+pixel and region comparison tools, an MCP activity panel with a timestamped
+log, and a three-way disk merge (`disk_diff`, `sync_from_disk`) so an AI
+session and the window can share one file.
 
 ## 1. Feature parity table
 
@@ -269,8 +336,8 @@ Verdict: the rewrite ports the complete editing surface of the original. All ori
 | Examples generator | absent | `example/ExampleSkins.java` | different | New. |
 | CLI | absent | `cli/SkinStudioCli.java`: `mcp`, `render`, `inspect`, `validate`, `new`, `vlt`, `tui`, `examples` | different | New. |
 | Terminal UI | absent | `tui/TuiShell.java`, `tui/TuiLoop.java`, `tui/AsciiRenderer.java` | different | New. |
-| MCP server | absent | `mcp/McpToolset.java` (63 tools), `mcp/McpServerRunner.java` | different | New; tools mirror every editor operation. |
-| AI assistant | absent | `ai/AiAssistant.java`, `app/panel/AiPanel.java` | different | New; OpenAI compatible endpoint driving the MCP toolset. |
+| MCP server | absent | `mcp/McpToolset.java` (76 tools), `mcp/McpServerRunner.java` | different | New; tools mirror every editor operation, including `disk_diff` and `sync_from_disk` for a file shared with a running window. |
+| AI assistant | absent | removed | different | The in-app chat panel was tried and deliberately removed; MCP is the single automation surface, as `AGENTS.md` states. |
 | XML source panel | absent | `app/panel/XmlPanel.java` with apply, refresh, copy, select all | different | New. |
 | Status bar | absent | `app/chrome/StatusBar.java` | different | New. |
 | Dockable panels | fixed `JDesktopPane` with three internal frames and a preview frame | ModernDocking panels with saved `layout.xml` | different | New layout mechanism; resources, structure, items, canvas, inspector, variables, problems and XML panels. |
@@ -280,10 +347,10 @@ Verdict: the rewrite ports the complete editing surface of the original. All ori
 
 Ordered by importance, with concrete file references in both trees.
 
-1. Save preview PNG behavior differs. Original `src/vlcskineditor/Main.java` lines 1176-1187 kept the menu item disabled until a layout preview existed and saved exactly the shown layout. Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/Studio.java` lines 302-316 always offers the dialog and falls back to `session.currentLayout()`, and `snapshot/PreviewSnapshot.java` lines 43-52 renders without checkerboard or overlays. Also original `PreviewWindow.savePNG()` lines 405-420 hides the selection before writing; the rewrite relies on `RenderOptions.withoutOverlays()` (`render/RenderOptions.java` lines 58-61), which leaves `anchorHelpers` enabled.
+1. Save preview PNG behavior differs. Original `src/vlcskineditor/Main.java` lines 1176-1187 kept the menu item disabled until a layout preview existed and saved exactly the shown layout. Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/Studio.java` lines 302-316 always offers the dialog and falls back to `session.currentLayout()`, and `snapshot/PreviewSnapshot.java` lines 43-52 renders without checkerboard or overlays. Also original `PreviewWindow.savePNG()` lines 405-420 hides the selection before writing; the rewrite relies on `RenderOptions.withoutOverlays()` (`render/RenderOptions.java` lines 58-61), which disables the selection, hover, pressed and anchor helper overlays.
 2. Menu item mnemonics are not translated. Original every menu entry sets a language-file mnemonic (`src/vlcskineditor/Main.java` lines 203-324). Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/chrome/MenuBarFactory.java` lines 42-141 sets mnemonics only on the top-level menus and uses fixed accelerators, so translated alt keys are lost.
 3. Double click no longer opens an editor. Original `src/vlcskineditor/Main.java` lines 1846-1851 opened the item, resource, window or layout dialog. Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/panel/AbstractTreePanel.java` lines 50-55 and `ResourcesPanel.java` lines 80-87 make double click a selection that fills the inspector. This is a deliberate UX change but a workflow difference.
-4. Preferences differ in options. Original `src/vlcskineditor/Config.java` lines 180-298 offered autoupdate, language, one of three Swing LAFs, and a toolbar toggle. Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/dialog/PreferencesDialog.java` offers theme, language, canvas background, checkerboard and toolbar; autoupdate lives in the Help menu and is a real release check with the missed patch notes and a SHA-256 verified self update; there is no LAF choice (FlatLaf themes instead).
+4. Preferences differ in options. Original `src/vlcskineditor/Config.java` lines 180-298 offered autoupdate, language, one of three Swing LAFs, and a toolbar toggle. Rewrite `src/main/java/dev/zoroaster1x/vlcskin/app/dialog/PreferencesDialog.java` offers theme, language, interface size, a keyboard shortcut editor, canvas background, checkerboard, toolbar visibility and the AI and MCP section; autoupdate lives in the Help menu and is a real release check with the missed patch notes and a SHA-256 verified self update; there is no LAF choice (FlatLaf themes instead).
 5. Windows-only and dead code in the original that the rewrite drops: `src/com/ice/jni/registry/*` (JNI registry), `share/ICE_JNIRegistry.dll`, `share/VLCSkinEditor.exe`, `SkinEditorInstaller.iss`, `share/vlcskineditor.jsmooth`; `resources/BitmapFont.java` is dead (never instantiated by `Skin.parseNode()`); `items/RadialSlider.java` refuses editing; the `vlc.onTop()` action is declared at `src/vlcskineditor/ActionEditor.java` line 73 but never added to the popup.
 6. Popup menu entries have no editor in the rewrite. `src/main/java/dev/zoroaster1x/vlcskin/model/resource/PopupMenuResource.java` models `MenuItem` and `MenuSeparator` and `format/parse/ResourceParser.java` lines 100-121 parses them, but `app/panel/InspectorPanel.java` lines 114-125 falls through to the "no editable attributes here" note and `mcp/PropertyAccess.java` lines 374-377 allows only the id. The original did not parse the element at all, so this is preserved data without a UI, not a regression.
 7. Ini file content cannot be edited in either tree; the rewrite adds the resource and metadata only (`model/resource/IniFileResource.java`, `InspectorPanel.iniForm()` lines 707-712).

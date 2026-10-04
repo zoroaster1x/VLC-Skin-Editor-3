@@ -5,6 +5,7 @@ import dev.zoroaster1x.vlcskin.app.config.StudioSettings;
 import dev.zoroaster1x.vlcskin.app.theme.ThemeManager;
 import dev.zoroaster1x.vlcskin.cli.SkinStudioCli;
 import dev.zoroaster1x.vlcskin.edit.EditorSession;
+import dev.zoroaster1x.vlcskin.util.Platform;
 import dev.zoroaster1x.vlcskin.mcp.EditorService;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -38,7 +39,7 @@ public final class VlcSkinStudio {
                 System.setProperty("sun.awt.fontconfig", fontConfig.toString());
             }
         }
-        if (isMac()) {
+        if (Platform.isMac()) {
             System.setProperty("apple.laf.useScreenMenuBar", "true");
         }
         if (isNativeImage() && (args.length == 0 || "gui".equals(args[0]))) {
@@ -55,13 +56,17 @@ public final class VlcSkinStudio {
             dev.zoroaster1x.vlcskin.cli.McpCommand.HOST.set(
                     () -> new dev.zoroaster1x.vlcskin.app.snapshot.SettingsHost(store, settings));
             int code;
+            long started = System.nanoTime();
+            dev.zoroaster1x.vlcskin.util.Log.info("command: %s", String.join(" ", args));
             try {
-                code = new CommandLine(new SkinStudioCli()).execute(args);
+                code = dev.zoroaster1x.vlcskin.cli.SkinStudioCli.commandLine().execute(args);
             } catch (RuntimeException | Error ex) {
                 String message = ex.getMessage() == null ? ex.toString() : ex.getMessage();
-                System.err.println(message);
+                dev.zoroaster1x.vlcskin.util.Log.error("%s", message);
                 code = 3;
             }
+            dev.zoroaster1x.vlcskin.util.Log.info("command finished with %d in %d ms",
+                    code, (System.nanoTime() - started) / 1_000_000);
             System.exit(code);
         }
         startGui(args);
@@ -79,8 +84,7 @@ public final class VlcSkinStudio {
             return true;
         }
         return Arrays.stream(new CommandLine(new SkinStudioCli()).getSubcommands().keySet().toArray(String[]::new))
-                .anyMatch(name -> name.equals(first));
-    }
+                .anyMatch(name -> name.equals(first));    }
 
     /**
      * The folder the running executable lives in; a stand-in for java.home
@@ -184,10 +188,6 @@ public final class VlcSkinStudio {
                 dump(child, depth + 1);
             }
         }
-    }
-
-    private static boolean isMac() {
-        return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac");
     }
 
     /**

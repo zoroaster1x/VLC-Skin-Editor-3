@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Unknown position"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win" position="Middle" xoffset="10" yoffset="20">
+    <Layout id="lay" width="64" height="48">
+      <Image id="i" image="b" width="20" height="20"/>
+    </Layout>
+  </Window>
+</Theme>

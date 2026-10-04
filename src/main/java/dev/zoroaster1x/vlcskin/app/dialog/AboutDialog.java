@@ -28,7 +28,8 @@ public final class AboutDialog extends JDialog {
         JPanel content = new JPanel(new BorderLayout(8, 8));
         content.setBorder(BorderFactory.createEmptyBorder(16, 18, 12, 18));
         JLabel title = new JLabel(Version.NAME + " " + Version.VERSION);
-        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 18f));
+        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD,
+                title.getFont().getSize2D() + 5f));
         javax.swing.JTextPane body = new javax.swing.JTextPane();
         body.setContentType("text/html");
         body.setText("""

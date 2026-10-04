@@ -3,6 +3,7 @@ package dev.zoroaster1x.vlcskin.app.chrome;
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
 import dev.zoroaster1x.vlcskin.app.theme.ThemeManager;
+import dev.zoroaster1x.vlcskin.util.Platform;
 import dev.zoroaster1x.vlcskin.model.item.Item;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -41,8 +42,10 @@ public final class MenuBarFactory {
 
         JMenu file = new JMenu(Messages.get("MENU_FILE", "File"));
         file.setMnemonic(KeyEvent.VK_F);
-        file.add(item(Messages.get("MENU_FILE_NEW", "New"), "new", KeyEvent.VK_N, e -> actions.newSkin()));
-        file.add(item(Messages.get("MENU_FILE_OPEN", "Open..."), "open", KeyEvent.VK_O, e -> actions.openSkin()));
+        file.add(shortcut(actions, item(Messages.get("MENU_FILE_NEW", "New"), "new", 0,
+                e -> actions.newSkin()), "file.new"));
+        file.add(shortcut(actions, item(Messages.get("MENU_FILE_OPEN", "Open..."), "open", 0,
+                e -> actions.openSkin()), "file.open"));
         JMenu recent = new JMenu(Messages.get("MENU_FILE_RECENT", "Recent files"));
         java.util.List<String> recents = actions.recentFiles();
         if (recents == null || recents.isEmpty()) {
@@ -58,60 +61,58 @@ public final class MenuBarFactory {
             }
         }
         file.add(recent);
-        file.add(item(Messages.get("MENU_FILE_SAVE", "Save"), "save", KeyEvent.VK_S, e -> actions.save()));
+        file.add(shortcut(actions, item(Messages.get("MENU_FILE_SAVE", "Save"), "save", 0,
+                e -> actions.save()), "file.save"));
         file.add(item("Save as...", null, 0, e -> actions.saveAs()));
         file.addSeparator();
         file.add(item("Import VLT...", null, 0, e -> actions.importVlt()));
-        file.add(item(Messages.get("APP_GALLERY_MENU", "Browse themes..."), "open", KeyEvent.VK_B,
-                e -> actions.browseThemes()));
-        JMenuItem exportVlt = item(Messages.get("MENU_FILE_VLT", "Export as VLT..."), null, 0, e -> actions.exportVlt());
-        exportVlt.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_V,
-                menuShortcutMask() | KeyEvent.SHIFT_DOWN_MASK));
-        file.add(exportVlt);
+        file.add(shortcut(actions, item(Messages.get("APP_GALLERY_MENU", "Browse themes..."), "open", 0,
+                e -> actions.browseThemes()), "file.browse"));
+        file.add(shortcut(actions, item(Messages.get("MENU_FILE_VLT", "Export as VLT..."), null, 0,
+                e -> actions.exportVlt()), "file.exportVlt"));
         file.add(item(Messages.get("MENU_FILE_PNG", "Save current preview as image..."), "image", 0,
                 e -> actions.renderPreview()));
         file.addSeparator();
-        JMenuItem testVlc = item(Messages.get("MENU_FILE_TEST", "Test skin in VLC"), "play", 0, e -> actions.testInVlc());
-        testVlc.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T,
-                menuShortcutMask() | KeyEvent.SHIFT_DOWN_MASK));
-        file.add(testVlc);
+        file.add(shortcut(actions, item(Messages.get("MENU_FILE_TEST", "Test skin in VLC"), "play", 0,
+                e -> actions.testInVlc()), "file.testVlc"));
         file.addSeparator();
         file.add(item(Messages.get("MENU_FILE_EXIT", "Exit"), null, 0, e -> actions.exit()));
         bar.add(file);
 
         JMenu edit = new JMenu(Messages.get("MENU_EDIT", "Edit"));
         edit.setMnemonic(KeyEvent.VK_E);
-        edit.add(item(Messages.get("MENU_EDIT_UNDO", "Undo"), "undo", KeyEvent.VK_Z, e -> actions.undo()));
-        edit.add(item(Messages.get("MENU_EDIT_REDO", "Redo"), "redo", KeyEvent.VK_Y, e -> actions.redo()));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_UNDO", "Undo"), "undo", 0,
+                e -> actions.undo()), "edit.undo"));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_REDO", "Redo"), "redo", 0,
+                e -> actions.redo()), "edit.redo"));
         edit.addSeparator();
-        edit.add(item(Messages.get("MENU_EDIT_THEME", "Skin settings"), "layout", KeyEvent.VK_I, e -> actions.openSettings()));
-        edit.add(item(Messages.get("MENU_EDIT_VARS", "Global variables"), "checkbox", KeyEvent.VK_G,
-                e -> actions.showVariables()));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_THEME", "Skin settings"), "layout", 0,
+                e -> actions.openSettings()), "edit.skinSettings"));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_VARS", "Global variables"), "checkbox", 0,
+                e -> actions.showVariables()), "edit.variables"));
         edit.add(item(Messages.get("MENU_EDIT_PREFS", "Preferences"), null, 0,
                 e -> openPreferences(actions)));
         edit.addSeparator();
-        edit.add(item("Duplicate item", "duplicate", KeyEvent.VK_D, e -> actions.duplicate()));
-        JMenuItem delete = item("Delete item", "delete", 0, e -> actions.deleteSelected());
-        delete.setAccelerator(isMac()
-                ? KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, menuShortcutMask())
-                : KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
-        edit.add(delete);
+        edit.add(shortcut(actions, item("Duplicate item", "duplicate", 0,
+                e -> actions.duplicate()), "edit.duplicate"));
+        edit.add(shortcut(actions, item("Delete item", "delete", 0,
+                e -> actions.deleteSelected()), "edit.delete"));
         edit.addSeparator();
-        edit.add(item(Messages.get("MENU_EDIT_UP", "Move selected item up"), "up", 0,
-                e -> actions.moveSelected(0, -1)));
-        edit.add(item(Messages.get("MENU_EDIT_DOWN", "Move selected item down"), "down", 0,
-                e -> actions.moveSelected(0, 1)));
-        edit.add(item(Messages.get("MENU_EDIT_LEFT", "Move selected item left"), null, 0,
-                e -> actions.moveSelected(-1, 0)));
-        edit.add(item(Messages.get("MENU_EDIT_RIGHT", "Move selected item right"), null, 0,
-                e -> actions.moveSelected(1, 0)));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_UP", "Move selected item up"), "up", 0,
+                e -> actions.moveSelected(0, -1)), "item.moveUp"));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_DOWN", "Move selected item down"), "down", 0,
+                e -> actions.moveSelected(0, 1)), "item.moveDown"));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_LEFT", "Move selected item left"), null, 0,
+                e -> actions.moveSelected(-1, 0)), "item.moveLeft"));
+        edit.add(shortcut(actions, item(Messages.get("MENU_EDIT_RIGHT", "Move selected item right"), null, 0,
+                e -> actions.moveSelected(1, 0)), "item.moveRight"));
         bar.add(edit);
 
         JMenu view = new JMenu("View");
         view.setMnemonic(KeyEvent.VK_V);
-        view.add(item("Zoom in", "zoom-in", KeyEvent.VK_EQUALS, e -> actions.zoomIn()));
-        view.add(item("Zoom out", "zoom-out", KeyEvent.VK_MINUS, e -> actions.zoomOut()));
-        view.add(item("Fit window", "grid", 0, e -> actions.fitToWindow()));
+        view.add(shortcut(actions, item("Zoom in", "zoom-in", 0, e -> actions.zoomIn()), "view.zoomIn"));
+        view.add(shortcut(actions, item("Zoom out", "zoom-out", 0, e -> actions.zoomOut()), "view.zoomOut"));
+        view.add(shortcut(actions, item("Fit window", "grid", 0, e -> actions.fitToWindow()), "view.fit"));
         view.addSeparator();
         JCheckBoxMenuItem checkerboard = new JCheckBoxMenuItem("Checkerboard",
                 actions.studio().settings().isCheckerboard());
@@ -120,6 +121,26 @@ public final class MenuBarFactory {
             checkerboard.setSelected(actions.studio().settings().isCheckerboard());
         });
         view.add(checkerboard);
+        JMenu canvasBackground = new JMenu(Messages.get("APP_PREFS_CANVAS_BG", "Canvas background"));
+        java.util.Map<String, String> backgrounds = new java.util.LinkedHashMap<>();
+        backgrounds.put("theme", Messages.get("APP_PREFS_CANVAS_THEME", "Follow the theme"));
+        backgrounds.put("light", Messages.get("APP_PREFS_CANVAS_LIGHT", "Light"));
+        backgrounds.put("dark", Messages.get("APP_PREFS_CANVAS_DARK", "Dark"));
+        for (var entry : backgrounds.entrySet()) {
+            JCheckBoxMenuItem choice = new JCheckBoxMenuItem(entry.getValue(),
+                    entry.getKey().equals(actions.studio().settings().getCanvasBackground()));
+            choice.addActionListener(e -> {
+                setCanvasBackground(actions, entry.getKey());
+                for (int index = 0; index < canvasBackground.getItemCount(); index++) {
+                    JMenuItem item = canvasBackground.getItem(index);
+                    if (item instanceof JCheckBoxMenuItem box) {
+                        box.setSelected(box == choice);
+                    }
+                }
+            });
+            canvasBackground.add(choice);
+        }
+        view.add(canvasBackground);
         JMenu panels = new JMenu("Panels");
         for (var entry : java.util.List.of(
                 java.util.Map.entry("resources", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.resources()),
@@ -129,6 +150,7 @@ public final class MenuBarFactory {
                 java.util.Map.entry("inspector", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.inspector()),
                 java.util.Map.entry("variables", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables()),
                 java.util.Map.entry("problems", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems()),
+                java.util.Map.entry("mcp", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.mcp()),
                 java.util.Map.entry("xml", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml()))) {
             JMenuItem panelItem = new JMenuItem(entry.getValue());
             panelItem.addActionListener(e -> actions.showPanel(entry.getKey()));
@@ -201,6 +223,21 @@ public final class MenuBarFactory {
         }
     }
 
+    private static JMenuItem shortcut(ChromeActions actions, JMenuItem menuItem, String id) {
+        menuItem.setAccelerator(dev.zoroaster1x.vlcskin.app.config.Keymap.keyStroke(
+                actions.keybindings(), id));
+        return menuItem;
+    }
+
+    /**
+     * Applies and stores a canvas backdrop choice, then repaints the canvas.
+     */
+    private static void setCanvasBackground(ChromeActions actions, String value) {
+        actions.studio().settings().setCanvasBackground(value);
+        actions.studio().saveSettings();
+        actions.studio().session().fireChanged();
+    }
+
     private static JMenuItem item(String text, String icon, int acceleratorKey, ActionListener listener) {
         JMenuItem menuItem = new JMenuItem(text);
         if (icon != null) {
@@ -222,17 +259,13 @@ public final class MenuBarFactory {
         }
     }
 
-    private static boolean isMac() {
-        return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac");
-    }
-
     /**
      * The platform menu shortcut. A headless toolkit throws instead of
      * answering, and the tests build the same menu bar offscreen.
      */
     private static int menuShortcutMask() {
         if (java.awt.GraphicsEnvironment.isHeadless()) {
-            return isMac() ? KeyEvent.META_DOWN_MASK : KeyEvent.CTRL_DOWN_MASK;
+            return Platform.isMac() ? KeyEvent.META_DOWN_MASK : KeyEvent.CTRL_DOWN_MASK;
         }
         return Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
     }

@@ -6,6 +6,7 @@ import dev.zoroaster1x.vlcskin.app.chrome.MenuBarFactory;
 import dev.zoroaster1x.vlcskin.app.chrome.StatusBar;
 import dev.zoroaster1x.vlcskin.app.chrome.ToolBarFactory;
 import dev.zoroaster1x.vlcskin.app.config.StudioSettings;
+import dev.zoroaster1x.vlcskin.util.Platform;
 import dev.zoroaster1x.vlcskin.app.dialog.AboutDialog;
 import dev.zoroaster1x.vlcskin.app.dialog.PreferencesDialog;
 import dev.zoroaster1x.vlcskin.app.dialog.ThemeSettingsDialog;
@@ -109,6 +110,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         registerDockable("variables", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.variables(), panels.variables);
         registerDockable("problems", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.problems(), panels.problems);
         registerDockable("xml", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.xml(), panels.xml);
+        registerDockable("mcp", dev.zoroaster1x.vlcskin.app.i18n.PanelTitles.mcp(), panels.mcp);
 
         dockDefaultLayout();
         restoreLayout();
@@ -117,6 +119,11 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         studio.addStatusListener(statusBar::setMessage);
         studio.service().setUi(new SwingUiInspector(this::getContentPane, studio, "Desktop window",
                 () -> panels.canvas, this::showPanelByName, this::resetLayout, this::exit));
+        studio.service().addActivityListener(activity -> SwingUtilities.invokeLater(() -> {
+            if (studio.settings().isShowToolCalls()) {
+                statusBar.setMessage("MCP " + activity.tool() + " (" + activity.millis() + " ms)");
+            }
+        }));
         studio.session().addListener(this::onSessionChanged);
 
         addWindowListener(new WindowAdapter() {
@@ -128,10 +135,16 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         onSessionChanged();
     }
 
+    @Override
+    public java.util.Map<String, String> keybindings() {
+        return studio.settings().getKeys();
+    }
+
     private void onSessionChanged() {
         panels.canvas.refreshBackdrop();
         statusBar.update(studio);
-        MenuBarFactory.refreshUndoLabels(getJMenuBar(), studio, "Undo", "Redo");
+        MenuBarFactory.refreshUndoLabels(getJMenuBar(), studio,
+                Messages.get("MENU_EDIT_UNDO", "Undo"), Messages.get("MENU_EDIT_REDO", "Redo"));
         applyToolbarVisibility();
         ToolBarFactory.syncUndoButtons(toolbar,
                 studio.session().history().canUndo(), studio.session().history().canRedo());
@@ -269,26 +282,45 @@ public final class StudioFrame extends JFrame implements ChromeActions {
 
     private void installShortcuts() {
         JComponent root = getRootPane();
-        bind(root, "DELETE", "delete-item", e -> deleteSelected());
-        if (isMac()) {
-            bind(root, "meta BACK_SPACE", "delete-item-backspace", e -> deleteSelected());
+        var inputMap = root.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        for (KeyStroke existing : inputMap.allKeys()) {
+            Object name = inputMap.get(existing);
+            if (name != null && name.toString().startsWith("shortcut:")) {
+                inputMap.remove(existing);
+            }
         }
-        bind(root, "control UP", "move-up", e -> moveSelected(0, -1));
-        bind(root, "control DOWN", "move-down", e -> moveSelected(0, 1));
-        bind(root, "control LEFT", "move-left", e -> moveSelected(-1, 0));
-        bind(root, "control RIGHT", "move-right", e -> moveSelected(1, 0));
-        bind(root, "control EQUALS", "zoom-in", e -> zoomIn());
-        bind(root, "control MINUS", "zoom-out", e -> zoomOut());
-        bind(root, "control 0", "fit", e -> fitToWindow());
-        bind(root, "control D", "duplicate", e -> duplicate());
+        java.util.Map<String, String> keys = studio.settings().getKeys();
+        java.util.Map<String, Runnable> actions = java.util.Map.ofEntries(
+                java.util.Map.entry("edit.delete", this::deleteSelected),
+                java.util.Map.entry("edit.duplicate", this::duplicate),
+                java.util.Map.entry("item.moveUp", () -> moveSelected(0, -1)),
+                java.util.Map.entry("item.moveDown", () -> moveSelected(0, 1)),
+                java.util.Map.entry("item.moveLeft", () -> moveSelected(-1, 0)),
+                java.util.Map.entry("item.moveRight", () -> moveSelected(1, 0)),
+                java.util.Map.entry("view.zoomIn", this::zoomIn),
+                java.util.Map.entry("view.zoomOut", this::zoomOut),
+                java.util.Map.entry("view.fit", this::fitToWindow));
+        for (java.util.Map.Entry<String, Runnable> entry : actions.entrySet()) {
+            KeyStroke stroke = dev.zoroaster1x.vlcskin.app.config.Keymap.keyStroke(keys, entry.getKey());
+            if (stroke != null) {
+                bind(root, stroke, "shortcut:" + entry.getKey(), e -> entry.getValue().run());
+            }
+        }
     }
 
-    private static boolean isMac() {
-        return System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("mac");
+    /**
+     * Reapplies the configurable shortcuts after the keymap dialog changed
+     * them.
+     */
+    public void reinstallKeymap() {
+        setJMenuBar(MenuBarFactory.build(this, themeControl));
+        installShortcuts();
+        revalidate();
+        repaint();
     }
 
-    private void bind(JComponent component, String keyStroke, String name, Consumer<ActionEvent> action) {
-        component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke(keyStroke), name);
+    private void bind(JComponent component, KeyStroke keyStroke, String name, Consumer<ActionEvent> action) {
+        component.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, name);
         component.getActionMap().put(name, new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -562,7 +594,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
      * Preferences with a live toolbar visibility callback.
      */
     public void openPreferences() {
-        new PreferencesDialog(studio, this::setToolbarVisible).setVisible(true);
+        new PreferencesDialog(studio, this::setToolbarVisible, this::reinstallKeymap).setVisible(true);
     }
 
     private void setToolbarVisible(boolean visible) {
@@ -603,6 +635,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
             case "inspector", "properties" -> "inspector";
             case "variables", "globals" -> "variables";
             case "problems", "validation" -> "problems";
+            case "mcp", "activity" -> "mcp";
             case "xml", "source" -> "xml";
             default -> null;
         };
@@ -670,6 +703,7 @@ public final class StudioFrame extends JFrame implements ChromeActions {
         Docking.dock("items", "structure", DockingRegion.SOUTH, 0.55);
         Docking.dock("problems", "canvas", DockingRegion.SOUTH, 0.25);
         Docking.dock("xml", "problems", DockingRegion.CENTER);
+        Docking.dock("mcp", "xml", DockingRegion.CENTER);
         Docking.dock("variables", "inspector", DockingRegion.SOUTH, 0.4);
     }
 

@@ -8,6 +8,7 @@ import dev.zoroaster1x.vlcskin.model.SkinLayout;
 import dev.zoroaster1x.vlcskin.model.item.Item;
 import dev.zoroaster1x.vlcskin.model.item.SliderItem;
 import dev.zoroaster1x.vlcskin.render.BezierPath;
+import dev.zoroaster1x.vlcskin.render.Bounds;
 import dev.zoroaster1x.vlcskin.render.HitTester;
 import dev.zoroaster1x.vlcskin.render.RenderOptions;
 import java.awt.CardLayout;
@@ -23,6 +24,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
@@ -47,10 +49,10 @@ public final class CanvasPanel extends JPanel {
     private final Surface surface;
     private final WelcomeCard welcome;
     private final JPanel controls = new JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 4));
-    private final JLabel zoomLabel = new JLabel();
+    private final JComboBox<String> zoomBox = new JComboBox<>();
     private final JLabel layoutLabel = new JLabel();
-    private final JToggleButton moveButton = new JToggleButton(Messages.get("TOOLBAR_MOVE", "Move"));
-    private final JToggleButton pathButton = new JToggleButton(Messages.get("TOOLBAR_PATH", "Path"));
+    private final JToggleButton moveButton = new JToggleButton(Messages.get("APP_CANVAS_TOOL_MOVE", "Move"));
+    private final JToggleButton pathButton = new JToggleButton(Messages.get("APP_CANVAS_TOOL_CURVE", "Curve"));
     private Tool tool = Tool.MOVE;
     private Item hover;
     private Item pressed;
@@ -143,15 +145,19 @@ public final class CanvasPanel extends JPanel {
     private JPanel buildControls() {
         controls.setOpaque(false);
         moveButton.setSelected(true);
-        moveButton.setToolTipText(Messages.get("TOOLBAR_MOVE", "Select and move items"));
-        pathButton.setToolTipText(Messages.get("TOOLBAR_PATH",
-                "Drag slider control points; shift adds a point, alt removes one"));
+        moveButton.setIcon(dev.zoroaster1x.vlcskin.app.component.Icons.of("move", 14));
+        moveButton.setToolTipText(Messages.get("APP_CANVAS_TOOL_MOVE_TIP",
+                "Select and move items on the canvas"));
+        pathButton.setIcon(dev.zoroaster1x.vlcskin.app.component.Icons.of("path", 14));
+        pathButton.setToolTipText(Messages.get("APP_CANVAS_TOOL_CURVE_TIP",
+                "Edit a slider curve: drag a point, Shift+click adds one, Alt+click removes one"));
         moveButton.addActionListener(e -> {
             setTool(Tool.MOVE);
             syncToolButtons();
         });
         pathButton.addActionListener(e -> {
-            setTool(Tool.PATH);            syncToolButtons();
+            setTool(Tool.PATH);
+            syncToolButtons();
         });
         JButton zoomOut = new JButton(dev.zoroaster1x.vlcskin.app.component.Icons.of("zoom-out", 14));
         zoomOut.setToolTipText(Messages.get("APP_CANVAS_ZOOM_OUT", "Zoom out"));
@@ -159,9 +165,26 @@ public final class CanvasPanel extends JPanel {
         JButton zoomIn = new JButton(dev.zoroaster1x.vlcskin.app.component.Icons.of("zoom-in", 14));
         zoomIn.setToolTipText(Messages.get("APP_CANVAS_ZOOM_IN", "Zoom in"));
         zoomIn.addActionListener(e -> zoomIn());
-        JButton fit = new JButton(Messages.get("APP_CANVAS_FIT", "Fit"));
+        for (int zoom = 1; zoom <= 16; zoom++) {
+            zoomBox.addItem(zoom + "x");
+        }
+        zoomBox.setToolTipText(Messages.get("APP_CANVAS_ZOOM_TIP", "Zoom level"));
+        zoomBox.setPreferredSize(new Dimension(64, zoomBox.getPreferredSize().height));
+        zoomBox.addActionListener(e -> {
+            Object selected = zoomBox.getSelectedItem();
+            if (selected == null) {
+                return;
+            }
+            int zoom = Integer.parseInt(selected.toString().replace("x", ""));
+            if (zoom != studio.settings().getCanvasZoom()) {
+                studio.settings().setCanvasZoom(zoom);
+                refresh();
+            }
+        });
+        JButton fit = new JButton(Messages.get("APP_CANVAS_FIT", "Fit"),
+                dev.zoroaster1x.vlcskin.app.component.Icons.of("fit", 14));
+        fit.setToolTipText(Messages.get("APP_CANVAS_FIT_TIP", "Fit the whole layout in the canvas"));
         fit.addActionListener(e -> fitToWindow());
-        zoomLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 8, 0, 8));
         layoutLabel.setBorder(javax.swing.BorderFactory.createEmptyBorder(0, 0, 0, 12));
         layoutLabel.setForeground(javax.swing.UIManager.getColor("Label.disabledForeground"));
         controls.add(layoutLabel);
@@ -169,7 +192,7 @@ public final class CanvasPanel extends JPanel {
         controls.add(pathButton);
         controls.add(javax.swing.Box.createHorizontalStrut(12));
         controls.add(zoomOut);
-        controls.add(zoomLabel);
+        controls.add(zoomBox);
         controls.add(zoomIn);
         controls.add(fit);
         updateZoomLabel();
@@ -177,7 +200,10 @@ public final class CanvasPanel extends JPanel {
     }
 
     private void updateZoomLabel() {
-        zoomLabel.setText(Messages.format("APP_CANVAS_ZOOM", "Zoom %ix", studio.settings().getCanvasZoom()));
+        String label = studio.settings().getCanvasZoom() + "x";
+        if (!label.equals(zoomBox.getSelectedItem())) {
+            zoomBox.setSelectedItem(label);
+        }
         SkinLayout layout = displayLayout();
         if (layout == null) {
             layoutLabel.setText("");
@@ -185,6 +211,35 @@ public final class CanvasPanel extends JPanel {
         }
         var window = studio.session().index().windowOf(layout);
         layoutLabel.setText((window == null ? "" : window.getId() + " / ") + layout.getId());
+    }
+
+    /**
+     * When the selected item extends past the layout edge, VLC clips it and
+     * the canvas pad is not part of the theme. Outline the full bounds with a
+     * dashed accent so the clipped part stays visible and can be dragged back.
+     */
+    private void paintOutOfBoundsItem(Graphics g, SkinLayout layout, RenderOptions options,
+                                      Rectangle imageBounds) {
+        Item selected = options.selection();
+        if (selected == null) {
+            return;
+        }
+        Rectangle itemBounds = Bounds.of(selected, studio.session().index(),
+                studio.session().images(), studio.session().variables());
+        boolean outside = itemBounds.x < 0 || itemBounds.y < 0
+                || itemBounds.x + itemBounds.width > layout.getWidth()
+                || itemBounds.y + itemBounds.height > layout.getHeight();
+        if (!outside) {
+            return;
+        }
+        int zoom = Math.max(1, options.zoom());
+        java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
+        g2.setColor(ThemeManager.ACCENT);
+        g2.setStroke(new java.awt.BasicStroke(1.5f, java.awt.BasicStroke.CAP_BUTT,
+                java.awt.BasicStroke.JOIN_MITER, 10f, new float[] {5f, 4f}, 0f));
+        g2.drawRect(imageBounds.x + itemBounds.x * zoom, imageBounds.y + itemBounds.y * zoom,
+                Math.max(1, itemBounds.width * zoom), Math.max(1, itemBounds.height * zoom));
+        g2.dispose();
     }
 
     /**
@@ -654,7 +709,6 @@ public final class CanvasPanel extends JPanel {
      * It tracks the viewport when the image is smaller and scrolls when bigger.
      */
     private final class Surface extends JPanel implements javax.swing.Scrollable {
-
         Surface() {
             setOpaque(true);
             setBackground(backdrop());
@@ -712,6 +766,7 @@ public final class CanvasPanel extends JPanel {
                     ? new Color(255, 255, 255, 24)
                     : new Color(0, 0, 0, 32));
             g.drawRect(bounds.x - 1, bounds.y - 1, bounds.width + 1, bounds.height + 1);
+            paintOutOfBoundsItem(g, layout, options, bounds);
             if (layout.getItems().isEmpty()) {
                 java.awt.Graphics2D g2 = (java.awt.Graphics2D) g.create();
                 g2.setRenderingHint(java.awt.RenderingHints.KEY_TEXT_ANTIALIASING,

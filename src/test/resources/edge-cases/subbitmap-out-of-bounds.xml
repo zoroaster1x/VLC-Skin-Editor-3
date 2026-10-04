@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Out of bounds"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <SubBitmap id="oob" x="900" y="900" width="10" height="10"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Image id="i" image="oob"/>
+    </Layout>
+  </Window>
+</Theme>

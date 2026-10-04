@@ -51,8 +51,9 @@ A variable is a `$` followed by a letter. VLC replaces it wherever it appears in
 | `$N` | Name of the playing stream. | `Artist - Title` |
 | `$F` | Full name with path. | `http://www.example.com/Artist - Title.mp3` |
 | `$S` | Audio sample rate in kHz. | `44` |
+| `$R` | Playback rate. | `1` |
 
-VLC 2.0 also documents `$R` for the playback rate. The editor keeps it in the text and VLC substitutes it at runtime, but the preview has no sample value for it.
+VLC 2.0 also documents `$R` for the playback rate; the Variables panel carries a sample for it like every other token.
 
 Substitution is a plain text replacement for each known token, never a regular expression. A `$` that does not start a known token stays as typed, so unknown tokens show literally.
 

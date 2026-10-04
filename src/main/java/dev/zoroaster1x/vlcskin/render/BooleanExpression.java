@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 /**
@@ -15,27 +16,51 @@ public final class BooleanExpression {
     private BooleanExpression() {
     }
 
+    /**
+     * The outcome of an expression: the value plus whether every identifier
+     * resolved. VLC returns no variable at all when any token is unknown, and
+     * callers differ in what they do about it (a control stays visible, a
+     * checkbox is dropped), so the distinction has to survive evaluation.
+     */
+    public record Result(boolean value, boolean resolved) {
+    }
+
+    /**
+     * Evaluates an expression, treating an identifier the predicate rejects as
+     * unknown and therefore false. This is the permissive form used by tests
+     * and by callers that do not care to distinguish false from unresolved.
+     */
     public static boolean evaluate(String expression, Predicate<String> identifier) {
+        return resolve(expression, name -> identifier.test(name)).value();
+    }
+
+    /**
+     * Evaluates an expression with a resolver that returns null for an unknown
+     * identifier. The result reports whether every identifier was known, which
+     * VLC callers treat differently per attribute.
+     */
+    public static Result resolve(String expression, Function<String, Boolean> identifier) {
         if (expression == null || expression.isBlank()) {
-            return false;
+            return new Result(false, false);
         }
         List<String> tokens = tokenize(expression);
         List<String> rpn = toRpn(tokens);
         if (rpn == null) {
-            return false;
+            return new Result(false, false);
         }
         Deque<Boolean> stack = new ArrayDeque<>();
+        boolean resolved = true;
         for (String token : rpn) {
             switch (token.toLowerCase(Locale.ROOT)) {
                 case "not" -> {
                     if (stack.isEmpty()) {
-                        return false;
+                        return new Result(false, false);
                     }
                     stack.push(!stack.pop());
                 }
                 case "and" -> {
                     if (stack.size() < 2) {
-                        return false;
+                        return new Result(false, false);
                     }
                     boolean right = stack.pop();
                     boolean left = stack.pop();
@@ -43,26 +68,31 @@ public final class BooleanExpression {
                 }
                 case "or" -> {
                     if (stack.size() < 2) {
-                        return false;
+                        return new Result(false, false);
                     }
                     boolean right = stack.pop();
                     boolean left = stack.pop();
                     stack.push(left || right);
                 }
-                default -> stack.push(lookup(token, identifier));
+                default -> {
+                    if ("true".equalsIgnoreCase(token)) {
+                        stack.push(true);
+                    } else if ("false".equalsIgnoreCase(token)) {
+                        stack.push(false);
+                    } else {
+                        Boolean known = identifier.apply(token);
+                        if (known == null) {
+                            resolved = false;
+                            stack.push(false);
+                        } else {
+                            stack.push(known);
+                        }
+                    }
+                }
             }
         }
-        return stack.size() == 1 && stack.pop();
-    }
-
-    private static boolean lookup(String token, Predicate<String> identifier) {
-        if ("true".equalsIgnoreCase(token)) {
-            return true;
-        }
-        if ("false".equalsIgnoreCase(token)) {
-            return false;
-        }
-        return identifier.test(token);
+        boolean value = stack.size() == 1 && stack.pop();
+        return new Result(value, resolved);
     }
 
     static List<String> tokenize(String expression) {

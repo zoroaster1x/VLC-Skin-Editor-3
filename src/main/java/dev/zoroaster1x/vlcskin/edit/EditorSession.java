@@ -28,7 +28,7 @@ public final class EditorSession {
 
     private SkinTheme theme;
     private Path file;
-    private boolean dirty;
+    private volatile boolean dirty;
     private List<ParseIssue> issues = List.of();
     private SkinIndex index;
     private ImageStore images;
@@ -38,7 +38,54 @@ public final class EditorSession {
     private final PreviewVariables variables = new PreviewVariables();
     private final List<Runnable> listeners = new ArrayList<>();
     private volatile java.util.function.Consumer<Runnable> dispatcher = Runnable::run;
-    private volatile long revision;
+    private final java.util.concurrent.atomic.AtomicLong revision =
+            new java.util.concurrent.atomic.AtomicLong();
+
+    /**
+     * One recorded change outside the tool-call machinery, for the notice an
+     * AI client sees when the document moved under it.
+     */
+    public record Change(long revision, String origin, String description, long timeMillis) {
+    }
+
+    private final java.util.concurrent.atomic.AtomicLong changeRevision =
+            new java.util.concurrent.atomic.AtomicLong();
+    private final java.util.concurrent.ConcurrentLinkedDeque<Change> journal =
+            new java.util.concurrent.ConcurrentLinkedDeque<>();
+    private volatile String changeOrigin = "user";
+
+    /**
+     * Who is making the changes. The MCP dispatcher sets a tool name while a
+     * tool runs; anything else records as {@code user}.
+     */
+    public void setChangeOrigin(String origin) {
+        this.changeOrigin = origin == null || origin.isBlank() ? "user" : origin;
+    }
+
+    public String changeOrigin() {
+        return changeOrigin;
+    }
+
+    private void recordChange(String description) {
+        long revision = changeRevision.incrementAndGet();
+        journal.add(new Change(revision, changeOrigin,
+                description == null || description.isBlank() ? "edit" : description,
+                System.currentTimeMillis()));
+        while (journal.size() > 200) {
+            journal.pollFirst();
+        }
+    }
+
+    /**
+     * Changes recorded after the given revision, oldest first.
+     */
+    public List<Change> changesSince(long revision) {
+        return journal.stream().filter(change -> change.revision() > revision).toList();
+    }
+
+    public long changeRevision() {
+        return changeRevision.get();
+    }
 
     private EditorSession(SkinTheme theme, Path file) {
         rebuild(theme, file);
@@ -49,7 +96,7 @@ public final class EditorSession {
      * Bumped on every document change; the canvas cache keys on it.
      */
     public long revision() {
-        return revision;
+        return revision.get();
     }
 
     public static EditorSession empty() {
@@ -157,7 +204,7 @@ public final class EditorSession {
     }
 
     public void fireChanged() {
-        revision++;
+        revision.incrementAndGet();
         List<Runnable> snapshot;
         synchronized (listeners) {
             snapshot = List.copyOf(listeners);

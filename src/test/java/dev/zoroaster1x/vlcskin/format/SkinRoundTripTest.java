@@ -83,6 +83,25 @@ class SkinRoundTripTest {
     }
 
     @Test
+    void playlistSliderValueIsNotWritten() {
+        SkinTheme theme = buildFullTheme();
+        SkinLayout layout = theme.getWindows().get(0).getLayouts().get(0);
+        PlaytreeItem playtree = (PlaytreeItem) layout.getItems().get(6);
+        playtree.getSlider().setValue("time");
+        assertThat(playtree.getSlider().isInPlaytree()).isTrue();
+
+        String xml = SkinWriter.toXml(theme);
+        int playlistSlider = xml.indexOf("<Slider id=\"playlist_scroll\"");
+        assertThat(playlistSlider).isGreaterThan(0);
+        String playlistTag = xml.substring(playlistSlider, xml.indexOf('>', playlistSlider));
+        assertThat(playlistTag).doesNotContain("value=");
+
+        int topLevel = xml.indexOf("<Slider id=\"seek\"");
+        String seekTag = xml.substring(topLevel, xml.indexOf('>', topLevel));
+        assertThat(seekTag).contains("value=\"time\"");
+    }
+
+    @Test
     void htmlCharactersAreEscapedAndComeBack() {
         SkinTheme theme = buildFullTheme();
         theme.getThemeInfo().setName("A & B <\"quoted\">");

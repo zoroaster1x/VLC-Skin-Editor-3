@@ -192,7 +192,9 @@ final class ItemWriter {
         writer.attrIf("over", item.getOver(), "none");
         writer.attr("points", item.getPoints());
         writer.attrIf("thickness", item.getThickness(), SliderItem.DEFAULT_THICKNESS);
-        writer.attrIf("value", item.getValue(), "none");
+        if (!item.isInPlaytree()) {
+            writer.attrIf("value", item.getValue(), "none");
+        }
         writer.attrIf("tooltiptext", item.getTooltiptext(), "");
         tailAttributes(item, writer);
         item.foreignAttributes().forEach(writer::attr);

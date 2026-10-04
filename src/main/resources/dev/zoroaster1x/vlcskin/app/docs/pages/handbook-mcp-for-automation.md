@@ -44,11 +44,13 @@ opencode mcp add vlc-skin-studio --global -- java -jar /path/vlc-skin-studio.jar
 
 Use the absolute path to the fat jar, `build/libs/vlc-skin-studio.jar` after `./gradlew shadowJar`. The server runs as its own process with its own open document; the two tools that describe the desktop window, `describe_editor_ui` and `screenshot_editor`, need that window running in the same process.
 
+The window and the server share the file rather than memory. When another program saves it, a result can start with a `[NOTICE]`; `disk_diff` lists the changed lines and `sync_from_disk` merges them without discarding either side. The server's activity is appended to the cache `mcp.log` and `mcp-status.json`, which the MCP activity panel tails, and Preferences (AI and MCP) can disable the server; the `mcp` command then refuses to start unless `--force` is passed.
+
 ## The tool groups in plain language
 
 | Group | What it covers |
 |---|---|
-| Document | Open, create, save and reset a theme, export and import `.vlt`, and read a summary of the open document. |
+| Document | Open, create, save and reset a theme, export and import `.vlt`, read a summary of the open document, and reconcile a file another program changed with `disk_diff` and `sync_from_disk`. |
 | Inspect and render | The layout as geometry data, the layout as a PNG plus geometry, item and resource attributes, and the generated XML. |
 | Edit items | Add, delete, duplicate, move and nudge items, change one attribute by name, change z order and move items into groups and panels. |
 | Resources | Add bitmaps, fonts, bitmap fonts, popup menus and ini files, import images from disk, cut sub bitmaps, edit them, delete and duplicate them, and reload images from disk. |

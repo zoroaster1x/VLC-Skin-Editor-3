@@ -55,6 +55,24 @@ public final class EditorService {
     private UiInspector ui;
     private volatile java.util.function.Consumer<Runnable> dispatcher = Runnable::run;
 
+    /**
+     * One tool call as the UI or a log shows it.
+     */
+    public record Activity(String tool, long millis, boolean error, String file) {
+    }
+
+    private final List<Consumer<Activity>> activityListeners = new ArrayList<>();
+    private long lastResponseRevision;
+    private long knownStamp = -1;
+    private boolean diskChanged;
+
+    /**
+     * What both sides last agreed on, for a three-way merge when the file on
+     * disk changes under a dirty session.
+     */
+    private String baseXml;
+    private List<String> diskDiffLines = List.of();
+
     public EditorService(EditorSession session) {
         this.session = session;
         session.setDispatcher(dispatcher);
@@ -90,6 +108,225 @@ public final class EditorService {
         newSession.setDispatcher(dispatcher);
     }
 
+    /**
+     * Called by the UI shell to see tool calls while they happen.
+     */
+    public synchronized void addActivityListener(Consumer<Activity> listener) {
+        if (listener != null) {
+            activityListeners.add(listener);
+        }
+    }
+
+    /**
+     * Marks the origin of the edits a tool is about to make and returns the
+     * notice for anything that moved since the previous call: edits recorded
+     * outside tool calls, and a save by another program. Null when all is calm.
+     */
+    public synchronized String beginToolCall(String tool) {
+        session.setChangeOrigin("tool:" + tool);
+        List<String> notes = new ArrayList<>();
+        List<EditorSession.Change> changes = session.changesSince(lastResponseRevision);
+        if (!changes.isEmpty()) {
+            Map<String, Integer> byOrigin = new LinkedHashMap<>();
+            for (EditorSession.Change change : changes) {
+                byOrigin.merge(originLabel(change.origin()), 1, Integer::sum);
+            }
+            StringBuilder summary = new StringBuilder();
+            byOrigin.forEach((origin, count) -> summary.append(summary.isEmpty() ? "" : ", ")
+                    .append(count).append(" by ").append(origin));
+            List<String> examples = changes.stream()
+                    .map(EditorSession.Change::description)
+                    .filter(description -> description != null && !description.isBlank())
+                    .distinct().limit(3).toList();
+            notes.add(changes.size() + " change(s) since your last call (" + summary + ")"
+                    + (examples.isEmpty() ? "" : ": " + String.join("; ", examples)));
+        }
+        if (session.file() != null) {
+            long stamp = fileStamp(session.file());
+            if (stamp >= 0 && knownStamp >= 0 && stamp != knownStamp) {
+                diskChanged = true;
+            }
+            if (stamp >= 0) {
+                knownStamp = stamp;
+            }
+        }
+        if (diskChanged) {
+            notes.add("the file changed on disk outside this server (" + session.file()
+                    + ")" + diskSummary() + "; call disk_diff for the changed lines or sync_from_disk "
+                    + "to merge those changes into your document. Your edits are kept and conflicts "
+                    + "are reported, so you can keep working");
+        }
+        if (notes.isEmpty()) {
+            return null;
+        }
+        return "[NOTICE] " + String.join(". ", notes)
+                + ". The user shares this file and may edit or save it at any time.";
+    }
+
+    /**
+     * A short description of the disk differences, computed and cached when a
+     * change is first noticed.
+     */
+    private String diskSummary() {
+        if (session.file() == null || !diskChanged) {
+            return "";
+        }
+        refreshDiskDiff();
+        if (diskDiffLines.isEmpty()) {
+            return " (the file differs but could not be compared)";
+        }
+        int added = (int) diskDiffLines.stream().filter(line -> line.startsWith("+ ")).count();
+        int removed = (int) diskDiffLines.stream().filter(line -> line.startsWith("- ")).count();
+        return " with " + added + " added and " + removed + " removed line(s)";
+    }
+
+    private void refreshDiskDiff() {
+        if (session.file() == null) {
+            diskDiffLines = List.of();
+            return;
+        }
+        try {
+            SkinParser.Result disk = SkinParser.parse(session.file());
+            String diskXml = dev.zoroaster1x.vlcskin.format.SkinWriter.toXml(disk.theme());
+            diskDiffLines = dev.zoroaster1x.vlcskin.format.XmlMerger.diffLines(
+                    dev.zoroaster1x.vlcskin.format.SkinWriter.toXml(session.theme()), diskXml);
+        } catch (java.io.IOException | RuntimeException ex) {
+            diskDiffLines = List.of();
+        }
+    }
+
+    /**
+     * The changed lines between the open document and the file on disk.
+     */
+    public synchronized ToolOutcome diskDiff() {
+        if (session.file() == null) {
+            return ToolOutcome.error("The document has no file; save it first");
+        }
+        refreshDiskDiff();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("file", session.file().toString());
+        result.put("dirty", session.isDirty());
+        result.put("differences", diskDiffLines.size());
+        result.put("lines", diskDiffLines);
+        return ToolOutcome.text(Json.write(result), result);
+    }
+
+    /**
+     * Merges changes another program made to the file into the open document.
+     *
+     * <p>A clean session simply reloads. A dirty session gets a three-way merge
+     * over the last agreed text: changes only disk made are applied, changes
+     * only ours made are kept, and a line both sides changed differently keeps
+     * ours and is reported as a conflict, so no side is discarded silently.
+     */
+    public synchronized ToolOutcome syncFromDisk() {
+        if (session.file() == null) {
+            return ToolOutcome.error("The document has no file; save it first");
+        }
+        SkinParser.Result disk;
+        try {
+            disk = SkinParser.parse(session.file());
+        } catch (java.io.IOException ex) {
+            return ToolOutcome.error(ex.getMessage());
+        }
+        if (!session.isDirty() || baseXml == null || baseXml.isBlank()) {
+            session.replace(disk.theme(), session.file(), disk.issues());
+            session.selectFirstLayout();
+            markBase();
+            return ToolOutcome.text("Reloaded " + session.file().getFileName()
+                    + " (" + disk.theme().getWindows().size() + " window(s))");
+        }
+        String ours = dev.zoroaster1x.vlcskin.format.SkinWriter.toXml(session.theme());
+        String theirs = dev.zoroaster1x.vlcskin.format.SkinWriter.toXml(disk.theme());
+        dev.zoroaster1x.vlcskin.format.XmlMerger.Merge merged =
+                dev.zoroaster1x.vlcskin.format.XmlMerger.merge(baseXml, ours, theirs);
+        SkinParser.Result parsed = SkinParser.parse(
+                merged.text().getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                session.file().toString());
+        if (parsed.hasErrors()) {
+            return ToolOutcome.error("The merge produced invalid XML; the document is unchanged. "
+                    + parsed.issues().stream()
+                            .filter(issue -> issue.severity()
+                                    == dev.zoroaster1x.vlcskin.format.ParseIssue.Severity.ERROR)
+                            .limit(3).map(Object::toString).toList());
+        }
+        session.replace(parsed.theme(), session.file(), parsed.issues());
+        session.selectFirstLayout();
+        markBase();
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("file", session.file().toString());
+        result.put("conflicts", merged.conflicts().size());
+        result.put("conflictDetails", merged.conflicts());
+        String text = merged.clean()
+                ? "Merged the disk changes into the document"
+                : "Merged the disk changes; " + merged.conflicts().size()
+                        + " conflict(s) kept your version, see conflictDetails";
+        return ToolOutcome.text(text, result);
+    }
+
+    /**
+     * Remembers the current text as the merge base and accepts the current
+     * file stamp as known.
+     */
+    private void markBase() {
+        try {
+            baseXml = dev.zoroaster1x.vlcskin.format.SkinWriter.toXml(session.theme());
+        } catch (RuntimeException ex) {
+            baseXml = null;
+        }
+        diskChanged = false;
+        diskDiffLines = List.of();
+        if (session.file() != null) {
+            long stamp = fileStamp(session.file());
+            if (stamp >= 0) {
+                knownStamp = stamp;
+            }
+        }
+    }
+
+    /**
+     * Called after a tool ran: closes the origin window, advances the notice
+     * mark and tells the UI.
+     */
+    public synchronized void endToolCall(String tool, long millis, boolean error) {
+        session.setChangeOrigin("user");
+        lastResponseRevision = session.changeRevision();
+        if (session.file() != null) {
+            long stamp = fileStamp(session.file());
+            if (stamp >= 0) {
+                knownStamp = stamp;
+            }
+        }
+        diskChanged = false;
+        Activity activity = new Activity(tool, millis, error,
+                session.file() == null ? null : session.file().toString());
+        for (Consumer<Activity> listener : List.copyOf(activityListeners)) {
+            listener.accept(activity);
+        }
+    }
+
+    private static String originLabel(String origin) {
+        if (origin == null || origin.isBlank() || "user".equals(origin)) {
+            return "the user";
+        }
+        if (origin.startsWith("tool:")) {
+            return "tool " + origin.substring("tool:".length());
+        }
+        return origin;
+    }
+
+    /**
+     * A cheap file identity for external-change detection: last modified time
+     * combined with size.
+     */
+    private static long fileStamp(Path file) {
+        try {
+            return Files.getLastModifiedTime(file).toMillis() * 31 + Files.size(file);
+        } catch (IOException ex) {
+            return -1;
+        }
+    }
+
 
     public synchronized ToolOutcome open(String path) {
         try {
@@ -97,6 +334,7 @@ public final class EditorService {
             SkinParser.Result parsed = SkinParser.parse(file);
             session.replace(parsed.theme(), file, parsed.issues());
             session.selectFirstLayout();
+            markBase();
             return ToolOutcome.text("Opened " + path, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
@@ -118,6 +356,7 @@ public final class EditorService {
         theme.getWindows().add(window);
         session.replace(theme, null, List.of());
         session.selectFirstLayout();
+        markBase();
         return ToolOutcome.text("Started a new skin", documentInfo());
     }
 
@@ -128,6 +367,7 @@ public final class EditorService {
             } else {
                 session.save();
             }
+            markBase();
             return ToolOutcome.text("Saved " + (path == null ? session.file() : path));
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());
@@ -156,6 +396,7 @@ public final class EditorService {
             SkinParser.Result parsed = SkinParser.parse(themeFile);
             session.replace(parsed.theme(), themeFile.toAbsolutePath(), parsed.issues());
             session.selectFirstLayout();
+            markBase();
             return ToolOutcome.text("Imported " + archive + " into " + folder, documentInfo());
         } catch (IOException ex) {
             return ToolOutcome.error(ex.getMessage());

@@ -49,6 +49,17 @@ public final class McpToolset {
                 Schema.object().string("path", "The archive path")
                         .string("folder", "Optional target folder").required("path").build(),
                 args -> service.importVlt(str(args, "path"), str(args, "folder"))));
+        tools.add(new ToolSpec("disk_diff", "Disk differences",
+                "Changed lines between the open document and its file on disk, when another program "
+                        + "edited or saved the file while you worked. Call this after a [NOTICE] about "
+                        + "a disk change to see exactly what changed.",
+                Schema.object().build(), args -> service.diskDiff()));
+        tools.add(new ToolSpec("sync_from_disk", "Merge disk changes",
+                "Merge changes another program made to the file into the open document without "
+                        + "discarding your edits. A clean document reloads; a dirty one is three-way "
+                        + "merged over the last agreed text, changes only disk made are applied, and a "
+                        + "conflict keeps your version and is reported.",
+                Schema.object().build(), args -> service.syncFromDisk()));
 
         tools.add(new ToolSpec("layout_tree", "Layout geometry",
                 "Every item of a layout with absolute x, y, width, height, z order, text and attributes. "

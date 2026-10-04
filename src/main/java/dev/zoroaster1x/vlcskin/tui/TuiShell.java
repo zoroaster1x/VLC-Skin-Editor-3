@@ -32,13 +32,17 @@ public final class TuiShell {
     }
 
     public String banner() {
-        return "VLC Skin Studio TUI. Type help for commands.\n";
+        String file = service.session().file() == null ? "untitled"
+                : service.session().file().toString();
+        return "VLC Skin Studio TUI. Type help for commands.\n"
+                + "Document: " + file + "\n";
     }
 
     public String execute(String line) {
         if (line == null || line.isBlank()) {
             return "";
         }
+        dev.zoroaster1x.vlcskin.util.Log.debug("tui> %s", line);
         List<String> parts = split(line);
         String command = parts.get(0).toLowerCase();
         try {

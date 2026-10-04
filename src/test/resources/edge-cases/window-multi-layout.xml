@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Multiple layouts"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="first" width="60" height="40">
+      <Image id="i1" image="b" width="20" height="20"/>
+    </Layout>
+    <Layout id="second" width="80" height="50">
+      <Image id="i2" image="b" width="20" height="20"/>
+    </Layout>
+  </Window>
+</Theme>

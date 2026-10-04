@@ -1,5 +1,6 @@
 package dev.zoroaster1x.vlcskin.render.draw;
 
+import dev.zoroaster1x.vlcskin.model.item.AbstractItem;
 import dev.zoroaster1x.vlcskin.model.item.AnchorItem;
 import dev.zoroaster1x.vlcskin.model.item.ButtonItem;
 import dev.zoroaster1x.vlcskin.model.item.CheckboxItem;
@@ -34,6 +35,10 @@ public final class ItemPainters {
 
     public static void draw(Graphics2D g, dev.zoroaster1x.vlcskin.model.item.Item item,
                             int offsetX, int offsetY, DrawContext context) {
+        if (item instanceof AbstractItem abstractItem
+                && !context.options().variables().visible(abstractItem.getVisible())) {
+            return;
+        }
         switch (item) {
             case ImageItem image -> IMAGE.draw(g, image, offsetX, offsetY, context);
             case ButtonItem button -> BUTTON.draw(g, button, offsetX, offsetY, context);

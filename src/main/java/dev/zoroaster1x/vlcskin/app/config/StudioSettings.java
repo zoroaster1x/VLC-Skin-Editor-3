@@ -32,7 +32,19 @@ public final class StudioSettings {
     private int canvasZoom = 2;
     private String canvasBackground = "theme";
     private boolean showToolCalls;
+    private boolean mcpEnabled = true;
     private String lastExample = "neon";
+
+    /**
+     * Interface font scale in percent; 100 uses the look and feel default.
+     */
+    private int fontScale = 100;
+
+    /**
+     * User overrides for {@link dev.zoroaster1x.vlcskin.app.config.Keymap}
+     * action ids; an empty value means deliberately unbound.
+     */
+    private java.util.Map<String, String> keys = new java.util.LinkedHashMap<>();
 
     public void remember(String file) {
         recentFiles.remove(file);

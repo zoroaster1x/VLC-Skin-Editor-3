@@ -22,6 +22,7 @@ Examples:
 ```bash
 # Start from a generated example with real images.
 java -jar vlc-skin-studio.jar new --example neon out/theme.xml
+# neon, panel and velocity; velocity is the bundled VeLoCity Dark theme.
 
 # Validate and render at 2x, with the geometry as JSON.
 java -jar vlc-skin-studio.jar validate out/theme.xml
@@ -31,6 +32,9 @@ java -jar vlc-skin-studio.jar render out/theme.xml -z 2 -o preview.png --json ge
 java -jar vlc-skin-studio.jar vlt export out/theme.xml out/theme.vlt
 vlc -I skins2 --skins2-last=out/theme.xml
 ```
+
+Every subcommand accepts `--verbose` (`-v`): timestamped progress, parse and
+render timings, and errors on stderr, while stdout stays machine readable.
 
 `render` writes a PNG and, with `--json`, a `layout_tree` style description:
 every item with id, type, absolute x/y/width/height, z order, visibility, text

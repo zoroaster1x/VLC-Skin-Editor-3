@@ -172,10 +172,6 @@ public final class DocumentationBundle {
     }
 
     private static Path cacheFolder() {
-        String cacheHome = System.getenv("XDG_CACHE_HOME");
-        Path base = cacheHome != null && !cacheHome.isBlank()
-                ? Path.of(cacheHome)
-                : Path.of(System.getProperty("user.home"), ".cache");
-        return base.resolve("vlc-skin-studio").resolve("docs");
+        return dev.zoroaster1x.vlcskin.app.config.AppPaths.cacheDir().resolve("docs");
     }
 }

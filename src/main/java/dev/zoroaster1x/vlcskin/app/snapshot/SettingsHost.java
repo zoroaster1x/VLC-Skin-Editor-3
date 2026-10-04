@@ -64,6 +64,8 @@ public final class SettingsHost implements UiInspector {
         values.put("canvasZoom", Integer.toString(settings.getCanvasZoom()));
         values.put("canvasBackground", settings.getCanvasBackground());
         values.put("autoUpdate", Boolean.toString(settings.isAutoUpdate()));
+        values.put("mcpEnabled", Boolean.toString(settings.isMcpEnabled()));
+        values.put("showToolCalls", Boolean.toString(settings.isShowToolCalls()));
         values.put("recentFiles", String.join("\n", settings.getRecentFiles()));
         return values;
     }
@@ -82,6 +84,8 @@ public final class SettingsHost implements UiInspector {
             case "canvasbackground" -> settings.setCanvasBackground(
                     dev.zoroaster1x.vlcskin.app.theme.ThemeManager.normalizeCanvasBackground(value));
             case "autoupdate" -> settings.setAutoUpdate(Boolean.parseBoolean(value));
+            case "mcpenabled" -> settings.setMcpEnabled(Boolean.parseBoolean(value));
+            case "showtoolcalls" -> settings.setShowToolCalls(Boolean.parseBoolean(value));
             default -> {
                 return false;
             }

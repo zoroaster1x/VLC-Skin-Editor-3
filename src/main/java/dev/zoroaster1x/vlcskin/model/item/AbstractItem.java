@@ -36,7 +36,25 @@ public abstract sealed class AbstractItem extends SkinNode implements Item
         return false;
     }
 
+    /**
+     * True when an attribute names the resource. VLC accepts "id1;id2" fallback
+     * lists, so a resource is in use when any segment names it.
+     */
     protected static boolean eq(String value, String other) {
-        return value == null ? other == null : value.equals(other);
+        if (value == null) {
+            return other == null;
+        }
+        if (value.equals(other)) {
+            return true;
+        }
+        if (other == null || value.indexOf(';') < 0) {
+            return false;
+        }
+        for (String part : value.split(";")) {
+            if (part.strip().equals(other)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

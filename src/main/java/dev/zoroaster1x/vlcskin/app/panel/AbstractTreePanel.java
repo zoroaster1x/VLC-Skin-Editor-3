@@ -36,7 +36,6 @@ abstract class AbstractTreePanel extends JPanel {
         tree = new JTree(model);
         tree.setRootVisible(false);
         tree.setShowsRootHandles(true);
-        tree.setRowHeight(22);
         tree.setCellRenderer(new RefRenderer());
         tree.getSelectionModel().setSelectionMode(javax.swing.tree.TreeSelectionModel.SINGLE_TREE_SELECTION);
         // JTree.setDragEnabled throws HeadlessException without a display; the
@@ -87,7 +86,7 @@ abstract class AbstractTreePanel extends JPanel {
         JPanel header = new JPanel(new BorderLayout());
         JLabel label = new JLabel(title);
         label.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 8, 2, 8));
-        label.setFont(label.getFont().deriveFont(java.awt.Font.BOLD, 12f));
+        label.setFont(label.getFont().deriveFont(java.awt.Font.BOLD));
         header.add(label, BorderLayout.WEST);
         header.add(toolbar, BorderLayout.SOUTH);
         add(header, BorderLayout.NORTH);

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Unknown focus"/>
+  <Font id="f" file="shared.otf"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="40">
+      <Text id="tx" font="f" text="Hover me" focus="mystery.flag" width="80"/>
+    </Layout>
+  </Window>
+</Theme>

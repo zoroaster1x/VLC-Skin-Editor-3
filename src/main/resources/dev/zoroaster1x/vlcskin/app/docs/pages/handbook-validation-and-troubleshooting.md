@@ -63,28 +63,28 @@ Problems come in three severities: errors, warnings and info. The list colours e
 
 ## What the gallery sweep found
 
-The conformance sweep over the official VideoLAN gallery plus the two themes VLC ships imported, validated and rendered all 123 themes. The summary:
+The conformance sweep over the official VideoLAN gallery imported, validated and rendered all 139 themes. The summary:
 
 | Number | Value |
 |---|---|
-| Themes | 123 |
-| Imported and rendered | 123 |
-| Layout items seen | 12336 |
-| Validation issues | 550, of which 133 errors |
-| Render time | median 959 ms, maximum 2249 ms |
+| Themes | 139 |
+| Imported and rendered | 139 |
+| Layout items seen | 13434 |
+| Validation issues | 490, of which 119 errors |
+| Render time | median 1845 ms, maximum 2460 ms |
 
 The most common messages were:
 
 | Count | Severity | Message |
 |---|---|---|
-| 83 | warning | Non positive size |
-| 76 | error | Duplicate item id |
+| 80 | error | Duplicate item id |
+| 76 | warning | Non positive size |
 | 65 | warning | Missing referenced file |
-| 27 | error | Duplicate resource id |
-| 21 | error | Missing resource reference |
+| 25 | error | Duplicate resource id |
 | 14 | warning | Playtree without slider |
-| 5 | warning | Colors that are not `#RRGGBB`, including `none` and empty strings |
-| 4 | warning | Slider thickness should be positive |
+| 13 | error | Missing resource reference |
+| 5 | warning | Slider thickness should be positive |
+| 3 | warning | Colors that are not `#RRGGBB`, including `none` and empty strings |
 
 Two things are worth knowing about that list. First, none of these stopped a theme from loading or rendering; they are defects the old skins carry, not import failures. Second, duplicate ids are the most common problem in real themes because themes were often assembled by copying layouts, and VLC quietly resolves each id to the first match. The control that loses the lookup simply never updates.
 

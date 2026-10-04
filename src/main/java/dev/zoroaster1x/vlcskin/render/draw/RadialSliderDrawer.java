@@ -17,8 +17,8 @@ public final class RadialSliderDrawer implements Drawer<RadialSliderItem> {
         }
         int frames = Math.max(1, item.getNbimages());
         int frameHeight = Math.max(1, sequence.getHeight() / frames);
-        int index = Math.min(frames - 1, Math.max(0, (int) Math.floor(context.options().variables().sliderValue()
-                * frames)));
+        int index = (int) (context.options().variables().sliderValue() * (frames - 1));
+        index = Math.min(frames - 1, Math.max(0, index));
         g.drawImage(sequence, offsetX + item.getX(), offsetY + item.getY(),
                 offsetX + item.getX() + sequence.getWidth(), offsetY + item.getY() + frameHeight,
                 0, index * frameHeight, sequence.getWidth(), index * frameHeight + frameHeight, null);

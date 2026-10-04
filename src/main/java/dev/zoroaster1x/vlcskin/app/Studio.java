@@ -42,6 +42,7 @@ public final class Studio {
         this.settingsStore = settingsStore;
         this.settings = settings;
         this.darkTheme = ThemeManager.byId(settings.getTheme()).dark();
+        ThemeManager.applyFontScale(settings.getFontScale());
         // Session changes can arrive from an MCP thread; the panels are Swing.
         service.setDispatcher(runnable -> {
             if (SwingUtilities.isEventDispatchThread()) {
@@ -83,6 +84,15 @@ public final class Studio {
         darkTheme = ThemeManager.byId(id).dark();
         settings.setTheme(id);
         ThemeManager.apply(id);
+        saveSettings();
+    }
+
+    /**
+     * Applies and stores the interface font scale.
+     */
+    public void applyFontScale(int percent) {
+        settings.setFontScale(percent);
+        ThemeManager.applyFontScale(percent);
         saveSettings();
     }
 
@@ -427,6 +437,9 @@ public final class Studio {
         }
         SkinTheme theme = result.theme();
         session().replace(theme, session().file(), result.issues());
+        if (parent instanceof dev.zoroaster1x.vlcskin.app.panel.XmlPanel panel) {
+            panel.markSynced();
+        }
         status("Applied XML");
     }
 }

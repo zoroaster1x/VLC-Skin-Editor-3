@@ -47,6 +47,8 @@ With the OpenCode CLI you can add it directly instead: `opencode mcp add vlc-ski
 | `export_vlt` | Write the theme and its assets as a `.vlt`. |
 | `import_vlt` | Unpack a `.vlt` and open the theme inside. |
 | `reset_skin` | Start over without a path prompt. |
+| `disk_diff` | The changed lines when the file changed on disk since the last call. |
+| `sync_from_disk` | Three-way merge those changes into the open document; a conflict keeps the open version and is reported. |
 
 ### Inspect and render
 
@@ -115,6 +117,10 @@ With the OpenCode CLI you can add it directly instead: `opencode mcp add vlc-ski
 | `check_for_updates`, `install_update` | See the newest release and every missed patch note, then download, verify and install the jar. |
 | `app_info`, `list_documentation`, `search_documentation`, `read_documentation` | The About box and Help links, plus the whole bundled documentation: topic list, ranked search and full markdown, including the skin format reference and this MCP guide. |
 | `list_gallery_themes`, `gallery_theme_preview`, `import_gallery_theme` | Search the official VideoLAN gallery, look at a theme's preview PNG before deciding, then import it. |
+
+## The shared file and the activity log
+
+The server is a separate process from the window, so they share the file rather than memory. A result can start with a `[NOTICE]` line when the file changed on disk outside the server; `disk_diff` shows the changed lines and `sync_from_disk` merges them. The MCP activity panel tails the server's cache `mcp.log` and `mcp-status.json`, and Preferences (AI and MCP) can disable the server; the `mcp` command then refuses to start unless `--force` is passed.
 
 ## Geometry or pixels
 

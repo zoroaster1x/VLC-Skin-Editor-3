@@ -44,6 +44,7 @@ public final class PreviewVariables {
         texts.put("$N", "Artist - Title");
         texts.put("$F", "http://www.example.com/Artist - Title.mp3");
         texts.put("$S", "44");
+        texts.put("$R", "1");
     }
 
     public Map<String, Boolean> booleans() {
@@ -79,17 +80,30 @@ public final class PreviewVariables {
     }
 
     /**
-     * Parses a VLC boolean expression against the current state.
+     * Parses a VLC boolean expression against the current state. An unknown
+     * identifier makes the whole expression unresolved, and callers that use
+     * this as a plain boolean (a checkbox state) read that as false.
      */
     public boolean evaluate(String expression) {
-        if (expression == null) {
-            return false;
-        }
-        String resolved = expression;
-        for (Map.Entry<String, Boolean> entry : booleans.entrySet()) {
-            resolved = resolved.replace(entry.getKey(), entry.getValue().toString());
-        }
-        return BooleanExpression.evaluate(resolved, name -> false);
+        BooleanExpression.Result result = resolve(expression);
+        return result.resolved() && result.value();
+    }
+
+    /**
+     * The full evaluation result, so a caller can tell false from unresolved.
+     */
+    public BooleanExpression.Result resolve(String expression) {
+        return BooleanExpression.resolve(expression, booleans::get);
+    }
+
+    /**
+     * VLC's visibility semantics: a control with no visible attribute, or with
+     * an expression VLC cannot resolve, is drawn; only a resolved false hides
+     * it.
+     */
+    public boolean visible(String expression) {
+        BooleanExpression.Result result = resolve(expression);
+        return !result.resolved() || result.value();
     }
 
     /**

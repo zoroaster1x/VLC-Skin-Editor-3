@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Black alpha color"/>
+  <Bitmap id="blk" file="black-pixel.png" alphacolor="#000000"/>
+  <Window id="win">
+    <Layout id="lay" width="32" height="32">
+      <Image id="i" image="blk" width="8" height="8"/>
+    </Layout>
+  </Window>
+</Theme>

@@ -42,14 +42,14 @@ public final class UpdateDialog extends JDialog {
         headline.setLineWrap(true);
         headline.setWrapStyleWord(true);
         headline.setFocusable(false);
-        headline.setFont(getFont().deriveFont(Font.BOLD, 14f));
+        headline.setFont(getFont().deriveFont(Font.BOLD, getFont().getSize2D() + 2f));
         headline.setBorder(BorderFactory.createEmptyBorder(0, 2, 8, 2));
 
         JTextArea notes = new JTextArea(notesFor(info));
         notes.setEditable(false);
         notes.setLineWrap(true);
         notes.setWrapStyleWord(true);
-        notes.setFont(new Font(Font.MONOSPACED, Font.PLAIN, 12));
+        notes.setFont(new Font(Font.MONOSPACED, Font.PLAIN, getFont().getSize()));
         notes.setCaretPosition(0);
         JScrollPane scroll = new JScrollPane(notes);
         scroll.setPreferredSize(new Dimension(600, 340));
@@ -96,7 +96,7 @@ public final class UpdateDialog extends JDialog {
         button.setEnabled(false);
         UpdateService.Release latest = info.latest();
         try {
-            Path updates = AppPaths.configDir().resolve("updates");
+            Path updates = AppPaths.updatesDir();
             Files.createDirectories(updates);
             Path jar = updates.resolve("vlc-skin-studio-" + latest.version() + ".jar");
             Path sums = updates.resolve("SHA256SUMS-" + latest.version());

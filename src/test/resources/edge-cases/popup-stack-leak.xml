@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Popup stack leak"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <PopupMenu id="menu1">
+    <MenuItem label="One" action="none"/>
+  </PopupMenu>
+  <PopupMenu id="menu2">
+    <MenuItem label="Two" action="none"/>
+  </PopupMenu>
+  <MenuItem label="Leaked" action="none"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Button id="open1" up="b" action="menu1.show()"/>
+      <Button id="open2" up="b" action="menu2.show()" x="24"/>
+    </Layout>
+  </Window>
+</Theme>

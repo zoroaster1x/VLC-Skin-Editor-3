@@ -80,10 +80,10 @@ If you paint the strip yourself, set the Slider background fields directly:
 | Horizontal frames, Vertical frames | How many frames across and down. |
 | Horizontal padding, Vertical padding | Unused pixels between frames. |
 
-The grid holds `nbhoriz * nbvert` frames, filled left to right and then top to bottom. VLC picks frame `floor(fields * value)`, so frame 0 is empty and the last frame is full. The counting rules and worked examples are in [Slider backgrounds](slider-backgrounds.md).
+The grid holds `nbhoriz * nbvert` frames, filled left to right and then top to bottom. VLC picks frame `(int)(value * (fields - 1))`, so frame 0 is empty and the last frame is full. The counting rules and worked examples are in [Slider backgrounds](slider-backgrounds.md).
 
 ## Radial sliders
 
-RadialSlider is the knob version. Its Inspector takes a Sequence bitmap (the knob frames stacked vertically), the number of Images, a Minimum angle and a Maximum angle in degrees, and the same Value list. The preview selects the frame with `floor(value * nbimages)`.
+RadialSlider is the knob version. Its Inspector takes a Sequence bitmap (the knob frames stacked vertically), the number of Images, a Minimum angle and a Maximum angle in degrees, and the same Value list. The preview selects the frame with `(int)(value * (nbimages - 1))`.
 
 Next: [Step 6: animations and playlists](step-6-animations-and-playlists.md).

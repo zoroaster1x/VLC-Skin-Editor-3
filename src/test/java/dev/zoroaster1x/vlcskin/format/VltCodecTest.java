@@ -15,14 +15,30 @@ class VltCodecTest {
         Path skinFolder = folder.resolve("skin");
         Path themeFile = ExampleSkins.create(skinFolder, ExampleSkins.NEON);
         var session = dev.zoroaster1x.vlcskin.edit.EditorSession.open(themeFile);
+        session.theme().getThemeInfo().setName("Changed in memory");
 
         Path vlt = folder.resolve("theme.vlt");
         VltCodec.write(session.theme(), themeFile, vlt);
         assertThat(Files.size(vlt)).isGreaterThan(1000);
 
+        // The in-memory model wins; the archive must not carry the stale file on top.
         VltCodec.Contents contents = VltCodec.read(vlt);
+        assertThat(contents.themeXml()).contains("Changed in memory");
         assertThat(contents.themeXml()).contains("<Theme");
         assertThat(contents.assets()).containsKeys("background.png", "play.png");
+
+        int themeEntries = 0;
+        try (var tar = new org.apache.commons.compress.archivers.tar.TarArchiveInputStream(
+                new java.util.zip.GZIPInputStream(Files.newInputStream(vlt)))) {
+            var entry = tar.getNextEntry();
+            while (entry != null) {
+                if (entry.getName().equals("theme.xml")) {
+                    themeEntries++;
+                }
+                entry = tar.getNextEntry();
+            }
+        }
+        assertThat(themeEntries).as("exactly one theme.xml entry").isEqualTo(1);
 
         Path unpacked = folder.resolve("unpacked");
         Path unpackedTheme = VltCodec.unpack(vlt, unpacked);
@@ -32,6 +48,50 @@ class VltCodecTest {
         SkinParser.Result parsed = SkinParser.parse(unpackedTheme);
         assertThat(parsed.issues()).noneMatch(issue -> issue.severity() == ParseIssue.Severity.ERROR);
         assertThat(parsed.theme().getWindows()).hasSize(1);
+    }
+
+    @Test
+    void winamp2ArchivesGainTheBundledTemplate(@TempDir Path folder) throws Exception {
+        Path zip = folder.resolve("winamp.zip");
+        try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(zip))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("main.bmp"));
+            out.write(new byte[] {'B', 'M', 0, 0, 0, 0});
+            out.closeEntry();
+            out.putNextEntry(new java.util.zip.ZipEntry("cbuttons.bmp"));
+            out.write(new byte[] {'B', 'M', 1, 0, 0, 0});
+            out.closeEntry();
+        }
+        Path unpacked = folder.resolve("winamp-out");
+        Path theme = VltCodec.unpack(zip, unpacked);
+        assertThat(Files.readString(theme)).contains("Winamp2");
+        assertThat(unpacked.resolve("main.bmp")).exists();
+        assertThat(unpacked.resolve("cbuttons.bmp")).exists();
+
+        // A Winamp2 archive in a folder keeps VLC's rule: paths resolve next to main.bmp.
+        Path nested = folder.resolve("nested.zip");
+        try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(nested))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("CoolSkin/main.bmp"));
+            out.write(new byte[] {'B', 'M', 0, 0, 0, 0});
+            out.closeEntry();
+            out.putNextEntry(new java.util.zip.ZipEntry("CoolSkin/volume.bmp"));
+            out.write(new byte[] {'B', 'M', 1, 0, 0, 0});
+            out.closeEntry();
+        }
+        Path nestedOut = folder.resolve("nested-out");
+        assertThat(VltCodec.unpack(nested, nestedOut)).exists();
+        assertThat(nestedOut.resolve("main.bmp")).exists();
+        assertThat(nestedOut.resolve("volume.bmp")).exists();
+
+        // Without theme.xml and without main.bmp the error stands.
+        Path empty = folder.resolve("empty.zip");
+        try (var out = new java.util.zip.ZipOutputStream(Files.newOutputStream(empty))) {
+            out.putNextEntry(new java.util.zip.ZipEntry("readme.txt"));
+            out.write("nothing".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            out.closeEntry();
+        }
+        org.assertj.core.api.Assertions
+                .assertThatThrownBy(() -> VltCodec.unpack(empty, folder.resolve("empty-out")))
+                .isInstanceOf(java.io.IOException.class);
     }
 
     @Test

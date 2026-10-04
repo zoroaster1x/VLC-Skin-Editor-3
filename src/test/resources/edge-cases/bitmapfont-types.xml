@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bitmap font types"/>
+  <BitmapFont id="digits" file="digits.png"/>
+  <BitmapFont id="weird" file="digits.png" type="bogus"/>
+  <Window id="win">
+    <Layout id="lay" width="160" height="48">
+      <Text id="t1" font="digits" text="12 -" x="2" y="2"/>
+      <Text id="t2" font="weird" text="ABC" x="2" y="20"/>
+    </Layout>
+  </Window>
+</Theme>

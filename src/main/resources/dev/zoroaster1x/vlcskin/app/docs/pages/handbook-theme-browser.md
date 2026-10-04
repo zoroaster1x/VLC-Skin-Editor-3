@@ -21,7 +21,7 @@ The browser is a dialog with a filter, a sortable table, a preview and two butto
 | Download and open | Downloads the archive, unpacks it and opens its `theme.xml` in the editor. |
 | Close | Closes the browser. The editor window stays as it was. |
 
-The status line under the table reports what is happening: `Loading the gallery...`, `123 themes available`, `Downloading <name>...`, `Unpacking <name>...`, `Opened <name>`, or an explanatory error when the network or the download fails.
+The status line under the table reports what is happening: `Loading the gallery...`, `138 themes available`, `Downloading <name>...`, `Unpacking <name>...`, `Opened <name>`, or an explanatory error when the network or the download fails.
 
 ## What it downloads
 

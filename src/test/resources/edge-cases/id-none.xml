@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Id none"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="none">
+    <Layout id="none" width="64" height="48">
+      <Button id="none" up="b"/>
+      <Image image="b" x="24"/>
+    </Layout>
+  </Window>
+</Theme>

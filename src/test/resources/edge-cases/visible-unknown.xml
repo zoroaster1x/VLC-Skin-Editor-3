@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Unknown visible"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="90">
+      <Button id="btn" up="b" visible="mystery.flag" x="0" y="0"/>
+      <Image id="img" image="b" visible="missing.flag" x="0" y="24" width="20" height="20"/>
+      <Slider id="sl" up="b" points="(0,0)(30,0)" visible="?!" x="0" y="48"/>
+    </Layout>
+  </Window>
+</Theme>

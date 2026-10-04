@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Radial slider angles"/>
+  <Bitmap id="seq" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="120">
+      <RadialSlider id="r0" sequence="seq" nbimages="0" value="volume"/>
+      <RadialSlider id="r1" sequence="seq" nbimages="1" minangle="90" maxangle="90" value="volume" y="40"/>
+      <RadialSlider id="r2" sequence="seq" nbimages="1" minangle="180" maxangle="90" value="volume" y="80"/>
+    </Layout>
+  </Window>
+</Theme>

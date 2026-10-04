@@ -2,6 +2,7 @@ package dev.zoroaster1x.vlcskin.app.panel;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.i18n.TypeNames;
 import dev.zoroaster1x.vlcskin.app.inspector.InspectorFields;
 import dev.zoroaster1x.vlcskin.model.SkinLayout;
 import dev.zoroaster1x.vlcskin.model.SkinWindow;
@@ -29,10 +30,12 @@ import dev.zoroaster1x.vlcskin.model.resource.SubBitmap;
 import java.awt.BorderLayout;
 import java.util.List;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -51,7 +54,7 @@ public final class InspectorPanel extends JPanel {
         this.studio = studio;
         setLayout(new BorderLayout());
         title.setBorder(javax.swing.BorderFactory.createEmptyBorder(6, 8, 2, 8));
-        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD, 12f));
+        title.setFont(title.getFont().deriveFont(java.awt.Font.BOLD));
         header.add(title, BorderLayout.CENTER);
         add(header, BorderLayout.NORTH);
         javax.swing.JScrollPane scroll = new javax.swing.JScrollPane(form,
@@ -142,8 +145,8 @@ public final class InspectorPanel extends JPanel {
         form.removeAll();
         InspectorFields fields = new InspectorFields(studio, form);
         title.setText(switch (target) {
-            case AbstractItem item -> itemTypeName(item.type()) + ": " + item.getId();
-            case Resource resource -> resourceTypeName(resource) + ": " + resource.getId();
+            case AbstractItem item -> TypeNames.item(item.type()) + ": " + item.getId();
+            case Resource resource -> TypeNames.resource(resource) + ": " + resource.getId();
             case SubBitmap sub -> Messages.get("SUBBITMAP", "SubBitmap") + ": " + sub.getId();
             case SkinLayout layout -> Messages.get("LAYOUT", "Layout") + ": " + layout.getId();
             case SkinWindow window -> Messages.get("WINDOW", "Window") + ": " + window.getId();
@@ -156,7 +159,7 @@ public final class InspectorPanel extends JPanel {
             case BitmapFontResource font -> bitmapFontForm(fields, font);
             case IniFileResource ini -> iniForm(fields, ini);
             case Resource resource -> fields.note(Messages.format("APP_INSPECTOR_NO_ATTRS",
-                    "%t has no editable attributes here.", resourceTypeName(resource)));
+                    "%t has no editable attributes here.", TypeNames.resource(resource)));
             case SubBitmap sub -> subForm(fields, sub);
             case SkinLayout layout -> layoutForm(fields, layout);
             case SkinWindow window -> windowForm(fields, window);
@@ -168,42 +171,7 @@ public final class InspectorPanel extends JPanel {
         form.repaint();
     }
 
-    private static String itemTypeName(dev.zoroaster1x.vlcskin.model.ItemType type) {
-        return switch (type) {
-            case ANCHOR -> Messages.get("ANCHOR", "Anchor");
-            case BUTTON -> Messages.get("BUTTON", "Button");
-            case CHECKBOX -> Messages.get("CHECKBOX", "Checkbox");
-            case GROUP -> Messages.get("GROUP", "Group");
-            case IMAGE -> Messages.get("IMAGE", "Image");
-            case PANEL -> Messages.get("PANEL", "Panel");
-            case PLAYLIST -> Messages.get("APP_TYPE_PLAYLIST", "Playlist");
-            case PLAYTREE -> Messages.get("PLAYTREE", "Playtree");
-            case RADIAL_SLIDER -> Messages.get("RADIALSLIDER", "Radial slider");
-            case SLIDER -> Messages.get("SLIDER", "Slider");
-            case SLIDER_BACKGROUND -> Messages.get("SLIDERBG", "SliderBackground");
-            case TEXT -> Messages.get("TEXT", "Text");
-            case VIDEO -> Messages.get("VIDEO", "Video");
-        };
-    }
 
-    private static String resourceTypeName(Resource resource) {
-        if (resource instanceof BitmapResource) {
-            return Messages.get("BITMAP", "Bitmap");
-        }
-        if (resource instanceof FontResource) {
-            return Messages.get("FONT", "Font");
-        }
-        if (resource instanceof BitmapFontResource) {
-            return Messages.get("APP_TYPE_BITMAP_FONT", "Bitmap font");
-        }
-        if (resource instanceof PopupMenuResource) {
-            return Messages.get("APP_TYPE_POPUP_MENU", "Popup menu");
-        }
-        if (resource instanceof IniFileResource) {
-            return Messages.get("APP_TYPE_INI_FILE", "Ini file");
-        }
-        return resource.typeName();
-    }
 
 
     private void itemForm(InspectorFields fields, AbstractItem item) {
@@ -448,11 +416,16 @@ public final class InspectorPanel extends JPanel {
         fields.row(Messages.get("WIN_IMAGE_RESIZE", "Resize"), fields.combo(image.getResize(),
                 List.of("mosaic", "scale", "scale2"),
                 value -> setItem(image, "resize", value)));
-        fields.row(Messages.get("WIN_IMAGE_ACTION", "Click action"), fields.combo(image.getAction(),
-                List.of("none", "move", "resizeE", "resizeS", "resizeSE"),
-                value -> setItem(image, "action", value)));
-        fields.row(Messages.get("APP_INSPECTOR_ANY_ACTION", "Any action"),
-                fields.action(image.getAction(), value -> setItem(image, "action", value)));
+        // The preset combo and the action chain edit the same attribute, so
+        // each updates the other instead of silently overwriting on next view.
+        List<String> presets = List.of("none", "move", "resizeE", "resizeS", "resizeSE");
+        JTextField actionField = fields.actionText(image.getAction(), value -> setItem(image, "action", value));
+        JComboBox<String> actionCombo = fields.combo(image.getAction(), presets, value -> {
+            actionField.setText(value);
+            setItem(image, "action", value);
+        });
+        fields.row(Messages.get("WIN_IMAGE_ACTION", "Click action"), actionCombo);
+        fields.row(Messages.get("APP_INSPECTOR_ANY_ACTION", "Action chain"), fields.actionPanel(actionField));
         fields.row(Messages.get("WIN_IMAGE_ACTION2", "Double click action"), fields.action(image.getAction2(),
                 value -> setItem(image, "action2", value)));
         fields.row(Messages.get("WIN_IMAGE_ART", "Cover art"),

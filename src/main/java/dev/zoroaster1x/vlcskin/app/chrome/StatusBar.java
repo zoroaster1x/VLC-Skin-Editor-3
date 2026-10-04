@@ -44,6 +44,8 @@ public final class StatusBar extends JPanel {
 
     public void setMessage(String text) {
         message.setText(text);
+        // The label clips a long path; the tooltip always shows the whole message.
+        message.setToolTipText(text);
     }
 
     /**

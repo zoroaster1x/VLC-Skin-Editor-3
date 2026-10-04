@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Anchor points"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Image id="i" image="b"/>
+      <Anchor priority="1" points="zzz"/>
+      <Anchor priority="2" points="(1,1)(5,5)" range="12"/>
+    </Layout>
+  </Window>
+</Theme>

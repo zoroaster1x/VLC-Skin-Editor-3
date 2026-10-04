@@ -33,6 +33,24 @@ to the model.
   (the official VideoLAN gallery, with preview images before importing)
 * `describe_editor_ui`, `screenshot_editor` (available when the desktop window
   is running in the same process)
+* `disk_diff`, `sync_from_disk`: the lines that changed on disk when another
+  program saved the file, and a three-way merge of those changes into the open
+  document without discarding either side.
+
+## The shared file and the activity log
+
+The server is a separate process from the desktop window, so the two share the
+file rather than memory. A tool result can start with a `[NOTICE]` line when
+the file changed on disk outside the server; `disk_diff` lists the changed
+lines and `sync_from_disk` merges them (`format/XmlMerger`). A change only one
+side made is applied; a conflict keeps the open document's version and is
+reported.
+
+The server can be disabled in Preferences (AI and MCP, Enable the MCP server);
+the `mcp` command then refuses to start unless `--force` is passed. Every run
+appends timestamped lines to the cache `mcp.log` and updates `mcp-status.json`,
+which the MCP activity panel tails live, and `Show tool calls in the status
+bar` names every call in the status bar.
 
 ## Register with OpenCode
 

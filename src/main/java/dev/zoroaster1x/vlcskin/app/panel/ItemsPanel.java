@@ -2,6 +2,7 @@ package dev.zoroaster1x.vlcskin.app.panel;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.i18n.TypeNames;
 import dev.zoroaster1x.vlcskin.edit.ItemFactory;
 import dev.zoroaster1x.vlcskin.edit.commands.AddNodeCommand;
 import dev.zoroaster1x.vlcskin.edit.commands.RemoveNodeCommand;
@@ -49,7 +50,7 @@ public final class ItemsPanel extends AbstractTreePanel {
 
     private DefaultMutableTreeNode node(Item item) {
         DefaultMutableTreeNode node = new DefaultMutableTreeNode(
-                new TreeRef(TreeRef.Kind.ITEM, item.getId(), typeName(item.type()) + ": " + item.getId(),
+                new TreeRef(TreeRef.Kind.ITEM, item.getId(), TypeNames.item(item.type()) + ": " + item.getId(),
                         item.type().name()));
         for (Item child : item.children()) {
             node.add(node(child));
@@ -57,23 +58,6 @@ public final class ItemsPanel extends AbstractTreePanel {
         return node;
     }
 
-    private static String typeName(ItemType type) {
-        return switch (type) {
-            case ANCHOR -> Messages.get("ANCHOR", "Anchor");
-            case BUTTON -> Messages.get("BUTTON", "Button");
-            case CHECKBOX -> Messages.get("CHECKBOX", "Checkbox");
-            case GROUP -> Messages.get("GROUP", "Group");
-            case IMAGE -> Messages.get("IMAGE", "Image");
-            case PANEL -> Messages.get("PANEL", "Panel");
-            case PLAYLIST -> Messages.get("APP_TYPE_PLAYLIST", "Playlist");
-            case PLAYTREE -> Messages.get("PLAYTREE", "Playtree");
-            case RADIAL_SLIDER -> Messages.get("RADIALSLIDER", "Radial slider");
-            case SLIDER -> Messages.get("SLIDER", "Slider");
-            case SLIDER_BACKGROUND -> Messages.get("SLIDERBG", "SliderBackground");
-            case TEXT -> Messages.get("TEXT", "Text");
-            case VIDEO -> Messages.get("VIDEO", "Video");
-        };
-    }
 
     @Override
     protected void selectionChanged(TreeRef ref) {
@@ -97,7 +81,7 @@ public final class ItemsPanel extends AbstractTreePanel {
             if (type == ItemType.SLIDER_BACKGROUND) {
                 continue;
             }
-            JMenuItem item = new JMenuItem(typeName(type));
+            JMenuItem item = new JMenuItem(TypeNames.item(type));
             item.addActionListener(e -> addItem(type));
             menu.add(item);
         }
@@ -183,7 +167,7 @@ public final class ItemsPanel extends AbstractTreePanel {
             if (type == ItemType.SLIDER_BACKGROUND) {
                 continue;
             }
-            menuItem(addMenu, typeName(type), () -> addItem(type));
+            menuItem(addMenu, TypeNames.item(type), () -> addItem(type));
         }
         menu.add(addMenu);
         if (ref != null) {

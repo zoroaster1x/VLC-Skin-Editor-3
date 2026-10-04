@@ -223,7 +223,7 @@ public final class SkinValidator {
                     issues.add(ParseIssue.warning("Text \"" + text.getId() + "\" width should not be negative",
                             location));
                 }
-                checkColor(text.getColor(), location, issues);
+                checkColor(text.getColor(), location, issues, index);
             }
             case PanelItem panel -> {
                 if (panel.getWidth() <= 0 || panel.getHeight() <= 0) {
@@ -242,11 +242,11 @@ public final class SkinValidator {
                     issues.add(ParseIssue.warning("Playtree \"" + playtree.getId() + "\" has no slider",
                             location));
                 }
-                checkColor(playtree.getFgcolor(), location, issues);
-                checkColor(playtree.getBgcolor1(), location, issues);
-                checkColor(playtree.getBgcolor2(), location, issues);
-                checkColor(playtree.getSelcolor(), location, issues);
-                checkColor(playtree.getPlaycolor(), location, issues);
+                checkColor(playtree.getFgcolor(), location, issues, index);
+                checkColor(playtree.getBgcolor1(), location, issues, index);
+                checkColor(playtree.getBgcolor2(), location, issues, index);
+                checkColor(playtree.getSelcolor(), location, issues, index);
+                checkColor(playtree.getPlaycolor(), location, issues, index);
             }
             case RadialSliderItem radial -> {
                 if (radial.getNbimages() <= 0) {
@@ -302,8 +302,12 @@ public final class SkinValidator {
         }
     }
 
-    private static void checkColor(String color, String location, List<ParseIssue> issues) {
+    private static void checkColor(String color, String location, List<ParseIssue> issues, SkinIndex index) {
         if (color == null || !color.matches("#[0-9a-fA-F]{6}")) {
+            if (index != null && index.constant(color) != null) {
+                // An IniFile constant such as pledit.text.normal; VLC resolves it.
+                return;
+            }
             issues.add(ParseIssue.warning("Color \"" + color + "\" is not #RRGGBB", location));
         }
     }

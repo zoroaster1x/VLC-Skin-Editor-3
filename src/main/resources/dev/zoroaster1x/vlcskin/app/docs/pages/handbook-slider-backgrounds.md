@@ -38,10 +38,13 @@ The grid holds `nbhoriz * nbvert` frames, called fields. For a slider value betw
 
 ```
 fields = nbhoriz * nbvert
-n      = floor(fields * value)          clamped to 0 .. fields - 1
+n      = (int)(value * (fields - 1))    clamped to 0 .. fields - 1
 fx     = n % nbhoriz
 fy     = n / nbhoriz
 ```
+
+VLC uses the last frame index (`CtrlSliderBg::onUpdate`), so a full slider
+shows the last frame and a value of 0 shows the first.
 
 Frames fill left to right, then top to bottom. The frame size subtracts the padding between frames:
 
@@ -52,13 +55,15 @@ frameHeight = (imageHeight - padvert  * (nbvert  - 1)) / nbvert
 
 The frame origin is `fx * (frameWidth + padhoriz)`, `fy * (frameHeight + padvert)`.
 
+`image` may name a sub bitmap; VLC cuts the frames from that rectangle, never from the whole parent sheet.
+
 ![Slider background](images/handbook-slider-background.png)
 
 For example, a 200 by 1010 bitmap with `nbhoriz="1"` and `nbvert="101"` holds 101 frames of 200 by 10 with no padding, one for every percent. With `nbhoriz="10"`, `nbvert="10"` and `padvert="1"` it holds 100 frames in a 10 by 10 grid, each 20 pixels wide and `(imageHeight - 9) / 10` pixels tall.
 
 A single frame is valid, and a missing or empty image simply draws nothing. The editor guards against a zero frame size.
 
-Note that the generator and the frame formula have to agree. If you paint the strip yourself, count carefully: the number of frames is `nbhoriz * nbvert`, and the fill frame `n` is the one VLC shows when `floor(fields * value)` equals `n`.
+Note that the generator and the frame formula have to agree. If you paint the strip yourself, count carefully: the number of frames is `nbhoriz * nbvert`, and the fill frame `n` is the one VLC shows when `(int)(value * (fields - 1))` equals `n`.
 
 The same generator is available over MCP as `generate_slider_background`, with parameters for the same inputs plus a slider id and an output path. It writes the PNG next to the theme, adds the bitmap resource and points the slider at it.
 

@@ -58,7 +58,7 @@ The Inspector for this slider has no Value list; it shows `Playtree scrolling` w
 
 ## What the preview shows
 
-The editor has no media library, so the playlist preview draws sample rows instead of your files: a closed folder, an open folder, a normal item, a playing item and a selected item for a tree, or the normal, playing and selected rows for a flat list. It also draws the slider child over the rows, and scrolling does nothing. The colours, the font and the row height are what you judge here; the real rows appear in VLC.
+The editor has no media library, so the playlist preview draws exactly what VLC shows with no media loaded: the two tree nodes "Playlist" and "Media Library", each with the item image when one is set. The nested slider is drawn at the fully scrolled position, like VLC's tree, and scrolling does nothing. The colours, the font and the row height are what you judge here; the real rows appear in VLC.
 
 Playlist buttons use the `playlist.*` action codes: next, previous, add, remove, sort, load, save and the random, loop and repeat toggles. See [Actions and variables](actions-and-variables.md).
 

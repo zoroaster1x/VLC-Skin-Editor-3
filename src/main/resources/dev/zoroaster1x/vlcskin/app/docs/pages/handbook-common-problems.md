@@ -39,7 +39,7 @@ The preview is a renderer, not a player. These are the usual differences:
 - A BitmapFont draws with a system font in the preview, not with the glyph sheet.
 - Fonts use the JVM font stack, so a machine with different fonts or hinting can differ by a pixel or two from VLC.
 - An animated bitmap with `fps` of 0 plays at 10 fps in the preview. The `loop` attribute is preserved but the preview always loops.
-- Playlist rows are sample rows, not your library, and scrolling does nothing.
+- Playlist rows are VLC's idle tree nodes, not your library, and scrolling does nothing.
 - Window position and visibility are hints for the first load; VLC remembers its own window positions between runs, so a fresh position may need VLC's state cleared.
 
 When the difference matters, use File > Test skin in VLC and judge there.
@@ -56,7 +56,7 @@ Duplicate id messages appear in several forms:
 | Duplicate window id "x" | Window actions and `windowId.*` expressions cannot tell the windows apart. |
 | Duplicate layout id "x" in window "y" | Layout ids are unique inside their window only, so the same name in another window is fine. |
 
-VLC resolves an id to the first match. The theme still loads and draws, but later elements with the same id are invisible to actions, expressions and lookups, which is a silent defect. Renaming the later element is usually safe unless an action targets that id. The conformance sweep of the 123 official gallery themes found 76 duplicate item ids and 27 duplicate resource ids, so old themes live with this all the time.
+VLC resolves an id to the first match. The theme still loads and draws, but later elements with the same id are invisible to actions, expressions and lookups, which is a silent defect. Renaming the later element is usually safe unless an action targets that id. The conformance sweep of the official gallery found 80 duplicate item ids and 25 duplicate resource ids, so old themes live with this all the time.
 
 ## VLC does not start in skins mode
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Fullscreen controller"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="fullscreenController" visible="true">
+    <Layout id="fsc" width="120" height="24">
+      <Image id="i" image="b" width="20" height="20"/>
+    </Layout>
+  </Window>
+</Theme>

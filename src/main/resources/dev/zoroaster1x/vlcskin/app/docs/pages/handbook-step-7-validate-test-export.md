@@ -38,7 +38,7 @@ Press Shift+Ctrl+T or choose File > Test skin in VLC. The editor:
 3. Starts it with
 
    ```bash
-   vlc -I skins2 --skins2-last=path/to/theme.xml --skins2-systray
+   vlc -I skins2 --skins2-last=path/to/theme.xml
    ```
 
 If no VLC is found, the editor shows the command to run yourself. VLC reads the theme when it loads it and does not watch the file, so after changing the theme in the editor, reload the skin in VLC or start VLC again.

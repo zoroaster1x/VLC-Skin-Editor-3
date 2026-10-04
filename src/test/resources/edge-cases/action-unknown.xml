@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Unknown actions"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="80">
+      <Button id="gone" up="b" action="bogus.action()" x="0" y="0"/>
+      <Button id="kept" up="b" action="bogus.action(); vlc.play()" x="0" y="24"/>
+      <Button id="noop" up="b" action=" ;; " x="0" y="48"/>
+    </Layout>
+  </Window>
+</Theme>

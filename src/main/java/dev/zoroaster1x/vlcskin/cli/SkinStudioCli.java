@@ -23,6 +23,11 @@ import picocli.CommandLine.Command;
         })
 public final class SkinStudioCli implements Callable<Integer> {
 
+    @picocli.CommandLine.Option(names = {"-v", "--verbose"},
+            description = "Detailed progress, timings and errors on stderr.",
+            scope = picocli.CommandLine.ScopeType.INHERIT)
+    boolean verbose;
+
     @Override
     public Integer call() {
         System.out.println("VLC Skin Studio " + Version.VERSION);
@@ -30,8 +35,22 @@ public final class SkinStudioCli implements Callable<Integer> {
         return 0;
     }
 
+    /**
+     * A CommandLine configured with the verbose execution strategy, shared by
+     * the launcher and tests so --verbose works for every subcommand.
+     */
+    public static picocli.CommandLine commandLine() {
+        picocli.CommandLine cli = new picocli.CommandLine(new SkinStudioCli());
+        cli.setExecutionStrategy(parseResult -> {
+            dev.zoroaster1x.vlcskin.util.Log.setVerbose(
+                    parseResult.hasMatchedOption("--verbose") || parseResult.hasMatchedOption("-v"));
+            return new picocli.CommandLine.RunLast().execute(parseResult);
+        });
+        return cli;
+    }
+
     public static void main(String[] args) {
-        System.exit(new picocli.CommandLine(new SkinStudioCli()).execute(args));
+        System.exit(commandLine().execute(args));
     }
 
     /**

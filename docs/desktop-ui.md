@@ -17,6 +17,7 @@ so nothing in the window is a separate implementation. Screenshots live in the
 | Variables | simulates player state: booleans such as `vlc.isPlaying`, text variables such as `$N`, slider position |
 | Problems | validation results; double click jumps to the element |
 | Skin XML | the generated XML with syntax highlighting, editable with an Apply step |
+| MCP activity | the timestamped server log and its status file; Refresh rereads them, Copy copies the tail |
 
 Panels are dockable; drag them anywhere, float them, or restore the default
 arrangement from View > Reset panel layout. The toolbar can float as its own

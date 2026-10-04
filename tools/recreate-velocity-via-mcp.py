@@ -13,8 +13,10 @@ Usage:
         --theme /path/to/velocity/theme.xml \
         --out screenshots
 
-VeLoCity is MIT licensed, Copyright (c) 2022 dmtiir. Its theme is used here as
-a rendering fixture; no VeLoCity asset is redistributed by this repository.
+VeLoCity is MIT licensed, Copyright (c) 2022 dmtiir. A copy of the theme ships
+as the built in "velocity" example (see src/main/resources/dev/zoroaster1x/vlcskin/example/velocity,
+license included there); this script rebuilds the player window from its assets
+through the MCP tools as a demonstration.
 """
 
 import argparse

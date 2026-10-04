@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bad alpha colors"/>
+  <Bitmap id="empty" file="shared.png" alphacolor=""/>
+  <Bitmap id="bad" file="shared.png" alphacolor="red"/>
+  <Bitmap id="argb" file="shared.png" alphacolor="#80FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="32">
+      <Image id="i1" image="empty" width="16" height="16"/>
+      <Image id="i2" image="bad" x="20" width="16" height="16"/>
+      <Image id="i3" image="argb" x="40" width="16" height="16"/>
+    </Layout>
+  </Window>
+</Theme>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bad checkbox state"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="96" height="80">
+      <Checkbox id="cb1" up1="b" up2="b" state="not a valid var"/>
+      <Checkbox id="cb2" up1="b" up2="b" state="" y="24"/>
+      <Checkbox id="cb3" up1="b" up2="b" state="vlc.isPlaying" y="48"/>
+    </Layout>
+  </Window>
+</Theme>

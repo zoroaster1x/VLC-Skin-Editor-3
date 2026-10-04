@@ -11,8 +11,8 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.Map;
 import javax.imageio.ImageIO;
 
@@ -45,10 +45,13 @@ public final class ImageStore {
     }
 
     private final Path skinFolder;
-    private final Map<String, BufferedImage> images = new HashMap<>();
-    private final Map<String, BufferedImage> wholeImages = new HashMap<>();
-    private final Map<String, Font> fonts = new HashMap<>();
-    private final Map<String, String> problems = new HashMap<>();
+    // The canvas renders on the event thread while MCP renders on the server
+    // thread, so the caches must tolerate concurrent access.
+    private final Map<String, BufferedImage> images = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, BufferedImage> wholeImages = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, Font> fonts = new java.util.concurrent.ConcurrentHashMap<>();
+    private final Map<String, String> problems = new java.util.concurrent.ConcurrentHashMap<>();
+    private volatile Font defaultFont;
 
     public ImageStore(Path skinFolder) {
         this.skinFolder = skinFolder;
@@ -216,11 +219,19 @@ public final class ImageStore {
     }
 
     /**
-     * Resolves a font resource, falling back to a sane sans serif.
+     * Resolves a font resource, falling back to VLC's bundled default font.
+     *
+     * <p>VLC's {@code defaultfont} is FreeSans from its own resource path
+     * (builder.cpp:1211-1226). Rendering with the same typeface makes text
+     * metrics match VLC instead of Java's platform font, so a text control
+     * lands where VLC puts it.
      */
     public Font font(SkinIndex index, String id) {
         if (id == null || id.isEmpty() || "defaultfont".equals(id)) {
-            return new Font(Font.SANS_SERIF, Font.PLAIN, 12);
+            if (defaultFont == null) {
+                defaultFont = loadBundledDefaultFont();
+            }
+            return defaultFont;
         }
         Font cached = fonts.get(id);
         if (cached != null) {
@@ -239,6 +250,17 @@ public final class ImageStore {
         }
         fonts.put(id, result);
         return result;
+    }
+
+    private Font loadBundledDefaultFont() {
+        try (InputStream in = ImageStore.class.getResourceAsStream("fonts/FreeSans.ttf")) {
+            if (in != null) {
+                return Font.createFont(Font.TRUETYPE_FONT, in).deriveFont(12f);
+            }
+        } catch (FontFormatException | IOException ex) {
+            // A missing bundled font is not fatal; the platform font renders.
+        }
+        return new Font(Font.SANS_SERIF, Font.PLAIN, 12);
     }
 
     private static BufferedImage brokenPlaceholder() {

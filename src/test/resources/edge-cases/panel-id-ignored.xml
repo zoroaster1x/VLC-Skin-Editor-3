@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Panel id ignored"/>
+  <Bitmap id="b" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Panel id="myPanel" x="4" y="4" width="40" height="24">
+        <Image id="i" image="b" x="2" y="2"/>
+      </Panel>
+    </Layout>
+  </Window>
+</Theme>

@@ -156,9 +156,6 @@ public final class VltCodec {
      */
     public static Set<String> referencedFiles(SkinTheme theme) {
         Set<String> files = new LinkedHashSet<>();
-        if (theme.getSourcePath() != null) {
-            files.add(Path.of(theme.getSourcePath()).getFileName().toString());
-        }
         for (Resource resource : theme.getResources()) {
             switch (resource) {
                 case BitmapResource bitmap -> add(files, bitmap.getFile());
@@ -194,6 +191,10 @@ public final class VltCodec {
                 .filter(entry -> looksLikeArchive(entry.getValue()))
                 .toList();
         if (nested.isEmpty()) {
+            Path winamp2 = tryWinamp2(contents, targetFolder);
+            if (winamp2 != null) {
+                return winamp2;
+            }
             throw new IOException("The archive contains no theme.xml");
         }
         Path first = null;
@@ -213,15 +214,52 @@ public final class VltCodec {
             }
         }
         if (first == null) {
+            Path winamp2 = tryWinamp2(contents, targetFolder);
+            if (winamp2 != null) {
+                return winamp2;
+            }
             throw new IOException("The bundled .vlt files contain no theme.xml");
         }
         return first;
     }
 
+    /**
+     * Winamp2 archives carry BMPs and no theme.xml. VLC falls back to its
+     * bundled winamp2.xml template against the archive contents; this does the
+     * same with a bundled copy of that template.
+     */
+    private static Path tryWinamp2(Contents contents, Path targetFolder) throws IOException {
+        String mainEntry = null;
+        for (String name : contents.assets().keySet()) {
+            String base = name.contains("/") ? name.substring(name.lastIndexOf('/') + 1) : name;
+            if (base.equalsIgnoreCase("main.bmp")) {
+                mainEntry = name;
+                break;
+            }
+        }
+        if (mainEntry == null) {
+            return null;
+        }
+        // VLC resolves the whole theme relative to the folder holding main.bmp.
+        int slash = mainEntry.lastIndexOf('/');
+        String prefix = slash >= 0 ? mainEntry.substring(0, slash + 1) : "";
+        String template;
+        try (InputStream in = VltCodec.class.getResourceAsStream("winamp2.xml")) {
+            if (in == null) {
+                throw new IOException("winamp2.xml is missing from the classpath");
+            }
+            template = new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        return extractWithPrefix(new Contents(template, null, contents.assets()), targetFolder, prefix);
+    }
+
     private static Path extract(Contents contents, Path targetFolder) throws IOException {
+        return extractWithPrefix(contents, targetFolder, folderPrefix(contents.themeEntryName()));
+    }
+
+    private static Path extractWithPrefix(Contents contents, Path targetFolder, String prefix) throws IOException {
         Files.createDirectories(targetFolder);
         Files.writeString(targetFolder.resolve("theme.xml"), contents.themeXml(), StandardCharsets.UTF_8);
-        String prefix = folderPrefix(contents.themeEntryName());
         Path normalizedTarget = targetFolder.normalize();
         for (Map.Entry<String, byte[]> asset : contents.assets().entrySet()) {
             String relative = stripPrefix(asset.getKey(), prefix);

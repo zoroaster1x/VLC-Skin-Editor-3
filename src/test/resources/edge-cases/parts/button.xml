@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Theme version="2.0">
+  <Button id="orphan" up="b" action="none"/>
+</Theme>

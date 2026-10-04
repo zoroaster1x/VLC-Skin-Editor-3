@@ -32,7 +32,7 @@ Every menu entry, in plain language, followed by the keyboard shortcuts.
 | Redo | Reapplies the last undone change, with the same kind of label. |
 | Skin settings | Opens the dialog with the theme name, author, email, webpage, magnet and opacity values. |
 | Global variables | Brings the Variables panel forward. |
-| Preferences | Look and feel, language, canvas background, checkerboard and toolbar visibility. |
+| Preferences | Look and feel, language, interface size, keyboard shortcuts, canvas background, checkerboard, toolbar visibility and the AI and MCP section. |
 | Duplicate item | Copies the selection and asks for a rename pattern in which `%oldid%` becomes the old id. |
 | Delete item | Deletes the focused selection after a confirmation. It acts on the tree that has keyboard focus: item, resource, layout or window. |
 | Move selected item up / down / left / right | Moves the selected item by one pixel in that direction. The same as Ctrl and an arrow key. |
@@ -45,7 +45,9 @@ Every menu entry, in plain language, followed by the keyboard shortcuts.
 | Zoom out | One zoom step back, down to 1x. |
 | Fit window | Picks the largest whole zoom that shows the whole layout. |
 | Checkerboard | Draws the transparency checkerboard behind the preview. Checked by default. |
-| Reset panel layout | Restores the default dock arrangement of the eight panels. |
+| Canvas background | Pins the backdrop behind the preview to Follow the theme, Light or Dark. |
+| Panels | Shows any of the nine dockable panels, including the MCP activity panel. |
+| Reset panel layout | Restores the default dock arrangement of the nine panels. |
 | Move tool | The pointer selects and drags items. |
 | Path tool | The pointer edits slider control points. |
 | Dark theme | Switches between the Dark and Light themes. |
@@ -88,6 +90,6 @@ Every menu entry, in plain language, followed by the keyboard shortcuts.
 
 Menu accelerators use the Command key instead of Control: Cmd+N, Cmd+O, Cmd+S, Cmd+Z, Cmd+Y, Cmd+D, Cmd+I, Cmd+G, Cmd+B, Cmd+= for Zoom in, Cmd+- for Zoom out, Cmd+Shift+V and Cmd+Shift+T. Delete item is Cmd+Backspace.
 
-Fit window has no menu accelerator, and the item nudges plus the Ctrl+=, Ctrl+-, Ctrl+0 bindings are literal Control key bindings on every platform, including macOS. The apple.laf.useScreenMenuBar property puts the menu bar at the top of the screen, as a Mac application normally has it.
+The item nudges plus the Ctrl+=, Ctrl+-, Ctrl+0 bindings are literal Control key bindings on every platform, including macOS. The apple.laf.useScreenMenuBar property puts the menu bar at the top of the screen, as a Mac application normally has it.
 
 Next: [Step 1: prepare your artwork](step-1-prepare-artwork.md).

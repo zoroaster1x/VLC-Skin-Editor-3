@@ -26,8 +26,7 @@ public final class VlcFinder {
      */
     public static Optional<Path> find() {
         List<Path> candidates = new ArrayList<>();
-        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        if (os.contains("win")) {
+        if (Platform.isWindows()) {
             String programFiles = System.getenv("ProgramFiles");
             if (programFiles != null) {
                 candidates.add(Path.of(programFiles, "VideoLAN", "VLC", "vlc.exe"));
@@ -36,7 +35,7 @@ public final class VlcFinder {
             if (programFilesX86 != null) {
                 candidates.add(Path.of(programFilesX86, "VideoLAN", "VLC", "vlc.exe"));
             }
-        } else if (os.contains("mac")) {
+        } else if (Platform.isMac()) {
             candidates.add(Path.of("/Applications/VLC.app/Contents/MacOS/VLC"));
             candidates.add(Path.of(System.getProperty("user.home"), "Applications/VLC.app/Contents/MacOS/VLC"));
         } else {
@@ -78,15 +77,14 @@ public final class VlcFinder {
      */
     public static Path skinsFolder() {
         Path home = Path.of(System.getProperty("user.home"));
-        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        if (os.contains("win")) {
+        if (Platform.isWindows()) {
             String programFiles = System.getenv("ProgramFiles");
             if (programFiles != null) {
                 return Path.of(programFiles, "VideoLAN", "VLC", "skins");
             }
             return home.resolve("AppData/Roaming/vlc/skins2");
         }
-        if (os.contains("mac")) {
+        if (Platform.isMac()) {
             return home.resolve("Library/Application Support/org.videolan.vlc/skins2");
         }
         if (isFlatpak()) {
@@ -139,8 +137,7 @@ public final class VlcFinder {
     }
 
     private static Optional<Path> onPath() {
-        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
-        return onPathNamed(os.contains("win") ? "vlc.exe" : "vlc");
+        return onPathNamed(Platform.isWindows() ? "vlc.exe" : "vlc");
     }
 
     private static Optional<Path> onPathNamed(String name) {

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bad menu action"/>
+  <PopupMenu id="menu">
+    <MenuItem label="Broken" action="bogus.action()"/>
+    <MenuSeparator/>
+    <MenuItem label="Fine" action="none"/>
+  </PopupMenu>
+</Theme>

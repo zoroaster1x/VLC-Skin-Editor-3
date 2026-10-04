@@ -38,7 +38,7 @@ Add Slider from the Items panel. The Inspector's Slider section takes the thumb 
 
 The ten bands, in order, are 60 Hz, 170 Hz, 310 Hz, 600 Hz, 1 kHz, 3 kHz, 6 kHz, 12 kHz, 14 kHz and 16 kHz.
 
-A slider inside a `Playlist` or `Playtree` does not use a percentage variable; it is driven by the playlist scroll position. The editor does not set a value for one, and a value carried by an old file is preserved as written. See [Playlists and playtrees](playlists-and-playtrees.md).
+A slider inside a `Playlist` or `Playtree` does not use a percentage variable; it is driven by the playlist scroll position. The editor does not set a value for one, and it is not written back. See [Playlists and playtrees](playlists-and-playtrees.md).
 
 ## Points and the bezier path
 
@@ -66,7 +66,7 @@ A radial slider is a knob built from a vertical strip of images.
 | `maxangle` | `360` | Angle in degrees corresponding to 100 percent. |
 | `value` | `none` | Percentage variable, as for a slider. |
 
-The Inspector edits all five fields: Sequence bitmap, Images, Minimum angle, Maximum angle and Value. The preview selects the frame with `floor(value * nbimages)`, clamped to the strip. VLC uses the same sequence and maps the value between the two angles, which controls how the knob turns on screen.
+The Inspector edits all five fields: Sequence bitmap, Images, Minimum angle, Maximum angle and Value. The preview selects the frame with `(int)(value * (nbimages - 1))`, VLC's own formula, clamped to the strip. The value is mapped between the two angles, which controls how the knob turns on screen.
 
 The validator reports a missing `up` or background image as an error, a non positive `thickness` as a warning, and malformed `points` as an error. None of these stop VLC from loading the theme, but they usually mean something will not draw or click correctly.
 

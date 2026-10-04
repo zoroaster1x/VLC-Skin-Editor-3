@@ -15,7 +15,7 @@ machine readable docs/skin-gallery-report.json.
 
 Usage:
     python3 tools/gallery-conformance.py --jar build/libs/vlc-skin-studio.jar \
-        [--pack-url URL] [--work /tmp/opencode/skin-gallery] [--jobs 4] \
+        [--pack-url URL] [--work build/parity/skin-gallery] [--jobs 4] \
         [--limit 20]
 """
 
@@ -258,11 +258,14 @@ def write_report(records, out_dir):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--jar", required=True, type=Path)
-    parser.add_argument("--work", type=Path, default=Path("/tmp/opencode/skin-gallery"))
+    parser.add_argument("--work", type=Path, default=Path("build/parity/skin-gallery"))
     parser.add_argument("--out", type=Path, default=Path("docs"))
     parser.add_argument("--pack-url", default=DEFAULT_PACK)
     parser.add_argument("--jobs", type=int, default=4)
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument("--vlts", type=Path, action="append", default=[],
+                        help="A folder of downloaded .vlt archives, repeatable; "
+                             "combine with --no-pack to sweep a local corpus")
     parser.add_argument("--extra", type=Path, action="append", default=[],
                         help="A theme.xml or a folder containing one, repeatable; "
                              "use this for the themes VLC itself ships")
@@ -278,6 +281,7 @@ def main():
     args.work.mkdir(parents=True, exist_ok=True)
 
     records = []
+    vlts = []
     if not args.no_pack:
         pack = download(args.pack_url, args.work / "vlc-skins.zip")
         unpacked = args.work / "skins"
@@ -286,9 +290,15 @@ def main():
             unpacked.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(pack) as archive:
                 archive.extractall(unpacked)
-        vlts = sorted(unpacked.rglob("*.vlt"))
-        if args.limit:
-            vlts = vlts[:args.limit]
+        vlts.extend(sorted(unpacked.rglob("*.vlt")))
+    for folder in args.vlts:
+        if not folder.is_dir():
+            print(f"--vlts folder not found: {folder}", file=sys.stderr)
+            continue
+        vlts.extend(sorted(folder.rglob("*.vlt")))
+    if args.limit:
+        vlts = vlts[:args.limit]
+    if vlts:
         print(f"{len(vlts)} gallery themes to check with {args.jobs} workers")
         with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as pool:
             futures = {pool.submit(check_skin, args.jar, vlt, args.work): vlt for vlt in vlts}

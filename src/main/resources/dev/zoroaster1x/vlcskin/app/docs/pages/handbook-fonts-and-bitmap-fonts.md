@@ -28,7 +28,7 @@ A font resource loads the file at its declared size and can be referenced by any
 
 ## defaultfont
 
-`defaultfont` is not a resource in your file. It is a built-in font provided by VLC and the editor; in the preview it is Sans Serif at 12 points. It is the default for the theme's `tooltipfont` and the fallback when a `Text` item has no usable font. You never need to ship it.
+`defaultfont` is not a resource in your file. It is a built-in font provided by VLC and the editor; in the preview it is VLC's own FreeSans at 12 points, bundled so the metrics match VLC's renderer. It is the default for the theme's `tooltipfont` and the fallback when a `Text` item has no usable font. You never need to ship it.
 
 If you want a different size or face, add a real `Font` resource and point the items at it. Text fields accept `defaultfont` by name, so the drop-downs include it beside your resources.
 

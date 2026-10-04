@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.Timer;
@@ -134,7 +135,7 @@ public final class DocumentationPanel extends JPanel {
         JPanel left = new JPanel(new BorderLayout());
         left.add(searchRow, BorderLayout.NORTH);
         left.add(new JScrollPane(resultList), BorderLayout.CENTER);
-        left.setPreferredSize(new Dimension(360, 100));
+        left.setMinimumSize(new Dimension(200, 80));
 
         viewer.setEditable(false);
         viewer.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
@@ -168,15 +169,21 @@ public final class DocumentationPanel extends JPanel {
 
         JPanel page = new JPanel(new BorderLayout());
         breadcrumb.setBorder(BorderFactory.createEmptyBorder(6, 10, 0, 10));
-        breadcrumb.setFont(breadcrumb.getFont().deriveFont(java.awt.Font.BOLD, 12f));
+        breadcrumb.setFont(breadcrumb.getFont().deriveFont(java.awt.Font.BOLD));
         page.add(breadcrumb, BorderLayout.NORTH);
         page.add(right, BorderLayout.CENTER);
 
+        // A splitter, so the topic list can be widened instead of being
+        // pinned at one fixed width that no font scale changes.
+        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, left, page);
+        split.setDividerLocation(340);
+        split.setResizeWeight(0.0);
+        split.setContinuousLayout(true);
+
         JPanel main = new JPanel(new BorderLayout());
         main.add(toolbar, BorderLayout.NORTH);
-        main.add(left, BorderLayout.WEST);
         if (bundle.available()) {
-            main.add(page, BorderLayout.CENTER);
+            main.add(split, BorderLayout.CENTER);
         } else {
             JLabel missing = new JLabel(Messages.get("APP_DOCS_MISSING",
                     "The documentation bundle is not part of this build."));

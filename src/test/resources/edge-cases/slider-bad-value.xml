@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bad slider value"/>
+  <Bitmap id="atlas" file="shared.png" alphacolor="#FF00FF">
+    <SubBitmap id="cursor" x="0" y="0" width="4" height="4"/>
+  </Bitmap>
+  <Window id="win">
+    <Layout id="lay" width="96" height="64">
+      <Slider id="s1" up="cursor" points="(0,0)(20,0)" value="no.such.var"/>
+      <Slider id="s2" up="cursor" points="(0,0)(20,0)" y="24"/>
+    </Layout>
+  </Window>
+</Theme>

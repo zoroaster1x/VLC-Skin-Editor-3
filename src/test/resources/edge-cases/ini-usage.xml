@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Ini constants"/>
+  <IniFile id="missing" file="no-such.ini"/>
+  <IniFile id="cfg" file="colors.ini"/>
+  <Font id="f" file="shared.otf"/>
+  <Window id="win">
+    <Layout id="lay" width="160" height="90">
+      <Playlist id="pl" font="f" width="140" height="70"
+                fgcolor="cfg.text.normal" playcolor="cfg.text.playing"/>
+      <Text id="tx" font="f" text="text" color="cfg.text.normal" y="75"/>
+    </Layout>
+  </Window>
+</Theme>

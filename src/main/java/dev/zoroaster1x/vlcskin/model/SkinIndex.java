@@ -3,12 +3,19 @@ package dev.zoroaster1x.vlcskin.model;
 import dev.zoroaster1x.vlcskin.model.item.Item;
 import dev.zoroaster1x.vlcskin.model.resource.BitmapResource;
 import dev.zoroaster1x.vlcskin.model.resource.FontResource;
+import dev.zoroaster1x.vlcskin.model.resource.IniFileResource;
 import dev.zoroaster1x.vlcskin.model.resource.Resource;
 import dev.zoroaster1x.vlcskin.model.resource.SubBitmap;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -40,6 +47,7 @@ public final class SkinIndex {
     }
 
     private final SkinTheme theme;
+    private Map<String, String> constants;
 
     public SkinIndex(SkinTheme theme) {
         this.theme = theme;
@@ -53,6 +61,16 @@ public final class SkinIndex {
         if (id == null) {
             return null;
         }
+        for (String candidate : candidates(id)) {
+            Resource exact = findResourceExact(candidate);
+            if (exact != null) {
+                return exact;
+            }
+        }
+        return null;
+    }
+
+    private Resource findResourceExact(String id) {
         for (Resource resource : theme.getResources()) {
             if (id.equals(resource.getId())) {
                 return resource;
@@ -61,10 +79,24 @@ public final class SkinIndex {
         return null;
     }
 
+    /**
+     * VLC accepts "id1;id2;id3" references and uses the first resource that
+     * exists, which later Winamp2 derived themes rely on.
+     */
     public ImageRef findImage(String id) {
         if (id == null) {
             return null;
         }
+        for (String candidate : candidates(id)) {
+            ImageRef exact = findImageExact(candidate);
+            if (exact != null) {
+                return exact;
+            }
+        }
+        return null;
+    }
+
+    private ImageRef findImageExact(String id) {
         for (Resource resource : theme.getResources()) {
             if (resource instanceof BitmapResource bitmap) {
                 if (id.equals(bitmap.getId())) {
@@ -78,6 +110,80 @@ public final class SkinIndex {
             }
         }
         return null;
+    }
+
+    private static List<String> candidates(String id) {
+        if (id.indexOf(';') < 0) {
+            return List.of(id);
+        }
+        List<String> out = new ArrayList<>(3);
+        for (String part : id.split(";")) {
+            String trimmed = part.strip();
+            if (!trimmed.isEmpty()) {
+                out.add(trimmed);
+            }
+        }
+        return out.isEmpty() ? List.of(id) : out;
+    }
+
+    /**
+     * The value of a constant registered by an {@code IniFile} resource, keyed
+     * as VLC keys it: the ini id, the section and the key, lowercased and dot
+     * separated. Colors and other getConstant lookups resolve through here.
+     */
+    public String constant(String name) {
+        if (name == null || name.isEmpty()) {
+            return name;
+        }
+        return constants().get(name.toLowerCase(Locale.ROOT));
+    }
+
+    private Map<String, String> constants() {
+        Map<String, String> cached = constants;
+        if (cached != null) {
+            return cached;
+        }
+        Map<String, String> map = new LinkedHashMap<>();
+        Path folder = theme.getSourcePath() == null || theme.getSourcePath().isBlank()
+                ? null : Path.of(theme.getSourcePath()).getParent();
+        if (folder != null) {
+            for (Resource resource : theme.getResources()) {
+                if (resource instanceof IniFileResource ini && ini.getFile() != null) {
+                    Path file = folder.resolve(ini.getFile().replace('\\', '/')).normalize();
+                    try {
+                        parseIni(ini.getId(), file, map);
+                    } catch (IOException ex) {
+                        // A missing or unreadable ini leaves its constants absent.
+                    }
+                }
+            }
+        }
+        constants = Map.copyOf(map);
+        return constants;
+    }
+
+    private static void parseIni(String iniId, Path file, Map<String, String> map) throws IOException {
+        if (!Files.isRegularFile(file)) {
+            return;
+        }
+        String section = "";
+        for (String raw : Files.readAllLines(file, StandardCharsets.UTF_8)) {
+            String line = raw.strip();
+            if (line.isEmpty() || line.startsWith(";") || line.startsWith("#")) {
+                continue;
+            }
+            if (line.startsWith("[") && line.endsWith("]")) {
+                section = line.substring(1, line.length() - 1);
+                continue;
+            }
+            int equals = line.indexOf('=');
+            if (equals <= 0) {
+                continue;
+            }
+            String key = line.substring(0, equals).strip();
+            String value = line.substring(equals + 1).strip();
+            map.put((iniId + "." + section + "." + key).toLowerCase(Locale.ROOT), value);
+        }
     }
 
     public FontResource findFont(String id) {
@@ -342,7 +448,10 @@ public final class SkinIndex {
      */
     public String uniqueCopy(String pattern, String oldId) {
         String base = pattern == null || pattern.isEmpty() ? oldId + "_copy" : pattern;
-        base = base.replace("%oldid%", oldId).replaceAll("[%s\"]", "");
+        base = base.replace("%oldid%", oldId).replace("%", "").replace("\"", "");
+        if (base.isBlank()) {
+            base = oldId + "_copy";
+        }
         if (!idExists(base)) {
             return base;
         }

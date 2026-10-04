@@ -56,14 +56,12 @@ public final class ThemeGalleryClient {
     }
 
     /**
-     * The folder cached gallery data lives in, honouring XDG_CACHE_HOME.
+     * The folder cached gallery data lives in, following the platform cache
+     * convention (XDG on Linux, Library/Caches on macOS, LocalAppData on
+     * Windows) through {@link dev.zoroaster1x.vlcskin.app.config.AppPaths}.
      */
     public static Path defaultCacheRoot() {
-        String cacheHome = System.getenv("XDG_CACHE_HOME");
-        Path base = cacheHome != null && !cacheHome.isBlank()
-                ? Path.of(cacheHome)
-                : Path.of(System.getProperty("user.home"), ".cache");
-        return base.resolve("vlc-skin-studio");
+        return dev.zoroaster1x.vlcskin.app.config.AppPaths.cacheDir();
     }
 
     /**
@@ -182,14 +180,13 @@ public final class ThemeGalleryClient {
     }
 
     /**
-     * The folder a downloaded theme goes into when the caller has no opinion.
+     * The folder a downloaded theme goes into when the caller has no opinion,
+     * following the platform data convention through
+     * {@link dev.zoroaster1x.vlcskin.app.config.AppPaths}.
      */
     public static Path themesFolder(GalleryTheme theme) {
-        String dataHome = System.getenv("XDG_DATA_HOME");
-        Path base = dataHome != null && !dataHome.isBlank()
-                ? Path.of(dataHome)
-                : Path.of(System.getProperty("user.home"), ".local", "share");
-        return base.resolve("vlc-skin-studio").resolve("themes").resolve(theme.folderName());
+        return dev.zoroaster1x.vlcskin.app.config.AppPaths.dataDir()
+                .resolve("themes").resolve(theme.folderName());
     }
 
     private List<GalleryTheme> readThemes(Path file) {

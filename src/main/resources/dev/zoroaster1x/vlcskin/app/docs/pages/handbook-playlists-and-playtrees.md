@@ -20,7 +20,7 @@ Add Playlist or Playtree from the Items panel and fill in the Inspector's Playli
 - Text color, Background color 1, Background color 2, Playing color and Selection color take `#RRGGBB` values.
 - Edit playlist's slider appears when the list has its child slider; pressing it selects the slider so the Inspector switches to it.
 
-The preview draws sample rows so you can judge colours and row height: a closed folder, an open folder, a normal item, a playing item and a selected item for a tree, or the normal, playing and selected rows for a flat list. The preview draws the slider over the rows and scrolls nothing, because there is no real playlist in the editor.
+The preview draws exactly what VLC shows with no media loaded: the two tree nodes "Playlist" and "Media Library", with the item image when one is set. The nested slider is drawn at the fully scrolled position and scrolling does nothing, because there is no real playlist in the editor.
 
 ## Attributes
 

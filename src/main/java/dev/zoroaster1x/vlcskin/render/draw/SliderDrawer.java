@@ -14,6 +14,15 @@ public final class SliderDrawer implements Drawer<SliderItem> {
 
     @Override
     public void draw(Graphics2D g, SliderItem item, int offsetX, int offsetY, DrawContext context) {
+        draw(g, item, offsetX, offsetY, context, context.options().variables().sliderValue());
+    }
+
+    /**
+     * Draws the slider at an explicit value. The nested playlist slider always
+     * follows the playlist scroll position, which VLC initialises to 1.0.
+     */
+    public void draw(Graphics2D g, SliderItem item, int offsetX, int offsetY,
+                     DrawContext context, float value) {
         if (item.getBackground() != null) {
             drawBackground(g, item.getBackground(), offsetX + item.getX(), offsetY + item.getY(), context);
         }
@@ -21,9 +30,10 @@ public final class SliderDrawer implements Drawer<SliderItem> {
         if (thumb == null) {
             return;
         }
-        java.awt.geom.Point2D.Float position = SliderGeometry.thumbPosition(item, context.options().variables());
-        int x = (int) Math.round(offsetX + item.getX() + position.getX() - thumb.getWidth() / 2.0);
-        int y = (int) Math.round(offsetY + item.getY() + position.getY() - thumb.getHeight() / 2.0);
+        java.awt.geom.Point2D.Float position = SliderGeometry.thumbPosition(item, value);
+        // VLC: x = pos.left + xPos - imgWidth / 2, integer division on both.
+        int x = offsetX + item.getX() + (int) position.getX() - thumb.getWidth() / 2;
+        int y = offsetY + item.getY() + (int) position.getY() - thumb.getHeight() / 2;
         g.drawImage(thumb, x, y, null);
     }
 
@@ -31,12 +41,7 @@ public final class SliderDrawer implements Drawer<SliderItem> {
      * Draws one frame of a slider background grid.
      */
     public void drawBackground(Graphics2D g, SliderBackground item, int offsetX, int offsetY, DrawContext context) {
-        dev.zoroaster1x.vlcskin.model.SkinIndex.ImageRef ref =
-                context.index().findImage(item.getImage());
-        if (ref == null) {
-            return;
-        }
-        BufferedImage whole = context.images().wholeImage(context.index(), ref.bitmap());
+        BufferedImage whole = SliderGeometry.backgroundImage(context.index(), context.images(), item);
         Rectangle frame = SliderGeometry.backgroundFrame(item, context.options().variables().sliderValue(),
                 context.index(), context.images());
         if (whole == null || frame == null) {

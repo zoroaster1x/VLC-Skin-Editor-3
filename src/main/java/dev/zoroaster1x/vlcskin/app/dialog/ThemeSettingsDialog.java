@@ -2,6 +2,7 @@ package dev.zoroaster1x.vlcskin.app.dialog;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.inspector.InspectorFields;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -14,7 +15,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 
 /**
  * Theme metadata and window attributes.
@@ -34,9 +34,9 @@ public final class ThemeSettingsDialog extends JDialog {
         JTextField author = field(info.getAuthor());
         JTextField email = field(info.getEmail());
         JTextField webpage = field(info.getWebpage());
-        JSpinner magnet = new JSpinner(new SpinnerNumberModel(theme.getMagnet(), 0, 500, 1));
-        JSpinner alpha = new JSpinner(new SpinnerNumberModel(theme.getAlpha(), 1, 255, 1));
-        JSpinner movealpha = new JSpinner(new SpinnerNumberModel(theme.getMovealpha(), 1, 255, 1));
+        JSpinner magnet = new JSpinner(InspectorFields.safeModel(theme.getMagnet(), 0, 500, 1));
+        JSpinner alpha = new JSpinner(InspectorFields.safeModel(theme.getAlpha(), 1, 255, 1));
+        JSpinner movealpha = new JSpinner(InspectorFields.safeModel(theme.getMovealpha(), 1, 255, 1));
 
         content.add(row(Messages.get("WIN_THEME_NAME", "Name"), name));
         content.add(row(Messages.get("WIN_THEME_AUTHOR", "Author"), author));
@@ -79,24 +79,20 @@ public final class ThemeSettingsDialog extends JDialog {
         content.add(Box.createVerticalStrut(10));
         content.add(footer);
         setContentPane(content);
-        setPreferredSize(new Dimension(420, 320));
         pack();
         setLocationRelativeTo(null);
     }
 
     private JTextField field(String value) {
         JTextField field = new JTextField(value == null ? "" : value);
-        field.setPreferredSize(new Dimension(240, 26));
+        field.setMinimumSize(new Dimension(160, field.getPreferredSize().height));
         return field;
     }
 
     private JPanel row(String label, javax.swing.JComponent component) {
         JPanel row = new JPanel(new BorderLayout(8, 0));
-        JLabel name = new JLabel(label);
-        name.setPreferredSize(new Dimension(140, 24));
-        row.add(name, BorderLayout.WEST);
+        row.add(new JLabel(label), BorderLayout.WEST);
         row.add(component, BorderLayout.CENTER);
-        row.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         return row;
     }
 }

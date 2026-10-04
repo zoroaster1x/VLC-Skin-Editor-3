@@ -17,7 +17,7 @@ Sketch each window on paper or in any image tool and note the pixel size. The la
 - Whether it animates. An animated bitmap needs its frames stacked in one file.
 - Where the draggable and resizable areas are. A background image with the move action is how the user drags the window.
 
-Keep windows small until the theme works. The built in examples are 320x140 and 420x220; many skins are between 200 and 400 pixels wide.
+Keep windows small until the theme works. The two generated examples are 320x140 and 420x220, and the bundled VeLoCity Dark theme uses its own sizes; many skins are between 200 and 400 pixels wide.
 
 ## Design the bitmaps
 
@@ -51,7 +51,7 @@ Each bitmap has an alphacolor, a key colour in `#RRGGBB` form. Every pixel whose
 
 ## Common sizes
 
-These are the sizes the built in examples use, useful as a starting point rather than a rule:
+These are the sizes the generated examples use, useful as a starting point rather than a rule:
 
 | Piece | Example size |
 |---|---|

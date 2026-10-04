@@ -18,23 +18,28 @@ dialog with the download links instead of an UnsupportedClassVersionError.
 
 ## Tests
 
-98 tests across 22 suites cover round trips, escaping, unknown content, bezier
+132 tests across 33 suites cover round trips, escaping, unknown content, bezier
 maths, boolean expressions, rendering, hit testing, bitmap animation, slider
 backgrounds, VLT archives (including a zip that bundles further themes), the
-editor service, the MCP control surface, the update service, the theme gallery
-parser and cache, the settings store, the documentation bundle and search, the
-converted translations and the examples. The UI suite builds the whole panel
-tree offscreen, paints it in both themes, dispatches real mouse events to move
-an item and undo it, and writes screenshots to `build/reports/screenshots/`.
+editor service, the MCP control surface and log, the three-way disk merge, the
+update service, the theme gallery parser and cache, the settings store, the
+keymap, the platform paths, the terminal UI, the documentation bundle and
+search, the converted translations and the examples. The UI suite builds the
+whole panel tree offscreen, paints it in both themes, dispatches real mouse
+events to move an item and undo it, and writes screenshots to
+`build/reports/screenshots/`.
 
 Against real skins: the VeLoCity theme imports through the VLT codec and
 validates clean, and `tools/gallery-conformance.py` sweeps every theme in the
-official VideoLAN pack plus the two themes VLC itself ships. The latest run
-imported, validated and rendered all 123 themes; the numbers, the per theme
-table and the classification of the validation messages old themes carry are
-in [`skin-gallery-report.md`](skin-gallery-report.md). The feature by feature
-comparison with the original editor, including the remaining differences, is
-in [`feature-parity.md`](feature-parity.md).
+official VideoLAN pack, with `--extra` for themes VLC itself ships. The latest
+run imported, validated and rendered all 139 themes; the numbers, the per
+theme table and the classification of the validation messages old themes carry
+are in [`skin-gallery-report.md`](skin-gallery-report.md). The same work
+against real VLC lives in `tools/parity/` (isolated virtual display, xdotool
+GUI driving, MCP clients, numeric image and region comparison); its README
+documents every command. The feature by feature comparison with the original
+editor, including the remaining differences, is in
+[`feature-parity.md`](feature-parity.md).
 
 ## Architecture
 

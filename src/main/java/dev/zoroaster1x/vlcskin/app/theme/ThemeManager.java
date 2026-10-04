@@ -7,8 +7,11 @@ import com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatArcIJTheme;
 import com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme;
 import java.awt.Color;
+import java.awt.Font;
+import java.awt.Window;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -117,11 +120,38 @@ public final class ThemeManager {
         UIManager.put("TabbedPane.tabSelectionHeight", 3);
         UIManager.put("Table.showHorizontalLines", true);
         UIManager.put("Table.showVerticalLines", false);
-        UIManager.put("Tree.rowHeight", 22);
+        baseFont = null;
+        applyFontScale(fontScalePercent);
         UIManager.put("ToolTip.background", UIManager.getColor("Panel.background"));
         UIManager.put("ToolTip.border", javax.swing.BorderFactory.createLineBorder(
                 UIManager.getColor("Component.borderColor")));
         UIManager.put("TitlePane.unifiedBackground", true);
         FlatLaf.updateUI();
+    }
+
+    private static Font baseFont;
+    private static int fontScalePercent = 100;
+
+    /**
+     * Scales the whole interface by changing the look and feel default font.
+     * Row heights and our own derived fonts follow, so 125 percent and 150
+     * percent grow panels and text together instead of clipping.
+     */
+    public static void applyFontScale(int percent) {
+        fontScalePercent = Math.max(75, Math.min(200, percent));
+        if (baseFont == null) {
+            baseFont = UIManager.getFont("Label.font");
+        }
+        if (baseFont == null) {
+            return;
+        }
+        float size = Math.max(9f, Math.round(baseFont.getSize2D() * fontScalePercent / 100f));
+        Font font = baseFont.deriveFont(size);
+        UIManager.put("defaultFont", font);
+        UIManager.put("Tree.rowHeight", Math.max(22, font.getSize() + 10));
+        UIManager.put("Table.rowHeight", Math.max(22, font.getSize() + 8));
+        for (Window window : Window.getWindows()) {
+            SwingUtilities.updateComponentTreeUI(window);
+        }
     }
 }

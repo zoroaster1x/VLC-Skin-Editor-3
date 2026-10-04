@@ -100,6 +100,16 @@ Tooling under `tools/`:
 * `gallery-conformance.py`: imports, inspects, validates and renders every theme
   from the official gallery pack plus `--extra` themes, writes
   `docs/skin-gallery-report.md` and `.json`.
+* `parity/`: the end to end verification harness: an isolated virtual display
+  (`display.sh`), xdotool GUI driving (`gui.py`), MCP stdio clients
+  (`mcp_client.py`, `scenario.py`), the official gallery corpus
+  (`gallery_corpus.py`), numeric image comparison (`pixel_diff.py`,
+  `region_diff.py`), the VLC golden comparator (`vlc_shot.py`,
+  `vlc_compare.py`, `compare_all_layouts.py`) and step timing
+  (`parity_log.py`). `tools/parity/README.md` documents every command and the
+  traps; `tools/parity/LESSONS.md` collects every fact that cost real time,
+  including the VLC staging recipe and the fullscreen-controller limitation.
+  Read both before comparing anything against VLC or the original editor.
 * `recreate-velocity-via-mcp.py`: external MCP client that rebuilds the
   VeLoCity player window from its own assets, step by step, with a GIF.
 * `bundle-docs.py`: turns crawled documentation into the viewer bundle under
@@ -122,13 +132,14 @@ src/main/java/dev/zoroaster1x/vlcskin/
   model/item/       one class per control, sealed Item hierarchy
   model/resource/   bitmap, sub bitmap, font, bitmap font, popup menu, ini
   format/           SkinParser, SkinWriter, ThemeWriter, ItemWriter,
-                    ResourceWriter, SkinValidator, VltCodec, XmlSupport
+                    ResourceWriter, SkinValidator, VltCodec, XmlSupport,
+                    XmlMerger (three way disk merge)
   format/parse/     Attributes, ParseContext, ItemParser, ResourceParser,
                     WindowParser
   render/           SkinRenderer, ImageStore, BezierPath, Bounds, HitTester,
                     PreviewVariables, BooleanExpression, SliderGeometry,
                     SliderBackgroundGenerator, RenderOptions
-  render/draw/      one drawer per control
+  render/draw/      one drawer per control, Colors (ini constants)
   edit/             EditorSession, CommandStack, ValueCommand, DeepCopy,
                     ItemFactory, SelectionState, commands/
   action/           ActionCatalog, ActionChain, GlobalVariableCatalog
@@ -136,11 +147,14 @@ src/main/java/dev/zoroaster1x/vlcskin/
   snapshot/         PreviewSnapshot, UiInspector
   gallery/          GalleryTheme, ThemeGalleryClient (official skins gallery)
   mcp/              EditorService, EditorControl, McpToolset, McpServerRunner,
-                    PropertyAccess, Schema, ToolOutcome
+                    McpLog (activity file and status), PropertyAccess, Schema,
+                    ToolOutcome
   cli/              picocli commands: new, render, inspect, validate, vlt,
                     examples, mcp, tui
   tui/              TuiShell, TuiLoop, AsciiRenderer
-  example/          ExampleSkins with generated assets
+  util/             Json, XmlWriter, XmlEscape, VlcFinder, Platform, Log
+  example/          ExampleSkins with generated assets plus the bundled
+                    VeLoCity Dark theme
 src/main/java/dev/zoroaster1x/vlcskin/app/
   VlcSkinStudio     entry point, CLI dispatch or window
   Studio            session, settings, operations, status listeners
@@ -148,24 +162,29 @@ src/main/java/dev/zoroaster1x/vlcskin/app/
   HeadlessStudio    the same panels without a window, for tests and MCP
   chrome/           ChromeActions, MenuBarFactory, ToolBarFactory, StatusBar
   panel/            resources, structure, items, canvas, inspector, variables,
-                    problems, XML, welcome
+                    problems, XML, MCP activity, welcome
   inspector/        InspectorFields widget factories
   dialog/           theme settings, preferences, action editor, sub bitmap
                     editor, slider background generator, theme browser,
-                    documentation viewer, progress, about
+                    documentation viewer, progress, about, keymap editor
   docs/             DocumentationBundle, DocumentationSearch,
                     MarkdownRenderer, DocumentationPanel
   component/        Icons (hand drawn vector icons)
   snapshot/         SwingUiInspector, SettingsHost (UI and prefs for MCP)
-  theme/            ThemeManager (FlatLaf themes, VLC orange accent)
-  config/           StudioSettings, SettingsStore
-  i18n/             Messages, PanelTitles (original language bundles)
-src/main/resources/dev/zoroaster1x/vlcskin/app/
-  messages/         21 converted original translations
-  docs/             bundled handbook, format reference and archives
+  theme/            ThemeManager (FlatLaf themes, VLC orange accent, font scale)
+  config/           StudioSettings, SettingsStore, AppPaths, Keymap
+  i18n/             Messages, PanelTitles, TypeNames (original translations)
+src/main/resources/dev/zoroaster1x/vlcskin/
+  app/messages/     21 converted original translations
+  app/docs/         bundled handbook, format reference and archives
+  render/fonts/     FreeSans.ttf, VLC's defaultfont, with its license note
+  format/winamp2.xml  VLC's Winamp2 template for archives without theme.xml
+  example/velocity/   the bundled VeLoCity Dark theme and its MIT license
 src/test/java/...   one suite per area, see section 6
-tools/              build, gallery, docs and screenshot harnesses
-docs/               skin-gallery-report.md/.json, feature-parity.md
+src/test/resources/edge-cases/  53 VLC edge case themes from docs/skins2-edge-cases.md
+tools/              build, gallery, docs, screenshot and parity harnesses
+docs/               skin-gallery-report.md/.json, feature-parity.md,
+                    skins2-parser.md, skins2-rendering.md, skins2-edge-cases.md
 screenshots/        README stills and GIFs, regenerated by uiScreenshots
 .github/            test and release workflows, release template
 ```
@@ -222,30 +241,41 @@ screenshots/        README stills and GIFs, regenerated by uiScreenshots
 
 ## 6. Test suites
 
-`./gradlew build` runs all of them. Current state: 98 tests in 22 suites.
+`./gradlew build` runs all of them. Current state: 132 tests in 33 suites.
 
 | Suite | Covers |
 |---|---|
-| `format/SkinRoundTripTest` | every element survives write, parse and write; escaping; unknown attributes and children kept; `id="none"` becomes a generated unique id |
-| `format/VltCodecTest` | VLT export and import, assets, zip archives accepted, a zip bundling further `.vlt` files unpacks every theme |
+| `format/SkinRoundTripTest` | every element survives write, parse and write; escaping; unknown attributes and children kept; `id="none"` becomes a generated unique id; playlist slider value is not written |
+| `format/VltCodecTest` | VLT export and import, assets, zip archives accepted, a zip bundling further `.vlt` files unpacks every theme, Winamp2 archives fall back to the bundled template, one theme.xml entry per export |
+| `format/XmlMergerTest` | three way merge: disjoint edits, identical edits, conflicts keep ours and report, insertions and deletions |
+| `format/EdgeCaseFixturesTest` | opens all 53 VLC edge case fixtures in `src/test/resources/edge-cases/` without throwing |
 | `render/BezierPathTest` | the port of VLC's bezier sampler: interpolation, single points, monotonic percentages, parsing and formatting |
-| `render/BooleanExpressionTest` | `not`/`and`/`or`, parentheses, unknown identifiers, variable substitution, slider state |
+| `render/BooleanExpressionTest` | `not`/`and`/`or`, parentheses, unknown identifiers, variable substitution, resolved-vs-unknown results |
 | `render/RendererTest` | the example renders at zoom, corner transparency, topmost hit testing, selection overlay, thumb tracking |
+| `render/VlcSemanticsTest` | hidden items are not drawn, unresolved visibility stays visible, text clipping and alignment, radial frame formula, ini constants, playlist idle rows and scroll |
 | `render/ImageStoreTest` | bitmap frame cycling, animation fps discovery, tick wrapping |
 | `render/SliderBackgroundGeneratorTest` | frame count, horizontal and vertical strips, required middle image |
+| `model/SkinIndexTest` | copy id patterns keep every letter, uniqueness, semicolon resource fallback |
 | `edit/EditorSessionTest` | coalesced nudges, per item undo steps, revision bumps |
+| `example/ExampleSkinsTest` | every built in example parses; VeLoCity ships its license and four windows |
 | `mcp/EditorServiceTest` | document info, add/move/edit/undo, unknown attributes and duplicate ids rejected, render PNG and geometry, validation, playlist slider rules, nested parent lists, sub bitmap lifecycle, tool catalog |
 | `mcp/EditorControlTest` | undo/redo and history, selection, nudge, reorder and reparent, XML round trip, preferences through a stub `UiInspector`, slider background generator, sub bitmap duplication |
+| `mcp/EditorDiskSyncTest` | disk change notice, `disk_diff`, `sync_from_disk` three way merge keeps both sides |
+| `mcp/McpLogTest` | the activity log and status file the MCP panel reads |
+| `mcp/HelpToolsTest` | documentation topic list, ranked search and the full format reference read |
 | `gallery/ThemeGalleryClientTest` | parsing the gallery's `showSkinBox` rows, escaped apostrophes in names |
 | `gallery/ThemeGalleryCacheTest` | the list, preview and archive caches, served by an in-process HTTP server |
 | `app/config/SettingsStoreTest` | atomic saves, backup recovery from a corrupt file, first-run language default |
+| `app/config/AppPathsTest` | platform config, cache and data roots and their derived folders |
+| `app/config/KeymapTest` | shortcut parsing, defaults, overrides and conflict-free descriptions |
 | `app/docs/DocumentationTest` | the bundle exposes topics, every page loads, ranked search over headings and text, markdown and image rewriting, term highlighting |
-| `app/StudioUiTest` | the whole panel tree paints real pixels in both themes, canvas drag moves items undoably, adding items updates the tree and the UI description |
+| `app/StudioUiTest` | the whole panel tree paints real pixels in both themes, canvas drag moves items undoably, adding items updates the tree and the UI description, extreme theme numbers open, interface scale, ctrl-wheel zoom |
+| `app/UiLayoutAuditTest` | no clipped labels, buttons, squashed controls or overlapping siblings at three window sizes and at 150 percent font scale |
+| `tui/TuiShellTest` | the terminal UI banner, info, help, items, tree, show, validate and render answers |
 | `app/i18n/MessagesTest` | the converted original translations load, unknown keys fall back, the language catalog lists the original 21 |
 | `app/panel/WelcomeCardTest` | example folder resolution: last writable folder, flatpak paths skipped, config directory fallback |
 | `app/theme/ThemeManagerTest` | the pinned light or dark canvas backdrop and its normalization |
 | `launch/LauncherTest` | the Java 8 entry point's version parsing and install message |
-| `mcp/HelpToolsTest` | documentation topic list, ranked search and the full format reference read |
 | `update/UpdateServiceTest` | version order, missed releases oldest first over a local HTTP server, jar download and SHA-256, Unix replacement, Windows helper shape |
 
 `src/test` writes `build/reports/screenshots/`; `./gradlew uiScreenshots`
@@ -283,10 +313,15 @@ avoid.
 * Slider thumb placement uses the simulated slider value, not the XML `value`
   attribute. `PreviewVariables.sliderValue` is the single source; the variables
   panel and MCP `set_variables` drive it.
-* A slider background is one bitmap cut into `nbhoriz x nbvert` frames; the
-  frame index is `floor(fields * value)`, filled left to right, top to bottom,
-  with `padhoriz`/`padvert` between frames. Empty and one frame images are
-  common and must not divide by zero.
+* A slider background is one bitmap cut into `nbhoriz x nbvert` frames; frames
+  run left to right, top to bottom, with `padhoriz`/`padvert` between them.
+  Empty and one frame images are common and must not divide by zero. The frame
+  index is `(int)(value * (fields - 1))`, not `floor(fields * value)`, because
+  VLC's `CtrlSliderBg::onUpdate` uses the last frame index. The thumb sits at
+  `pos + point - image/2` with integer division, and a background whose `image`
+  is a SubBitmap cuts frames from that sub rectangle, never from the whole
+  parent sheet (the VeLoCity time strip is a 204 wide SubBitmap of a 380 wide
+  sheet; ignoring that draws a 380 wide grey bar over the buttons).
 * Bitmap decoding follows VLC's `FileBitmap`: decode to RGBA, keep straight
   ARGB (no premultiply), a pixel whose RGB equals `alphacolor` becomes fully
   transparent regardless of its alpha, every other pixel keeps its alpha.
@@ -326,6 +361,25 @@ avoid.
   real home and `XDG_DATA_HOME` as
   `~/.var/app/org.videolan.VLC/data`, so the host path of an archive installed
   there is already valid inside the sandbox. Never pass `$HOME` unexpanded.
+* Resource references are fallback lists: `"id1;id2"` resolves to the first
+  resource that exists, like VLC's `IDmap::find_first_object`. `SkinIndex`
+  tries each semicolon separated segment and the validator follows.
+* IniFile resources register constants `<ini id>.<section>.<key>` lowercased;
+  a color value that names one resolves through them (`draw/Colors`), the way
+  VLC's `getColor` does. The Winamp2 playlist colors depend on this.
+* An archive without `theme.xml` but with `main.bmp` is a Winamp2 skin: VLC
+  renders it through `share/skins2/winamp2.xml`, and the studio bundles a copy
+  of that template and unpacks the BMPs next to it.
+* `defaultfont` is FreeSans, bundled from VLC's resource path, so text metrics
+  match VLC's renderer instead of Java's platform font.
+* The preview draws VLC's idle playlist: the rows "Playlist" and "Media
+  Library", and the nested scroll slider at position 1.0 because `VarTree`
+  starts fully scrolled. A playlist slider's x and y are layout absolute, not
+  relative to the playtree.
+* Unknown child elements are preserved verbatim in their relative order but
+  written after the known children of their parent, and unknown attributes
+  keep their order. This is the one deliberate exception to "never reorder";
+  VLC ignores those elements, so only hand inspection sees it.
 
 ## 8. Application UI patterns that earned their place
 
@@ -383,6 +437,22 @@ avoid.
 * Built in help buttons never open the Website; they call
   `DocumentationDialog.openTopic` with a handbook topic. Only Help > Online
   help and About may leave the app.
+* The inspector form is a two column MigLayout with capped, shrinkable editors
+  and wrapping notes; it has no horizontal scrollbar, so nothing runs off the
+  panel edge at any dock width or font scale. `UiLayoutAuditTest` fails if a
+  label, button or control clips or overlaps at 1440x900, 1180x780, 980x660 or
+  150 percent scale.
+* Canvas controls: Move and Curve are icon toggle buttons, zoom is a combo
+  plus minus, plus and Fit. The selected item's out-of-layout part gets a
+  dashed accent outline, because VLC clips there and the canvas pad is not
+  part of the theme.
+* View > Canvas background offers follow-the-theme, light and dark.
+  Preferences has interface size (75 to 200 percent, live), the keyboard
+  shortcut editor (`Keymap`, stored in `StudioSettings.keys`), and the AI and
+  MCP section (enable, command to copy, live status).
+* The MCP activity panel tails the timestamped server log and status file, so
+  the AI's calls are visible in the window even though the server is a
+  separate process.
 
 ## 9. MCP rules
 
@@ -396,6 +466,19 @@ avoid.
 * A standalone `mcp` process is headless, exits on stdin EOF and reads
   preferences through `McpCommand.HOST` when the desktop entry point installed
   `SettingsHost`. `listChanged` stays false.
+* The server can be disabled in Preferences (`mcpEnabled`); the `mcp` command
+  refuses to start then unless `--force` is passed. `McpLog` writes
+  `<cache>/mcp.log` and `mcp-status.json` on start and on every call; the MCP
+  activity panel and the Preferences status line read them.
+* Every tool response can start with a `[NOTICE]` line when the file changed on
+  disk outside the server. `disk_diff` lists the changed lines and
+  `sync_from_disk` three way merges them into the session (`XmlMerger`);
+  changes only one side made are applied, a conflict keeps the session's
+  version and is reported. Never go back to telling the model to reload or
+  overwrite; that discards a side. `EditorDiskSyncTest` and `XmlMergerTest`
+  pin the behaviour.
+* The initialize instructions explain that the user shares the file and how to
+  react to a notice. Every call is timed and logged, including errors.
 * The MCP server is registered in the OpenCode config under `mcp.servers`. After
   rebuilding the jar, reconnect from `/mcps`. `opencode mcp list` in that shell
   needs `XDG_CONFIG_HOME` set (see `PRIVATE_AGENTS.md`).
@@ -416,6 +499,18 @@ avoid.
   rebuild.
 * `SettingsStore` serializes saves and writes a temp file plus atomic move, with
   `settings.json.bak` as recovery.
+* `EditorSession.revision` and the change journal are atomic
+  (`AtomicLong`, `ConcurrentLinkedDeque`), `dirty` is volatile and the
+  `ImageStore` caches are `ConcurrentHashMap`s, because the canvas renders on
+  the event thread while MCP can render on the server thread.
+* `EditorControl` marshals every UI touching tool call onto the event thread
+  with `invokeAndWait`; a modal dialog blocks the call until the user answers,
+  exactly like a person clicking the command. `SwingUiInspector` uses
+  `invokeAndWait` for the same reason.
+* `AppPaths` is the only place that decides where the application writes on
+  disk (platform config, cache and data roots); `Platform` is the only place
+  that decides the operating system. Do not add another `.config`, `.cache` or
+  `os.name` check anywhere else.
 
 ## 11. Native image notes
 

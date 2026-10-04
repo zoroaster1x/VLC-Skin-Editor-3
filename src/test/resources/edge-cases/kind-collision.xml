@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Kind collision"/>
+  <Bitmap id="same" file="shared.png" alphacolor="#FF00FF"/>
+  <Font id="same" file="shared.otf"/>
+  <Window id="same">
+    <Layout id="lay" width="64" height="48">
+      <Text id="tx" font="same" text="Hello"/>
+      <Image id="img" image="same" y="20"/>
+      <Button id="go" up="same" action="same.show()" y="36"/>
+    </Layout>
+  </Window>
+</Theme>

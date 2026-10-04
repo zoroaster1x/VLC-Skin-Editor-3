@@ -40,12 +40,15 @@ public final class ExampleSkins {
     public static final Example PANEL = new Example("panel",
             "Flat panel",
             "A plain control panel with a video area and a playlist, a good starting point");
+    public static final Example VELOCITY = new Example("velocity",
+            "VeLoCity Dark",
+            "dmtiir's full four window player theme (MIT), bundled with its license");
 
     private ExampleSkins() {
     }
 
     public static java.util.List<Example> catalog() {
-        return java.util.List.of(NEON, PANEL);
+        return java.util.List.of(NEON, PANEL, VELOCITY);
     }
 
     /**
@@ -53,10 +56,37 @@ public final class ExampleSkins {
      */
     public static Path create(Path folder, Example example) throws IOException {
         Files.createDirectories(folder);
+        if (example.id().equals(VELOCITY.id())) {
+            return createVelocity(folder);
+        }
         SkinTheme theme = example.id().equals(PANEL.id()) ? buildPanel(folder) : buildNeon(folder);
         Path themeFile = folder.resolve("theme.xml");
         Files.writeString(themeFile, SkinWriter.toXml(theme), StandardCharsets.UTF_8);
         return themeFile;
+    }
+
+    /**
+     * VeLoCity is a real theme rather than a generated one, so its files ship
+     * as resources and are copied out together with the MIT license.
+     */
+    private static Path createVelocity(Path folder) throws IOException {
+        java.util.List<String> files = java.util.List.of(
+                "theme.xml", "bg.png", "bg2.png", "buttons20.png", "buttons30.png",
+                "corners.png", "roboto.ttf", "time.png", "volume.png");
+        for (String file : files) {
+            copyResource("velocity/" + file, folder.resolve(file));
+        }
+        copyResource("velocity/LICENSE.txt", folder.resolve("LICENSE-VeLoCity.txt"));
+        return folder.resolve("theme.xml");
+    }
+
+    private static void copyResource(String name, Path target) throws IOException {
+        try (java.io.InputStream in = ExampleSkins.class.getResourceAsStream(name)) {
+            if (in == null) {
+                throw new IOException("Example resource missing from the jar: " + name);
+            }
+            Files.write(target, in.readAllBytes());
+        }
     }
 
 

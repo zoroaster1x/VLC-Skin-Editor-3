@@ -68,7 +68,7 @@ anywhere, float them, or restore the layout on the next start.
 
 Inside the theme there is a generated example that looks like this:
 
-![Example preview](docs/example-neon.png)
+![Example preview](screenshots/example-neon.png)
 
 The desktop UI, the CLI, the terminal UI and the MCP server share one document
 model. The links below cover all four.

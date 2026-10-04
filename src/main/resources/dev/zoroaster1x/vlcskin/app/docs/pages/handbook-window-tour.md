@@ -10,7 +10,7 @@ The desktop window is a menu bar, a toolbar, a dockable panel area and a status 
 
 ## The panels
 
-The editor has eight panels. Six of them surround the canvas; the Problems and Skin XML panels share the bottom strip.
+The editor has nine panels. Six of them surround the canvas; the Problems, Skin XML and MCP activity panels share the bottom strip.
 
 | Panel | What it is for |
 |---|---|
@@ -19,15 +19,16 @@ The editor has eight panels. Six of them surround the canvas; the Problems and S
 | Items | The controls of the selected layout, nested by container. The toolbar has Add item, Move up, Move down, Duplicate and Delete. |
 | Canvas | The live preview with the layout label, the Move and Path tools, zoom and Fit. Without a selection it shows the welcome card. |
 | Inspector | Every attribute of whatever is selected: an item, a resource, a sub bitmap, a window, a layout or the theme. |
-| Variables | A simulated player: the slider position, sixteen boolean checkboxes and twelve text variables. Changes repaint the preview only. |
+| Variables | A simulated player: the slider position, sixteen boolean checkboxes and thirteen text variables. Changes repaint the preview only. |
 | Problems | Validation results with Validate now and Go to element. Errors are red, warnings amber. |
 | Skin XML | The generated XML with syntax highlighting. Refresh rebuilds it from the model, Apply XML parses your edits back, Copy copies the whole text. |
+| MCP activity | The MCP server's timestamped log and status, read from the cache folder. Refresh rereads the files and Copy copies the tail. |
 
 The Inspector is one scrolling form rather than a set of tabs. Its header names the selected element, for example `Button: play_btn`, and the form below has a General section plus the sections that belong to the type. The sections are rebuilt when the selection changes, and every field commit is an undo step.
 
 ## Dockable panels
 
-All eight panels are dockable. Drag a panel by its title tab:
+All nine panels are dockable. Drag a panel by its title tab:
 
 - Drop it on the edge of another panel to split the area.
 - Drop it on the center of another panel to stack them as tabs.
@@ -38,7 +39,7 @@ The arrangement is saved to `layout.xml` next to the settings file, `$XDG_CONFIG
 View > Reset panel layout deletes that saved arrangement and docks the default one:
 
 - Resources on the left, with Windows and layouts below it and Items below that.
-- Canvas in the middle, with Problems along the bottom and Skin XML tabbed with Problems.
+- Canvas in the middle, with Problems along the bottom and Skin XML and MCP activity tabbed with Problems.
 - Inspector on the right, with Variables below it.
 
 ## The toolbar

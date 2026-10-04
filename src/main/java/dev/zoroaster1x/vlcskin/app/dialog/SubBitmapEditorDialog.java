@@ -2,6 +2,7 @@ package dev.zoroaster1x.vlcskin.app.dialog;
 
 import dev.zoroaster1x.vlcskin.app.Studio;
 import dev.zoroaster1x.vlcskin.app.i18n.Messages;
+import dev.zoroaster1x.vlcskin.app.inspector.InspectorFields;
 import dev.zoroaster1x.vlcskin.edit.ValueCommand;
 import dev.zoroaster1x.vlcskin.model.resource.BitmapResource;
 import dev.zoroaster1x.vlcskin.model.resource.SubBitmap;
@@ -23,7 +24,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 
 /**
  * Visual cutter for a sub bitmap: drag the frame over the parent image.
@@ -107,7 +107,8 @@ public final class SubBitmapEditorDialog extends JDialog {
     }
 
     private JSpinner spinner(int value, int min, int max) {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, 1));
+        JSpinner spinner = new JSpinner(dev.zoroaster1x.vlcskin.app.inspector.InspectorFields
+                .safeModel(value, min, max, 1));
         spinner.setPreferredSize(new Dimension(70, 24));
         return spinner;
     }

@@ -61,6 +61,7 @@ public final class UiShots {
 
     private void start() throws Exception {
         Path work = Files.createTempDirectory("vlc-skin-ui-shots");
+        mcpRoot = work.resolve("mcp-cache");
         Path theme = ExampleSkins.create(work, ExampleSkins.NEON);
         dev.zoroaster1x.vlcskin.app.theme.ThemeManager.apply("dark");
         studio = VlcSkinStudio.headlessStudio();
@@ -69,6 +70,8 @@ public final class UiShots {
         session = studio.session();
         headless.render(WIDTH, HEIGHT);
     }
+
+    private Path mcpRoot;
 
     private void run() throws Exception {
         start();
@@ -87,6 +90,23 @@ public final class UiShots {
         onEdt(() -> headless.applyTheme("light"));
         still("studio-light-overview.png");
         onEdt(() -> headless.applyTheme("dark"));
+
+        // The MCP activity panel, with a realistic log written to a temp cache.
+        dev.zoroaster1x.vlcskin.mcp.McpLog.useRoot(mcpRoot);
+        dev.zoroaster1x.vlcskin.mcp.McpLog.started(dev.zoroaster1x.vlcskin.Version.VERSION,
+                session.file() == null ? null : session.file().toString());
+        dev.zoroaster1x.vlcskin.mcp.McpLog.call("document_info", 9, false, null, null);
+        dev.zoroaster1x.vlcskin.mcp.McpLog.call("layout_tree", 21, false, null, null);
+        dev.zoroaster1x.vlcskin.mcp.McpLog.call("render_layout", 48, false, null, null);
+        dev.zoroaster1x.vlcskin.mcp.McpLog.call("add_item", 6, false, null,
+                "[NOTICE] the file changed on disk outside this server");
+        onEdt(() -> {
+            headless.showNamedPanel("mcp");
+            headless.panels().mcp.refresh();
+        });
+        still("studio-mcp-activity.png");
+        onEdt(() -> headless.showNamedPanel("problems"));
+        dev.zoroaster1x.vlcskin.mcp.McpLog.resetRoot();
 
         if (velocityTheme != null && Files.exists(velocityTheme)) {
             stillVelocity();

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Bad text enums"/>
+  <Font id="f" file="shared.otf"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="60">
+      <Text id="badscroll" font="f" text="Hi" scrolling="fast"/>
+      <Text id="badalign" font="f" text="Hi" alignment="middle" y="16"/>
+      <Text id="ok" font="f" text="Hi" scrolling="manual" alignment="centre" y="32"/>
+    </Layout>
+  </Window>
+</Theme>

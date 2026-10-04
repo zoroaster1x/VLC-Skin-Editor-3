@@ -32,8 +32,11 @@ public final class VltCommand implements Callable<Integer> {
 
         @Override
         public Integer call() throws Exception {
+            long started = System.nanoTime();
             EditorService service = new EditorService();
             var outcome = service.importVlt(archive.toString(), folder == null ? null : folder.toString());
+            dev.zoroaster1x.vlcskin.util.Log.debug("vlt import of %s took %d ms",
+                    archive, (System.nanoTime() - started) / 1_000_000);
             System.out.println(outcome.text());
             return outcome.error() ? 1 : 0;
         }
@@ -50,8 +53,11 @@ public final class VltCommand implements Callable<Integer> {
 
         @Override
         public Integer call() throws Exception {
+            long started = System.nanoTime();
             EditorService service = new EditorService(EditorSession.open(skin));
             var outcome = service.exportVlt(out.toString());
+            dev.zoroaster1x.vlcskin.util.Log.debug("vlt export to %s took %d ms",
+                    out, (System.nanoTime() - started) / 1_000_000);
             System.out.println(outcome.text());
             return outcome.error() ? 1 : 0;
         }

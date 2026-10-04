@@ -124,6 +124,17 @@ public final class Icons {
                         }
                     }
                 }
+                case "fit" -> {
+                    g.draw(new java.awt.geom.Rectangle2D.Float(4.5f, 4.5f, 7, 7));
+                    line(g, 1, 1, 6, 1);
+                    line(g, 1, 1, 1, 6);
+                    line(g, 15, 1, 10, 1);
+                    line(g, 15, 1, 15, 6);
+                    line(g, 1, 15, 6, 15);
+                    line(g, 1, 15, 1, 10);
+                    line(g, 15, 15, 10, 15);
+                    line(g, 15, 15, 15, 10);
+                }
                 case "move" -> {
                     line(g, 8, 2, 8, 14);
                     line(g, 2, 8, 14, 8);

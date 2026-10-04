@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Zero width text"/>
+  <Font id="f" file="shared.otf"/>
+  <Window id="win">
+    <Layout id="lay" width="120" height="40">
+      <Text id="wide" font="f" text="This text has no width" width="0" x="2" y="2"/>
+    </Layout>
+  </Window>
+</Theme>

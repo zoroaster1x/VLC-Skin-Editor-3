@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Duplicate ids"/>
+  <Bitmap id="dup" file="shared.png" alphacolor="#FF00FF"/>
+  <Bitmap id="dup" file="shared.png" alphacolor="#FF00FF"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Button id="ctrl" up="dup"/>
+      <Button id="ctrl" up="dup" x="24"/>
+    </Layout>
+  </Window>
+</Theme>

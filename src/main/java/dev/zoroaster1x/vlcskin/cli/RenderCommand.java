@@ -39,16 +39,31 @@ public final class RenderCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
+        long started = System.nanoTime();
+        dev.zoroaster1x.vlcskin.util.Log.debug("opening %s", skin.toAbsolutePath());
         EditorService service = new EditorService(EditorSession.open(skin));
-        var outcome = service.renderLayout(window, layout, Math.max(1, Math.min(16, zoom)), null);
+        long parsed = System.nanoTime();
+        dev.zoroaster1x.vlcskin.util.Log.debug("parsed in %d ms: %s",
+                (parsed - started) / 1_000_000, service.documentInfo().get("name"));
+        int level = Math.max(1, Math.min(16, zoom));
+        var outcome = service.renderLayout(window, layout, level, null);
         if (outcome.error()) {
             System.err.println(outcome.text());
             return 1;
         }
+        long rendered = System.nanoTime();
         Files.write(out, outcome.png());
         if (json != null) {
             Files.writeString(json, Json.write(outcome.structured()));
         }
+        @SuppressWarnings("unchecked")
+        java.util.Map<String, Object> geometry = outcome.structured() instanceof java.util.Map<?, ?> map
+                ? (java.util.Map<String, Object>) map : java.util.Map.of();
+        dev.zoroaster1x.vlcskin.util.Log.debug(
+                "rendered %s/%s at zoom %d in %d ms, %d bytes to %s",
+                geometry.get("windowId"), geometry.get("layoutId"),
+                level, (rendered - parsed) / 1_000_000, outcome.png().length,
+                out.toAbsolutePath());
         if (!quiet) {
             System.out.println(outcome.text());
             System.out.println(Json.write(outcome.structured()));

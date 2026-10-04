@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE Theme PUBLIC "-//VideoLAN//DTD VLC Skins V2.0//EN" "skin.dtd">
+<Theme version="2.0">
+  <ThemeInfo name="Missing text font"/>
+  <Font id="f2" file="no-such-font.otf"/>
+  <Window id="win">
+    <Layout id="lay" width="64" height="48">
+      <Text id="t1" font="ghost" text="Hi"/>
+      <Text id="t2" font="f2" text="Hi" y="16"/>
+    </Layout>
+  </Window>
+</Theme>

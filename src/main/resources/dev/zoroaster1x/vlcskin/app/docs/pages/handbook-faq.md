@@ -44,7 +44,7 @@ The last layout in a window's list is the one VLC shows first. The editor's layo
 
 ## Why does my text show $T instead of a time?
 
-Substitution happens for the known `$` tokens in `Text` items and tooltip attributes. In the editor the token is replaced with whatever sample value the Variables panel holds, so you can watch the layout with realistic text. An unknown token stays literal, so check the spelling against the table in [Text items](text-items.md). VLC 2.0 documents `$R` for the playback rate; it has no preview sample and stays literal in the editor preview. If VLC itself shows the raw token, the string is in an attribute where VLC does not substitute variables.
+Substitution happens for the known `$` tokens in `Text` items and tooltip attributes. In the editor the token is replaced with whatever sample value the Variables panel holds, so you can watch the layout with realistic text. An unknown token stays literal, so check the spelling against the table in [Text items](text-items.md). VLC 2.0 documents `$R` for the playback rate, and the Variables panel carries a sample for it. If VLC itself shows the raw token, the string is in an attribute where VLC does not substitute variables.
 
 ## How do I make a window resizable?
 
@@ -58,7 +58,7 @@ Three things together:
 
 ## Why does the validator report duplicate ids when the theme still renders?
 
-Because VLC resolves an id by first match. The theme loads and draws, but any later element with the same id is invisible to actions, expressions and lookups, which is a silent defect rather than a crash. The conformance sweep of the 123 official gallery themes found 76 duplicate item ids and 27 duplicate resource ids, so old themes live with this all the time. If you are editing such a theme, the Problems panel lists each duplicate; renaming the later element is usually safe unless an action targets it by id.
+Because VLC resolves an id by first match. The theme loads and draws, but any later element with the same id is invisible to actions, expressions and lookups, which is a silent defect rather than a crash. The conformance sweep of the official gallery found 80 duplicate item ids and 25 duplicate resource ids, so old themes live with this all the time. If you are editing such a theme, the Problems panel lists each duplicate; renaming the later element is usually safe unless an action targets it by id.
 
 ## Is there an AI assistant in the editor?
 

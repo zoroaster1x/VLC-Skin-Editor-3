@@ -47,6 +47,40 @@ public final class EditorControl {
     }
 
     /**
+     * Runs a UI action on the event thread, because MCP tools are called from
+     * the server's thread. Swing components may only be touched there; a modal
+     * dialog on the event thread blocks this call until the user answers, which
+     * is the same as a person clicking the same command.
+     */
+    private <T> T onEdt(java.util.function.Supplier<T> action) {
+        if (javax.swing.SwingUtilities.isEventDispatchThread()) {
+            return action.get();
+        }
+        java.util.concurrent.atomic.AtomicReference<T> result =
+                new java.util.concurrent.atomic.AtomicReference<>();
+        java.util.concurrent.atomic.AtomicReference<RuntimeException> failure =
+                new java.util.concurrent.atomic.AtomicReference<>();
+        try {
+            javax.swing.SwingUtilities.invokeAndWait(() -> {
+                try {
+                    result.set(action.get());
+                } catch (RuntimeException ex) {
+                    failure.set(ex);
+                }
+            });
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Interrupted while waiting for the UI thread", ex);
+        } catch (java.lang.reflect.InvocationTargetException ex) {
+            throw new IllegalStateException(ex.getCause());
+        }
+        if (failure.get() != null) {
+            throw failure.get();
+        }
+        return result.get();
+    }
+
+    /**
      * The service this control drives.
      */
     public EditorService service() {
@@ -440,7 +474,7 @@ public final class EditorControl {
         List<String> rejected = new ArrayList<>();
         values.forEach((key, value) -> {
             if ("theme".equalsIgnoreCase(key)) {
-                if (ui.applyTheme(value)) {
+                if (onEdt(() -> ui.applyTheme(value))) {
                     applied.put(key, value);
                 } else {
                     rejected.add(key);
@@ -448,8 +482,9 @@ public final class EditorControl {
                 return;
             }
             if ("canvasZoom".equalsIgnoreCase(key) || "tool".equalsIgnoreCase(key)) {
-                boolean zoomOk = ui.setCanvas("canvasZoom".equalsIgnoreCase(key) ? Integer.valueOf(value) : null,
-                        "tool".equalsIgnoreCase(key) ? value : null, null);
+                boolean zoomOk = onEdt(() -> ui.setCanvas(
+                        "canvasZoom".equalsIgnoreCase(key) ? Integer.valueOf(value) : null,
+                        "tool".equalsIgnoreCase(key) ? value : null, null));
                 if (zoomOk) {
                     applied.put(key, value);
                 } else {
@@ -457,7 +492,7 @@ public final class EditorControl {
                 }
                 return;
             }
-            if (ui.setPreference(key, value)) {
+            if (onEdt(() -> ui.setPreference(key, value))) {
                 applied.put(key, value);
             } else {
                 rejected.add(key);
@@ -474,7 +509,7 @@ public final class EditorControl {
         if (ui == null) {
             return ToolOutcome.text("No desktop UI is attached; canvas state applies live only");
         }
-        if (ui.setCanvas(zoom, tool, checkerboard)) {
+        if (onEdt(() -> ui.setCanvas(zoom, tool, checkerboard))) {
             return ToolOutcome.text("Canvas updated");
         }
         return ToolOutcome.text("The attached host refused the canvas change");
@@ -485,7 +520,7 @@ public final class EditorControl {
         if (ui == null) {
             return ToolOutcome.text("No desktop UI is attached; panels exist only with the window");
         }
-        return ui.showPanel(name) ? ToolOutcome.text("Showing panel " + name)
+        return onEdt(() -> ui.showPanel(name)) ? ToolOutcome.text("Showing panel " + name)
                 : ToolOutcome.text("No panel named \"" + name + "\"");
     }
 
@@ -494,7 +529,7 @@ public final class EditorControl {
         if (ui == null) {
             return ToolOutcome.text("No desktop UI is attached");
         }
-        return ui.openSettings() ? ToolOutcome.text("Skin settings opened")
+        return onEdt(() -> ui.openSettings()) ? ToolOutcome.text("Skin settings opened")
                 : ToolOutcome.text("The attached host has no settings dialog");
     }
 
@@ -503,7 +538,7 @@ public final class EditorControl {
         if (ui == null) {
             return ToolOutcome.text("No desktop UI is attached; Fit applies to the running canvas");
         }
-        return ui.fitCanvas() ? ToolOutcome.text("Canvas fitted to the window")
+        return onEdt(() -> ui.fitCanvas()) ? ToolOutcome.text("Canvas fitted to the window")
                 : ToolOutcome.text("The attached host has no canvas to fit");
     }
 
@@ -512,7 +547,7 @@ public final class EditorControl {
         if (ui == null) {
             return ToolOutcome.text("No desktop UI is attached; panels exist only with the window");
         }
-        return ui.resetPanelLayout() ? ToolOutcome.text("Panel layout reset to the default arrangement")
+        return onEdt(() -> ui.resetPanelLayout()) ? ToolOutcome.text("Panel layout reset to the default arrangement")
                 : ToolOutcome.text("The attached host has no panel layout to reset");
     }
 
@@ -538,7 +573,7 @@ public final class EditorControl {
                 return saved;
             }
         }
-        return ui.quit() ? ToolOutcome.text("The desktop window is closing")
+        return onEdt(() -> ui.quit()) ? ToolOutcome.text("The desktop window is closing")
                 : ToolOutcome.text("The attached host cannot close its window");
     }
 
@@ -642,7 +677,7 @@ public final class EditorControl {
                 return ToolOutcome.text("Already on the latest version " + info.current());
             }
             var latest = info.latest();
-            Path folder = dev.zoroaster1x.vlcskin.app.config.AppPaths.configDir().resolve("updates");
+            Path folder = dev.zoroaster1x.vlcskin.app.config.AppPaths.updatesDir();
             Files.createDirectories(folder);
             Path jar = updates.downloadJar(latest,
                     folder.resolve("vlc-skin-studio-" + latest.version() + ".jar"), null);

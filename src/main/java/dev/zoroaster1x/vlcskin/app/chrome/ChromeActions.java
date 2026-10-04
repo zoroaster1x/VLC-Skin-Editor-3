@@ -54,6 +54,14 @@ public interface ChromeActions {
     void resetLayout();
 
     /**
+     * The user's keyboard shortcut overrides, action id to stroke text. The
+     * defaults live in {@link dev.zoroaster1x.vlcskin.app.config.Keymap}.
+     */
+    default java.util.Map<String, String> keybindings() {
+        return java.util.Map.of();
+    }
+
+    /**
      * Opens the official theme gallery browser.
      */
     void browseThemes();
