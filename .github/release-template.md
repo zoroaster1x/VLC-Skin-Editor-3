@@ -6,12 +6,7 @@ document model. Unknown attributes and elements are preserved on save, so a
 theme from any VLC version opens and writes back without losing data. Requires
 Java 25.
 
-Release assets are built and attested by GitHub Actions. Verify the downloaded
-`vlc-skin-studio.jar` with:
-
-```bash
-gh attestation verify vlc-skin-studio.jar --repo zoroaster1x/VLC-Skin-Editor-3
-```
+{{ATTESTATION}}
 
 ## Changes since {{PREVIOUS}}
 

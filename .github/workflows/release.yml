@@ -92,6 +92,8 @@ jobs:
         if: steps.version.outputs.version != ''
         env:
           REPO_URL: ${{ github.server_url }}/${{ github.repository }}
+          REPO_SLUG: ${{ github.repository }}
+          PRIVATE_REPO: ${{ github.event.repository.private }}
         run: |
           PREVIOUS=$(git describe --tags --abbrev=0 --match '[0-9]*' 2>/dev/null || true)
           if [ -z "$PREVIOUS" ]; then
@@ -110,12 +112,24 @@ jobs:
           template = open(".github/release-template.md", encoding="utf-8").read()
           changes = open("/tmp/changes.txt", encoding="utf-8").read().strip() or "- No changes since the previous release."
           commits = open("/tmp/commits.txt", encoding="utf-8").read().strip() or "- No commits."
+          if os.environ.get("PRIVATE_REPO", "").lower() == "true":
+              attestation = ("Artifact attestation is not available for user-owned private "
+                             "repositories. The jar and its SHA-256 checksum file are still "
+                             "built and published by CI from this commit.")
+          else:
+              attestation = (
+                  "Release assets are built and attested by GitHub Actions. Verify the "
+                  "downloaded\n`vlc-skin-studio.jar` with:\n\n"
+                  "```bash\ngh attestation verify vlc-skin-studio.jar --repo "
+                  + os.environ["REPO_SLUG"] + "\n```"
+              )
           body = (
               template.replace("{{VERSION}}", os.environ["VERSION"])
               .replace("{{PREVIOUS}}", os.environ["PREVIOUS_LABEL"])
               .replace("{{CHANGES}}", changes)
               .replace("{{COMMITS}}", commits)
               .replace("{{COMPARE}}", os.environ["COMPARE"])
+              .replace("{{ATTESTATION}}", attestation)
           )
           open("/tmp/release-body.md", "w", encoding="utf-8").write(body)
           PY
@@ -129,7 +143,7 @@ jobs:
           cat SHA256SUMS
 
       - name: Attest build provenance
-        if: steps.version.outputs.version != ''
+        if: steps.version.outputs.version != '' && github.event.repository.private != true
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: build/libs/vlc-skin-studio.jar
